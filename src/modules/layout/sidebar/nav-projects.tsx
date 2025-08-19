@@ -1,0 +1,59 @@
+"use client";
+
+import { type LucideIcon } from "lucide-react";
+
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu"
+import {
+  SidebarGroup,
+  // SidebarGroupLabel,
+  SidebarMenu,
+  // SidebarMenuAction,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  // useSidebar,
+} from "@/components/ui/sidebar";
+import Link from "next/link";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+
+export function NavProjects({
+  projects,
+}: {
+  projects: {
+    name: string;
+    url: string;
+    type: string;
+    icon: LucideIcon;
+  }[];
+}) {
+  // const { isMobile } = useSidebar()
+
+  const dashboardType = useSelector(
+    (state: RootState) => state.helper.dashboardType
+  );
+  return (
+    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+      {/* <SidebarGroupLabel>Projects</SidebarGroupLabel> */}
+      <SidebarMenu>
+        {projects
+          .filter((item) => item.type === dashboardType)
+          .map((item) => (
+            <SidebarMenuItem key={item.name}>
+              <SidebarMenuButton asChild>
+                <Link href={item.url} className="font-semibold">
+                  <item.icon />
+                  <span>{item.name}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+      </SidebarMenu>
+    </SidebarGroup>
+  );
+}

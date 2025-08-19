@@ -1,0 +1,60 @@
+# Redirect HTTP to HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://admin.karnalwebtech.com/$1 [R=301,L]
+
+# Proxy requests to Node.js server
+<IfModule mod_proxy.c>
+    ProxyPreserveHost On
+    ProxyPass / http://localhost:3000/
+    ProxyPassReverse / http://localhost:3000/
+    
+    # Websocket support (for Next.js HMR if needed)
+    RewriteCond %{HTTP:Upgrade} =websocket [NC]
+    RewriteRule /(.*) ws://localhost:3000/$1 [P,L]
+</IfModule>
+
+# Enable Gzip Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Caching for better performance
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/html "access 1h"
+    ExpiresByType text/css "access 1 month"
+    ExpiresByType text/javascript "access 1 month"
+    ExpiresByType application/javascript "access 1 month"
+    ExpiresByType image/jpeg "access 1 year"
+    ExpiresByType image/png "access 1 year"
+    ExpiresByType image/gif "access 1 year"
+    ExpiresByType image/svg+xml "access 1 year"
+    ExpiresByType application/font-woff2 "access 1 year"
+    ExpiresByType application/font-woff "access 1 year"
+</IfModule>
+
+# Prevent direct access to sensitive files
+<FilesMatch "(\.env|\.htaccess|package\.json|next\.config\.js)">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Enable CORS (Modify if needed)
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
+
+# Error Handling
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
+
+# Additional security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
