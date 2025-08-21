@@ -44,7 +44,7 @@ export function DrawerComponent({
 
   return (
     <Drawer open={isOpen} onOpenChange={handleClose}>
-      <DrawerContent>
+      <DrawerContent className="max-w-[98%] max-h-full rounded-md border-0 m-auto p-0">
         <div ref={contentRef} className="flex flex-col h-full">
           {showHeader ? (
             <DrawerHeader>
@@ -58,7 +58,7 @@ export function DrawerComponent({
               <DrawerTitle>{title}</DrawerTitle>
             </VisuallyHidden>
           )}
-          <div className="flex-1 overflow-y-auto p-4">{children}</div>
+          <div className="flex-1 overflow-y-auto">{children}</div>
           {showFooter && (
             <DrawerFooter>
               <Button onClick={handleSubmit}>Submit</Button>

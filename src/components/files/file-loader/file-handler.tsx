@@ -9,6 +9,7 @@ import {
 } from "@/reducers/healper-slice";
 import { RootState } from "@/store";
 import FileLoaderCards from "./files-loader-cards";
+import { Upload } from "lucide-react";
 interface FileHandlerProps {
   title?: string;
   typeId: string;
@@ -31,14 +32,14 @@ export const FileHandler = ({
   };
   const filteredFiles = filesData.filter((item) => item.fileType === typeId);
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-2 border-dashed border-gray-200 p-8 cursor-pointer">
+      {/* <CardHeader>
         <CardTitle>{title}</CardTitle>
-      </CardHeader>
+      </CardHeader> */}
       <CardContent>
         <div
           onClick={handelEvent}
-          className="flex justify-center items-center cursor-pointer border border-dashed border-gray-400 w-full rounded-sm border-2"
+          // className="flex justify-center items-center cursor-pointer border-dashed border-gray-400 w-full rounded-sm border-2"
         >
           {filteredFiles.length > 0 ? (
             filteredFiles.map((item) => (
@@ -47,8 +48,22 @@ export const FileHandler = ({
               </div>
             ))
           ) : (
-            <div className="flex justify-center h-[200px] items-center">
-              <p className="text-gray-400 ">Add {title}</p>
+            <div className="flex justify-center h-[120px] items-center">
+              <div className="flex flex-col items-center justify-center text-center space-y-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <Upload className="w-5 h-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">
+                    Upload images
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Drag and drop images here or click to upload.
+                    <br />
+                    Add {title}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>
