@@ -22,7 +22,28 @@ const supreme = [{
     ],
 },]
 
-const dashboard = [{
+const dashboard = [
+    {
+    title: "Products",
+    url: "#",
+    icon: FileChartLine,
+    isActive: false,
+    type: "dashboard",
+    items: [
+        {
+            title: "Product List",
+            url: "/dashboard/products",
+        },
+        {
+            title: "Create product",
+            url: "/dashboard/products/create",
+        },
+        {
+            title: "Categories",
+            url: "/dashboard/products/categories",
+        },
+    ],
+},{
     title: "Blog post",
     url: "#",
     icon: FileChartLine,
