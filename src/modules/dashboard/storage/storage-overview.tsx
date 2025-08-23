@@ -39,7 +39,7 @@ export function StorageOverview() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                {formatFileSize(usedStorage)} of {formatFileSize(totalStorage)} used
+                {formatFileSize((result?.usedStorage || 0) * 1024 * 1024)} of {formatFileSize(totalStorage * 1024 * 1024)} used
               </span>
               <Badge variant={progressValue > 90 ? "destructive" : "outline"}>{progressValue.toFixed(2)}%</Badge>
             </div>
@@ -47,11 +47,11 @@ export function StorageOverview() {
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Used</p>
-                <p className="text-lg font-bold">{formatFileSize(usedStorage)}</p>
+                <p className="text-lg font-bold">{formatFileSize((result?.usedStorage || 0)* 1024 * 1024)}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Available</p>
-                <p className="text-lg font-bold">{formatFileSize(result?.availableStorage ||0)}</p>
+                <p className="text-lg font-bold">{formatFileSize((result?.availableStorage ||0)* 1024 * 1024)}</p>
               </div>
             </div>
           </div>
@@ -82,7 +82,7 @@ export function StorageOverview() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Database className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{formatFileSize(totalStorage)} Total Storage</span>
+                <span className="text-sm">{formatFileSize(totalStorage* 1024 * 1024)} Total Storage</span>
               </div>
               <div className="flex items-center gap-2">
                 <Cloud className="h-4 w-4 text-muted-foreground" />
