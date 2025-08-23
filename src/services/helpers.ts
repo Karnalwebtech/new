@@ -6,17 +6,17 @@ export const slugify = (text: string) =>
     .replace(/[\s_-]+/g, "-") // collapse whitespace and dashes
     .replace(/^-+|-+$/g, ""); // trim - from start and end
 
-export const formatFileSize = (megabytes: number): string => {
-  const units = ['MB', 'GB', 'TB', 'PB']; // Adjusted for MB input
-  let index = 0;
+// export const formatFileSize = (megabytes: number): string => {
+//   const units = ['MB', 'GB', 'TB', 'PB']; // Adjusted for MB input
+//   let index = 0;
 
-  while (megabytes >= 1024 && index < units.length - 1) {
-    megabytes /= 1024;
-    index++;
-  }
+//   while (megabytes >= 1024 && index < units.length - 1) {
+//     megabytes /= 1024;
+//     index++;
+//   }
 
-  return `${megabytes.toFixed(2)} ${units[index]}`;
-};
+//   return `${megabytes.toFixed(2)} ${units[index]}`;
+// };
 
 export const capitalizeFirstLetter = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
@@ -51,6 +51,16 @@ export const convertToGB = (size: string): number => {
   const num = parseFloat(numStr);
 
   return num * (units[unit] || 1); // Convert to GB
+};
+
+export const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return "0 Bytes";
+
+  const units = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const size = (bytes / Math.pow(1024, i)).toFixed(2);
+
+  return `${size} ${units[i]}`;
 };
 
 export const formatDate = (dateString: string, month: "numeric" | "2-digit" | "long" | "short" = "short", includeTime: boolean = false): string => {

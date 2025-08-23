@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import {
   Settings,
@@ -25,19 +24,7 @@ const GoogleDriveForm = <T extends FieldValues>({
   control,
   errors,
 }: InputFieldProps<T>) => {
-  const [storageType, setStorageType] = useState("google-drive");
-  const [customFields, setCustomFields] = useState<string[]>([]);
 
-  const addCustomField = () => {
-    setCustomFields([
-      ...customFields,
-      `Custom Field ${customFields.length + 1}`,
-    ]);
-  };
-
-  const removeCustomField = (index: number) => {
-    setCustomFields(customFields.filter((_, i) => i !== index));
-  };
   return (
     <div className="mt-4">
       {/* Two Column Grid */}
@@ -56,7 +43,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"client_cert_uri" as Path<T>} // Ensure name is of type Path<T>
               type={"text"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter client_cert_uri"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -70,7 +57,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"auth_token_uri" as Path<T>} // Ensure name is of type Path<T>
               type={"text"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter auth_token_uri"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -84,7 +71,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"client_id" as Path<T>} // Ensure name is of type Path<T>
               type={"text"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter client_id"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -98,7 +85,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"private_key" as Path<T>} // Ensure name is of type Path<T>
               type={"text"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter private_key"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -112,7 +99,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"private_id" as Path<T>} // Ensure name is of type Path<T>
               type={"text"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter private_id"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -134,7 +121,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"auth_provider" as Path<T>} // Ensure name is of type Path<T>
               type={"text"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter auth_provider"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -148,7 +135,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"auth_uri" as Path<T>} // Ensure name is of type Path<T>
               type={"text"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter auth_uri"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -166,7 +153,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"client_email" as Path<T>} // Ensure name is of type Path<T>
               type={"text"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter client_email"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -180,7 +167,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"private_id_key" as Path<T>} // Ensure name is of type Path<T>
               type={"text"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter private_id_key"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -194,7 +181,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"type" as Path<T>} // Ensure name is of type Path<T>
               type={"text"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter type"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -218,7 +205,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"drive_folder" as Path<T>} // Ensure name is of type Path<T>
               type={"type"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter drive_folder"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -236,7 +223,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"metadata_api" as Path<T>} // Ensure name is of type Path<T>
               type={"type"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter metadata_api"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -249,7 +236,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"api" as Path<T>} // Ensure name is of type Path<T>
               type={"type"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter api"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
@@ -262,7 +249,7 @@ const GoogleDriveForm = <T extends FieldValues>({
             <InputField
               name={"universe_domain" as Path<T>} // Ensure name is of type Path<T>
               type={"type"}
-              placeholder="Enter auth token URI"
+              placeholder="Enter universe_domain"
               inputStyle="h-10 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent transition-all"
               control={control} // Replace with actual control from react-hook-form
               errors={errors} // Replace with actual errors from react-hook-form
