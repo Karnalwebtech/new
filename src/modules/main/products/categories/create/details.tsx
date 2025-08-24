@@ -1,20 +1,26 @@
 "use client";
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
+import React from "react";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import Media from "./media";
 import HoverTooltip from "@/components/tooltip/hover-tooltip";
-const Details = () => {
-  const [formData, setFormData] = useState({
-    title: "Winter jacket",
-    handle: "winter-jacket",
-    description: "A warm and cozy jacket",
-  });
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+import {
+  Control,
+  FieldErrors,
+  FieldValues,
+  Path,
+} from "react-hook-form";
+import SelectFields from "@/components/fields/select-field";
+import InputField from "@/components/fields/input-field";
+import TextareaField from "@/components/fields/textarea-field";
+interface DetailsProps<T extends FieldValues> {
+  control: Control<T>;
+  errors: FieldErrors<T>;
+}
+const Details = <T extends FieldValues>({
+  control,
+  errors,
+}: DetailsProps<T>) => {
+  
   return (
     <>
       {/* Form Content */}
@@ -31,11 +37,14 @@ const Details = () => {
               >
                 Title
               </Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                className="w-full"
+              <InputField
+                control={control}
+                errors={errors}
+                name={"title" as Path<T>}
+                placeholder="Title"
+                inputStyle={
+                  "placeholder-gray-200 bg-transparent border-zinc-300"
+                }
               />
             </div>
 
@@ -46,17 +55,24 @@ const Details = () => {
               >
                 Handle
                 <div className="w-4 h-4 bg-gray-400 rounded-full flex items-center justify-center">
-                  <HoverTooltip className="text-white text-xs cursor-pointer" title="i" description="The handle is used to reference the collection in your storefront. If not specified, the handle will be generated from the collection title." />
+                  <HoverTooltip
+                    className="text-white text-xs cursor-pointer"
+                    title="i"
+                    description="The handle is used to reference the collection in your storefront. If not specified, the handle will be generated from the collection title."
+                  />
                 </div>
                 <span className="text-gray-400">Optional</span>
               </Label>
               <div className="flex items-center">
                 <span className="text-gray-500 text-sm mr-1">/</span>
-                <Input
-                  id="handle"
-                  value={formData.handle}
-                  onChange={(e) => handleInputChange("handle", e.target.value)}
-                  className="w-full"
+                <InputField
+                  control={control}
+                  errors={errors}
+                  name={"metaCanonicalUrl" as Path<T>}
+                  placeholder="Handle"
+                  inputStyle={
+                    "placeholder-gray-200 bg-transparent border-zinc-300"
+                  }
                 />
               </div>
             </div>
@@ -70,13 +86,71 @@ const Details = () => {
             >
               Description <span className="text-gray-400">Optional</span>
             </Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              className="w-full min-h-[100px] resize-none"
+            <TextareaField
+              control={control}
+              errors={errors}
+              name={"description" as Path<T>}
+              placeholder="Description"
+              inputStyle={
+                "placeholder-gray-200 bg-transparent border-zinc-300 min-h-[100px]"
+              }
             />
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label
+                htmlFor="status"
+                className="text-sm font-medium text-gray-700"
+              >
+                Status
+              </Label>
+              <SelectFields
+                control={control}
+                errors={errors}
+                name={"status" as Path<T>}
+                placeholder="Select status" // Default placeholder
+                drop_down_selector={[
+                  {
+                    key: "active",
+                    value: "active",
+                  },
+                  {
+                    key: "inactive",
+                    value: "inactive",
+                  },
+                ]}
+                class_style={"text-gray-500"}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="visibility"
+                className="text-sm font-medium text-gray-700"
+              >
+                Visibility
+              </Label>
+              <SelectFields
+                control={control}
+                errors={errors}
+                name={"visibility" as Path<T>}
+                placeholder="Select visibility" // Default placeholder
+                drop_down_selector={[
+                  {
+                    key: "publish",
+                    value: "publish",
+                  },
+                  {
+                    key: "draft",
+                    value: "draft",
+                  },
+                ]}
+                class_style={"text-gray-500"}
+              />
+            </div>
+          </div>
+
           <Media />
         </div>
       </div>
