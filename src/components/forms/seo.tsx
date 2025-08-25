@@ -86,7 +86,7 @@ const Seo_form = <T extends FieldValues>({
           <InputField
             control={control}
             errors={errors}
-            name={"metaTitle" as Path<T>}
+            name={"meta_title" as Path<T>}
             label="Enter page title"
             type="text"
             inputStyle="text-gray-300 placeholder-gray-200 bg-transparent border-zinc-300"
@@ -104,7 +104,7 @@ const Seo_form = <T extends FieldValues>({
           <TextareaField
             control={control}
             errors={errors}
-            name={"metaDescription" as Path<T>}
+            name={"meta_description" as Path<T>}
             label="Enter meta description"
             inputStyle="text-gray-300 placeholder-gray-200 bg-transparent border-zinc-300"
           />
@@ -165,7 +165,7 @@ const Seo_form = <T extends FieldValues>({
               control={control}
               errors={errors}
               disabled_path={disabled_path==="canonical-url"?true:false} 
-              name={"metaCanonicalUrl" as Path<T>}
+              name={"meta_canonical_url" as Path<T>}
               label="Enter meta Canonical Url"
               type="text"
               inputStyle="text-gray-300 placeholder-gray-200 bg-transparent border-zinc-300"

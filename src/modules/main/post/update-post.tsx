@@ -64,16 +64,16 @@ const UpdatePost = ({ id }: UpdatePostProps) => {
   const result = data?.result;
 
   // Memoize watched values to prevent unnecessary re-renders [^1]
-  const title = watch("metaTitle", "");
-  const description = watch("metaDescription", "");
+  const title = watch("meta_title", "");
+  const description = watch("meta_description", "");
 
-  const metaCanonicalUrl = watch("metaCanonicalUrl", "");
+  const meta_canonical_url = watch("meta_canonical_url", "");
   useEffect(() => {
-    if (metaCanonicalUrl) {
-      const slug = slugify(metaCanonicalUrl);
-      setValue("metaCanonicalUrl", slug);
+    if (meta_canonical_url) {
+      const slug = slugify(meta_canonical_url);
+      setValue("meta_canonical_url", slug);
     }
-  }, [metaCanonicalUrl, setValue]);
+  }, [meta_canonical_url, setValue]);
   // Handle Form Submission - dependencies reduced to essential values
   const onSubmit = useCallback(
     async (formData: PostWithSeoFormData) => {
@@ -114,9 +114,9 @@ const UpdatePost = ({ id }: UpdatePostProps) => {
     setValue("status", result.status);
     setValue("content", result.content);
     setValue("description", result.description);
-    setValue("metaTitle", result?.seo?.metaTitle || "");
-    setValue("metaDescription", result?.seo?.metaDescription || "");
-    setValue("metaCanonicalUrl", result?.seo?.metaCanonicalUrl || "");
+    setValue("meta_title", result?.seo?.meta_title || "");
+    setValue("meta_description", result?.seo?.meta_description || "");
+    setValue("meta_canonical_url", result?.seo?.meta_canonical_url || "");
     setKeywords(result?.seo?.keywords || []);
     result?.categories?.forEach((category) => {
       const categoryId = (category as unknown as { _id: string })._id;

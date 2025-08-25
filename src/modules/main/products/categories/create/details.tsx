@@ -68,7 +68,7 @@ const Details = <T extends FieldValues>({
                 <InputField
                   control={control}
                   errors={errors}
-                  name={"metaCanonicalUrl" as Path<T>}
+                  name={"meta_canonical_url" as Path<T>}
                   placeholder="Handle"
                   inputStyle={
                     "placeholder-gray-200 bg-transparent border-zinc-300"

@@ -9,7 +9,7 @@ interface SlugPageProps {
 }
 
 // Define valid slugs and corresponding titles dynamically
-const metaTitles: Record<string, string> = {
+const meta_titles: Record<string, string> = {
   all: "All Files",
   video: "Video Files",
   image: "Image Files",
@@ -23,20 +23,20 @@ export async function generateMetadata({
 }: SlugPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  if (!metaTitles[slug]) {
+  if (!meta_titles[slug]) {
     notFound();
   }
 
   return {
-    title: metaTitles[slug] || "File Manager",
-    description: `Browse ${metaTitles[slug]} in the file manager.`,
+    title: meta_titles[slug] || "File Manager",
+    description: `Browse ${meta_titles[slug]} in the file manager.`,
   };
 }
 
 export default async function FileManager({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  if (!metaTitles[slug]) {
+  if (!meta_titles[slug]) {
     notFound();
   }
 

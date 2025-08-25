@@ -24,8 +24,8 @@ const Media = () => {
           Media <span className="text-gray-400">Optional</span>
         </Label>
         <FileHandler
-          title={"Fetaure image"}
-          typeId={"feature_image"}
+          title={"Thumbnail"}
+          typeId={"thumbnail"}
           maxLimit={1}
           category={"image"}
         />

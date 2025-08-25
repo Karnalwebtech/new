@@ -41,7 +41,7 @@ export default function AddNewPost() {
     setValue,
     watch,
   } = useForm<PostWithSeoFormData>({
-    defaultValues: { status: "draft", metaCanonicalUrl: baseurl },
+    defaultValues: { status: "draft", meta_canonical_url: baseurl },
     resolver: zodResolver(postWithSeoSchema),
   });
   useEffect(() => {
@@ -72,15 +72,15 @@ export default function AddNewPost() {
     [keywords, fileData, addNewPost, categories, tags]
   );
 
-  const title = watch("metaTitle", "");
-  const description = watch("metaDescription", "");
-   const metaCanonicalUrl = watch("metaCanonicalUrl", "");
+  const title = watch("meta_title", "");
+  const description = watch("meta_description", "");
+   const meta_canonical_url = watch("meta_canonical_url", "");
     useEffect(() => {
-      if (metaCanonicalUrl) {
-        const slug = slugify(metaCanonicalUrl);
-        setValue("metaCanonicalUrl", slug);
+      if (meta_canonical_url) {
+        const slug = slugify(meta_canonical_url);
+        setValue("meta_canonical_url", slug);
       }
-    }, [metaCanonicalUrl, setValue]);
+    }, [meta_canonical_url, setValue]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="dark-custom">

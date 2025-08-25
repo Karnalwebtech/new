@@ -1,9 +1,9 @@
 import { File } from "@/reducers/file-slice";
 import { User } from "./user-type";
 interface SEO {
-    metaCanonicalUrl: string;
-    metaDescription: string;
-    metaTitle: string;
+    meta_canonical_url: string;
+    meta_description: string;
+    meta_title: string;
     keywords: string[];
 }
 export interface ListResult {

@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { CircleDashed, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import DialogPopUp from "@/components/drawer/dialog-component";
 import Details from "./details";
@@ -22,6 +22,8 @@ import { RootState } from "@/store";
 import { baseurl } from "@/config";
 import { useAddProductCategoryMutation } from "@/state/product-category-api";
 import { ProductCategoryFormData } from "@/types/product-type";
+import { GeneralBtn } from "@/components/buttons/general-btn";
+import { useHandleNotifications } from "@/hooks/use-notification-handler";
 
 const tabs = ["Details", "SEO", "Organize Ranking"];
 
@@ -35,6 +37,12 @@ const ProductCategoryForm = () => {
   const fileData = useSelector((state: RootState) => state.files?.files);
   const [AddProductCategory, { isLoading, isSuccess, error }] =
     useAddProductCategoryMutation();
+  useHandleNotifications({
+    error: error,
+    isSuccess,
+    successMessage: "Product category added successfully!",
+    redirectPath: "/dashboard/products/categories",
+  });
   const {
     control,
     handleSubmit,
@@ -46,7 +54,7 @@ const ProductCategoryForm = () => {
     defaultValues: {
       status: "active",
       visibility: "publish",
-      metaCanonicalUrl: baseurl,
+      meta_canonical_url: baseurl,
     },
     resolver: zodResolver(schema),
   });
@@ -57,11 +65,11 @@ const ProductCategoryForm = () => {
     return [
       true,
       !!values.title?.trim(),
-      values.metaTitle?.trim().length > 0 &&
-        values.metaTitle?.trim().length <= 60 &&
-        values.metaCanonicalUrl?.trim().length > 0 &&
-        values.metaDescription?.trim().length > 50 &&
-        values.metaDescription?.trim().length <= 160,
+      values.meta_title?.trim().length > 0 &&
+        values.meta_title?.trim().length <= 60 &&
+        values.meta_canonical_url?.trim().length > 0 &&
+        values.meta_description?.trim().length > 50 &&
+        values.meta_description?.trim().length <= 160,
     ];
   }, [values]);
 
@@ -72,21 +80,21 @@ const ProductCategoryForm = () => {
   };
 
   // const handleSlugifyCanonicalUrl =useCallback(() => {
-  //   const rawUrl = getValues("metaCanonicalUrl");
+  //   const rawUrl = getValues("meta_canonical_url");
   //   const slug = slugify(rawUrl.trim());
-  //   setValue("metaCanonicalUrl", slug);
+  //   setValue("meta_canonical_url", slug);
   // },[getValues,setValue]);
-  const metaCanonicalUrl = watch("metaCanonicalUrl", "");
+  const meta_canonical_url = watch("meta_canonical_url", "");
   useEffect(() => {
-    if (metaCanonicalUrl) {
-      const slug = slugify(metaCanonicalUrl);
-      setValue("metaCanonicalUrl", slug);
+    if (meta_canonical_url) {
+      const slug = slugify(meta_canonical_url);
+      setValue("meta_canonical_url", slug);
     }
-  }, [metaCanonicalUrl, setValue]);
+  }, [meta_canonical_url, setValue]);
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      const payload:ProductCategoryFormData = {
+      const payload: ProductCategoryFormData = {
         ...data,
         keywords,
         FileData: fileData.map(({ fileType, _id }) => ({ [fileType]: _id })),
@@ -153,8 +161,8 @@ const ProductCategoryForm = () => {
               keywords={keywords}
               setKeywords={setKeywords}
               disabled_path={"disabled_path"}
-              title={values.metaTitle}
-              description={values.metaDescription}
+              title={values.meta_title}
+              description={values.meta_description}
             />
           )}
           {step === 2 && <CategoryDragSystem />}
@@ -177,12 +185,7 @@ const ProductCategoryForm = () => {
                 </Button>
               ) : (
                 <form onSubmit={handleSubmit(onSubmit)} className="inline">
-                  <Button
-                    type="submit"
-                    className="bg-gray-900 hover:bg-gray-800"
-                  >
-                    Save
-                  </Button>
+                  <GeneralBtn title="Save" loader={isLoading} type="submit" />
                 </form>
               )}
             </div>

@@ -1,10 +1,6 @@
 import { apiUrl, apiKey } from "@/config";
 import { getToken } from "@/lib/set-localstorage";
-import {
-  TrackingApiResponse,
-  TrackingDetailsApiResponse,
-} from "@/types/post-event-tracking-type";
-import { ProductCategoryFormData } from "@/types/product-type";
+import { GetResponseProductCategory, ProductCategoryFormData } from "@/types/product-type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const productCategoryApi = createApi({
@@ -20,10 +16,7 @@ export const productCategoryApi = createApi({
   }),
   tagTypes: ["productCategoryApi"],
   endpoints: (build) => ({
-    AddProductCategory: build.mutation<
-      void,
-      ProductCategoryFormData
-    >({
+    AddProductCategory: build.mutation<void, ProductCategoryFormData>({
       query: (data) => {
         const formData = new FormData();
         formData.append("data", JSON.stringify(data));
@@ -35,6 +28,34 @@ export const productCategoryApi = createApi({
       },
       invalidatesTags: [{ type: "productCategoryApi", id: "LIST" }],
     }),
+    GetProductCategory: build.query<
+      GetResponseProductCategory,
+      {
+        type?: string;
+        rowsPerPage?: number;
+        page?: number;
+      } | void
+    >({
+      query: (filters) => {
+        const params: Record<string, string | number | boolean> = {};
+        // Add filters to the query parameters if they are present
+        if (filters) {
+          if (filters.rowsPerPage) {
+            params.rowsPerPage = filters.rowsPerPage; // Convert number to string
+          }
+          if (filters.page) {
+            params.page = filters.page; // Convert number to string
+          }
+        }
+        return {
+          url: "/product-categorys",
+          params,
+          method: "GET",
+        };
+      },
+      providesTags: [{ type: "productCategoryApi", id: "LIST" }],
+    }),
   }),
 });
-export const {useAddProductCategoryMutation} = productCategoryApi;
+export const { useAddProductCategoryMutation, useGetProductCategoryQuery } =
+  productCategoryApi;

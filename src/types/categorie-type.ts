@@ -9,10 +9,10 @@ export interface CategorieFormData {
     id?:string;
     description: string;
     keywords: string[];
-    metaCanonicalUrl: string;
-    metaDescription: string;
+    meta_canonical_url: string;
+    meta_description: string;
     FileData: Filedata[];
-    metaTitle: string;
+    meta_title: string;
     status: string;
     title: string;
     type: string;

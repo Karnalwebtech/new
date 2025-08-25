@@ -3,13 +3,19 @@ interface Filedata {
 }
 export interface ProductCategoryFormData {
 title:string,
+name?:string,
 handle?:string,
 description?:string,
 status?:string,
 visibility?:string,
 keywords?: string[];
-metaCanonicalUrl: string;
-metaDescription: string;
+meta_canonical_url: string;
+meta_description: string;
 FileData?: Filedata[];
-metaTitle: string;
+meta_title: string;
+}
+export interface GetResponseProductCategory {
+    result:ProductCategoryFormData[],
+    success:boolean,
+    dataCounter:number;
 }

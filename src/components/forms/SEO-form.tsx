@@ -82,7 +82,7 @@ const SEOForm = <T extends FieldValues>({
           <InputField
             control={control}
             errors={errors}
-            name={"metaTitle" as Path<T>}
+            name={"meta_title" as Path<T>}
             type="text"
             inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
           />
@@ -97,7 +97,7 @@ const SEOForm = <T extends FieldValues>({
         {/* Meta Description */}
         <div className="space-y-2">
           <Label
-            htmlFor="metaDescription"
+            htmlFor="meta_description"
             className="text-sm font-medium text-gray-700"
           >
             Meta Description
@@ -105,7 +105,7 @@ const SEOForm = <T extends FieldValues>({
           <TextareaField
             control={control}
             errors={errors}
-            name={"metaDescription" as Path<T>}
+            name={"meta_description" as Path<T>}
             inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
           />
           <div className="flex justify-between text-sm">
@@ -168,7 +168,7 @@ const SEOForm = <T extends FieldValues>({
               control={control}
               errors={errors}
               disabled_path={disabled_path === "canonical-url" ? true : false}
-              name={"metaCanonicalUrl" as Path<T>}
+              name={"meta_canonical_url" as Path<T>}
               type="text"
               inputStyle="text-gray-500 placeholder-gray-200 bg-transparent border-zinc-300"
             />

@@ -8,10 +8,10 @@ export interface PostFormData {
     id?:string;
     description: string;
     keywords: string[];
-    metaCanonicalUrl: string;
-    metaDescription: string;
+    meta_canonical_url: string;
+    meta_description: string;
     FileData: Filedata[];
-    metaTitle: string;
+    meta_title: string;
     categories:string[];
     tags:string[];
     status: string;

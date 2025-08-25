@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LayoutGrid, Rows3 } from "lucide-react";
+import { LayoutGrid, Rows3, Search } from "lucide-react";
 import React, { memo } from "react";
 
 // Interface defining the props for the SubHeader component
@@ -26,7 +26,7 @@ const SubHeader = ({
   setSearchTerm,
   setRowsPerPage,
   dataCounter,
-  placeHolder = "Search by title",
+  placeHolder = "Search",
   type = false,
   isGrid = true,
   setIsGrid,
@@ -34,14 +34,18 @@ const SubHeader = ({
   return (
     <div className="py-2 px-2 lg:px-6 mb-4 gap-2 flex justify-between bg-white sticky top-0 shadow-md relative z-10">
       <div className="w-[65%]">
-        {/* Search input field */}
+      
+        {/* Search input field */}  
+        <div className="relative w-80">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
           type="search"
           placeholder={placeHolder}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full"
+            className="pl-10 bg-background border-border"
         />
+        </div>
         {/* Display total file count */}
         <p className="text-xs pt-[2px] px-2">Total files: {dataCounter}</p>
       </div>
