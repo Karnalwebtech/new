@@ -21,6 +21,8 @@ import SubHeader from "@/modules/layout/header/sub-header";
 import Shadcn_table from "@/components/table/table";
 import ShadcnPagination from "@/components/pagination";
 import useWindowWidth from "@/hooks/useWindowWidth";
+import LazyImage from "../../../../components/LazyImage";
+import { siteName } from "@/config";
 const categories = [
   {
     name: "Laptops",
@@ -74,12 +76,19 @@ const Categories = () => {
     }
     return filteredItems.map((item, index) => (
       <TableRow key={index}>
+        <TableCell className="font-medium">
+          <LazyImage
+            src={item?.thumbnail?.public_id || ""}
+            alt={item?.thumbnail?.altText ?? siteName ?? ""}
+            style="rounded-full w-[40px] h-[40px]"
+          />
+        </TableCell>
         <TableCell className="font-medium">{item.name}</TableCell>
         <TableCell>{item?.handle}</TableCell>
         {/* <TableCell>{<TimeAgo time={item.updatedAt} />}</TableCell> */}
         <TableCell>
           <div className="flex items-center gap-2">
-             {item?.status === "inactive" ? (
+            {item?.status === "inactive" ? (
               <div className="w-2 h-2 bg-black rounded-full"></div>
             ) : (
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -173,6 +182,7 @@ const Categories = () => {
             <div className="overflow-x-auto">
               <Shadcn_table
                 table_header={[
+                  "Thumbnail",
                   "Title",
                   "Handle",
                   "Status",

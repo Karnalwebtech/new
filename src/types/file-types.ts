@@ -22,7 +22,7 @@ export interface FileData {
   height?: number,
   signature?: string;
   _id: string,
-  altText?: string;
+  altText?: string | undefined;
   user: User;
   is_active?: boolean;
   createdAt: string,

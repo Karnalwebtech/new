@@ -17,7 +17,7 @@ export default function LazyImage({ src, alt, width = 500, height = 500, mimetyp
             return (
                 <Image
                     src={src ? `https://lh3.googleusercontent.com/d/${src}=s400` : "/assets/animat 404.gif"}
-                    alt={alt || "Mota"}
+                    alt={alt}
                     width={width}
                     height={height}
                     className={`object-cover ${style}`}

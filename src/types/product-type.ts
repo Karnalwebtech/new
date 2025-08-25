@@ -1,4 +1,6 @@
-interface Filedata {
+import { FileData } from "./file-types";
+
+interface FiledataKeyAndPair {
     [key: string]: string; // Dynamic keys, but values must be strings
 }
 export interface ProductCategoryFormData {
@@ -11,7 +13,8 @@ visibility?:string,
 keywords?: string[];
 meta_canonical_url: string;
 meta_description: string;
-FileData?: Filedata[];
+FileData?: FiledataKeyAndPair[];
+thumbnail?:FileData | undefined;
 meta_title: string;
 }
 export interface GetResponseProductCategory {
