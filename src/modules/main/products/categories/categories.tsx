@@ -1,8 +1,7 @@
 "use client";
 import React, { memo, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { MoreHorizontal, Pencil, Search } from "lucide-react";
+import { MoreHorizontal, Pencil } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +11,7 @@ import {
 import NavigateBtn from "@/components/buttons/navigate-btn";
 import { useGetProductCategoryQuery } from "@/state/product-category-api";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { TimeAgo } from "@/lib/timeAgo";
 import LinkTooltip from "@/components/tooltip/link-tooltip";
-import { Badge } from "@/components/ui/badge";
-import EventTooltip from "@/components/tooltip/event-tooltip";
 import { useTableFilters } from "@/hooks/useTableFilters";
 import SubHeader from "@/modules/layout/header/sub-header";
 import Shadcn_table from "@/components/table/table";
@@ -23,41 +19,15 @@ import ShadcnPagination from "@/components/pagination";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import LazyImage from "../../../../components/LazyImage";
 import { siteName } from "@/config";
-const categories = [
-  {
-    name: "Laptops",
-    handle: "/laptops",
-    status: "Active",
-    visibility: "Public",
-  },
-  {
-    name: "Accessories",
-    handle: "/accessories",
-    status: "Active",
-    visibility: "Public",
-  },
-  {
-    name: "Phones",
-    handle: "/phones",
-    status: "Active",
-    visibility: "Public",
-  },
-  {
-    name: "Monitors",
-    handle: "/monitors",
-    status: "Active",
-    visibility: "Public",
-  },
-];
-
+import { motion } from "framer-motion";
 const Categories = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<string>("10");
-  const { data, error, isLoading } = useGetProductCategoryQuery({
+  const { data, isLoading } = useGetProductCategoryQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
   });
-  console.log(data);
+
   const width = useWindowWidth();
   const result = data?.result || [];
   const { searchTerm, setSearchTerm, filteredItems } = useTableFilters(result, [
@@ -156,14 +126,20 @@ const Categories = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="text-sm bg-transparent">
-              Edit ranking
-            </Button>
-            <NavigateBtn
-              path="/dashboard/products/categories/create"
-              title="Create"
-              style="text-sm bg-black text-white"
-            />
+            <motion.div whileTap={{ scale: 0.97 }}>
+              <NavigateBtn
+                path="/dashboard/products/categories/organize"
+                title="Edit ranking"
+                style="text-sm bg-black cursor-pointer text-white"
+              />
+            </motion.div>
+            <motion.div whileTap={{ scale: 0.97 }}>
+              <NavigateBtn
+                path="/dashboard/products/categories/create"
+                title="Create"
+                style="text-sm bg-black cursor-pointer text-white"
+              />
+            </motion.div>
           </div>
         </div>
 

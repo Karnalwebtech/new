@@ -8,13 +8,12 @@ import { useSelector } from "react-redux";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { CircleDashed, X } from "lucide-react";
+import { X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import DialogPopUp from "@/components/drawer/dialog-component";
 import Details from "./details";
-import CategoryDragSystem from "./category-drag-system";
 import SEOForm from "@/components/forms/SEO-form";
-
+import { motion, type Variants } from "framer-motion";
 import { ProductCategoryDetailsSchema } from "@/zod-shema/product-schema";
 import { seoSchema } from "@/zod-shema/seo-schema";
 import { slugify } from "@/services/helpers";
@@ -24,11 +23,21 @@ import { useAddProductCategoryMutation } from "@/state/product-category-api";
 import { ProductCategoryFormData } from "@/types/product-type";
 import { GeneralBtn } from "@/components/buttons/general-btn";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
+import PageHeader from "@/modules/layout/header/page-heander";
 
-const tabs = ["Details", "SEO", "Organize Ranking"];
+const tabs = ["Details", "SEO"];
 
 const schema = ProductCategoryDetailsSchema.merge(seoSchema);
 type FormData = z.infer<typeof schema>;
+
+const headerVariants: Variants = {
+  initial: { y: -20, opacity: 0 },
+  animate: {
+    y: 0,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 500, damping: 35, mass: 0.7 },
+  },
+};
 
 const ProductCategoryForm = () => {
   const router = useRouter();
@@ -37,18 +46,19 @@ const ProductCategoryForm = () => {
   const fileData = useSelector((state: RootState) => state.files?.files);
   const [AddProductCategory, { isLoading, isSuccess, error }] =
     useAddProductCategoryMutation();
+
   useHandleNotifications({
     error: error,
     isSuccess,
     successMessage: "Product category added successfully!",
     redirectPath: "/dashboard/products/categories",
   });
+
   const {
     control,
     handleSubmit,
     watch,
     setValue,
-    getValues,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
@@ -79,11 +89,6 @@ const ProductCategoryForm = () => {
     }
   };
 
-  // const handleSlugifyCanonicalUrl =useCallback(() => {
-  //   const rawUrl = getValues("meta_canonical_url");
-  //   const slug = slugify(rawUrl.trim());
-  //   setValue("meta_canonical_url", slug);
-  // },[getValues,setValue]);
   const meta_canonical_url = watch("meta_canonical_url", "");
   useEffect(() => {
     if (meta_canonical_url) {
@@ -115,42 +120,13 @@ const ProductCategoryForm = () => {
     >
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-200 bg-white sticky top-0 z-10">
-            <div className="flex items-center">
-              <div className="pr-6 p-2 flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => router.push("/dashboard/products")}
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-                <Button variant="secondary" size="sm" className="text-gray-500">
-                  esc
-                </Button>
-              </div>
-              <div className="flex">
-                {tabs.map((tab, index) => (
-                  <Button
-                    key={tab}
-                    disabled={!canAccessStep[index]}
-                    onClick={() => setStep(index)}
-                    className={`flex text-sm font-medium bg-white hover:text-gray-100 text-gray-800 w-[180px] py-6 rounded-none border-0
-                      ${
-                        step === index
-                          ? "border-b-2 bg-gray-100 border-black"
-                          : ""
-                      }
-                    `}
-                  >
-                    {tab}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
-
+          <PageHeader
+            tabs={["Details", "SEO"]}
+            step={step}
+            setStep={setStep}
+            canAccessStep={canAccessStep}
+          />
+      
           {/* Form */}
           {/* <form onSubmit={handleSubmit(onSubmit)}> */}
           {step === 0 && <Details control={control} errors={errors} />}
@@ -165,27 +141,31 @@ const ProductCategoryForm = () => {
               description={values.meta_description}
             />
           )}
-          {step === 2 && <CategoryDragSystem />}
 
           {/* Footer */}
           <div className="fixed z-50 bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
             <div className="max-w-4xl mx-auto flex items-center justify-end gap-3">
-              <Button variant="outline" type="button">
-                Cancel
-              </Button>
-              <Button variant="outline">Save as draft</Button>
-              {step < 2 ? (
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={!canAccessStep[step + 1]}
-                  className="bg-gray-900 hover:bg-gray-800"
-                >
-                  Continue
+              <motion.div whileTap={{ scale: 0.97 }}>
+                <Button variant="outline" type="button">
+                  Cancel
                 </Button>
+              </motion.div>
+              {step < 1 ? (
+                <motion.div whileTap={{ scale: 0.97 }}>
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!canAccessStep[step + 1]}
+                    className="bg-gray-900 hover:bg-gray-800"
+                  >
+                    Continue
+                  </Button>
+                </motion.div>
               ) : (
                 <form onSubmit={handleSubmit(onSubmit)} className="inline">
-                  <GeneralBtn title="Save" loader={isLoading} type="submit" />
+                  <motion.div whileTap={{ scale: 0.97 }}>
+                    <GeneralBtn title="Save" loader={isLoading} type="submit" />
+                  </motion.div>
                 </form>
               )}
             </div>

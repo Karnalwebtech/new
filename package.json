@@ -44,6 +44,7 @@
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.7",
     "force": "^0.0.3",
+    "framer-motion": "^12.23.12",
     "helmet": "^8.1.0",
     "input-otp": "^1.4.2",
     "jodit-react": "^5.2.15",
