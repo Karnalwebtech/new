@@ -1,21 +1,21 @@
-import React from "react";
+import React, { memo } from "react";
 import { motion, type Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 type PageHeaderProps = {
   tabs: string[];
   step: number;
   setStep: (value: number) => void;
-   canAccessStep: Readonly<boolean[]>;
+  canAccessStep: Readonly<boolean[]>;
+  onCancel?: () => void;
 };
 const PageHeader = ({
   tabs,
   step,
   setStep,
+  onCancel,
   canAccessStep,
 }: PageHeaderProps) => {
-  const router = useRouter();
   const headerVariants: Variants = {
     initial: { y: -20, opacity: 0 },
     animate: {
@@ -39,7 +39,7 @@ const PageHeader = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/dashboard/products/categories")}
+              onClick={onCancel}
               className="hover:bg-gray-100"
             >
               <X className="w-5 h-5" />
@@ -119,4 +119,4 @@ const PageHeader = ({
   );
 };
 
-export default PageHeader;
+export default memo(PageHeader);

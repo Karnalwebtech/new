@@ -55,7 +55,14 @@ export const productCategoryApi = createApi({
       },
       providesTags: [{ type: "productCategoryApi", id: "LIST" }],
     }),
+    deleteProductCategory: build.mutation<void, {id:string}>({
+      query: ({id}) => ({
+        url: `/product-category-remove/${id}`,
+        method: "DELETE", // Use DELETE instead of PUT
+      }),
+      invalidatesTags: [{ type: "productCategoryApi", id: "LIST" }],
+    }),
   }),
 });
-export const { useAddProductCategoryMutation, useGetProductCategoryQuery } =
+export const { useAddProductCategoryMutation,useDeleteProductCategoryMutation, useGetProductCategoryQuery } =
   productCategoryApi;

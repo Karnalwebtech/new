@@ -1,7 +1,7 @@
 "use client";
-import React, { memo, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Pencil } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,9 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import NavigateBtn from "@/components/buttons/navigate-btn";
-import { useGetProductCategoryQuery } from "@/state/product-category-api";
+import {
+  useDeleteProductCategoryMutation,
+  useGetProductCategoryQuery,
+} from "@/state/product-category-api";
 import { TableCell, TableRow } from "@/components/ui/table";
-import LinkTooltip from "@/components/tooltip/link-tooltip";
 import { useTableFilters } from "@/hooks/useTableFilters";
 import SubHeader from "@/modules/layout/header/sub-header";
 import Shadcn_table from "@/components/table/table";
@@ -20,12 +22,28 @@ import useWindowWidth from "@/hooks/useWindowWidth";
 import LazyImage from "../../../../components/LazyImage";
 import { siteName } from "@/config";
 import { motion } from "framer-motion";
+import { AlertDialogComponenet } from "@/components/alert-dialog";
+import { useHandleNotifications } from "@/hooks/use-notification-handler";
 const Categories = () => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [deletedId, setDeletedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<string>("10");
-  const { data, isLoading } = useGetProductCategoryQuery({
+  const [
+    deleteProductCategory,
+    {
+      isLoading: isDeleteLoading,
+      isSuccess: isDeleteSuccess,
+      error: isDeleteError,
+    },
+  ] = useDeleteProductCategoryMutation();
+  const { data, isLoading, error } = useGetProductCategoryQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
+  });
+
+  useHandleNotifications({
+    error: isDeleteError || error,
   });
 
   const width = useWindowWidth();
@@ -33,7 +51,27 @@ const Categories = () => {
   const { searchTerm, setSearchTerm, filteredItems } = useTableFilters(result, [
     "name",
   ]);
+  const removeHandler = useCallback(
+    async (remove_id: string) => {
+      setIsOpen(true);
+      setDeletedId(remove_id);
+      // setRemoveId(remove_id);
+      // await deletePost({ id: remove_id });
+    },
+    [
+      // deletePost
+    ]
+  );
+  const DeleteHandler = useCallback(async () => {
+    await deleteProductCategory({ id: deletedId! });
+  }, [deleteProductCategory, deletedId]);
 
+  useEffect(() => {
+    if (isDeleteSuccess) {
+      setIsOpen(false);
+      setDeletedId(null);
+    }
+  }, [isDeleteSuccess]);
   const tableBody = useMemo(() => {
     if (!filteredItems || filteredItems.length === 0) {
       return (
@@ -77,19 +115,6 @@ const Categories = () => {
           </div>
         </TableCell>
         <TableCell className="text-end">
-          <LinkTooltip
-            Icon={Pencil}
-            description={"Edit"}
-            path={`/dashboard/post/`}
-            style={"text-green-800 hover:text-white hover:bg-green-800"}
-          />
-          {/* <EventTooltip
-              Icon={Trash2}
-              description={"Delete"}
-              isLoading={removeId === item._id}
-              action={() => removeHandler(item._id)}
-              style={"text-red-800 hover:text-white hover:bg-red-800"}
-            /> */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -99,7 +124,15 @@ const Categories = () => {
             <DropdownMenuContent align="end">
               <DropdownMenuItem>Edit</DropdownMenuItem>
               <DropdownMenuItem>Duplicate</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem
+                disabled={deletedId === item?._id}
+                className="text-destructive"
+                onClick={() => {
+                  const id = item?._id; // prefer typing properly instead of any
+                  if (!id) return; // or disable the button if no id
+                  removeHandler(id);
+                }}
+              >
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -107,11 +140,7 @@ const Categories = () => {
         </TableCell>
       </TableRow>
     ));
-  }, [
-    filteredItems,
-    //removeHandler,
-    // removeId
-  ]);
+  }, [filteredItems, removeHandler, deletedId]);
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8">
@@ -182,6 +211,18 @@ const Categories = () => {
           </div>
         </div>
       </div>
+      {isOpen && (
+        <AlertDialogComponenet
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          title="Are you absolutely sure?"
+          description="This action cannot be undone. This will permanently delete form Database."
+          action={DeleteHandler}
+          type="danger"
+          setDeletedId={setDeletedId}
+          isLoading={isDeleteLoading}
+        />
+      )}
     </div>
   );
 };

@@ -4,16 +4,12 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { z } from "zod";
-
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import DialogPopUp from "@/components/drawer/dialog-component";
 import Details from "./details";
 import SEOForm from "@/components/forms/SEO-form";
-import { motion, type Variants } from "framer-motion";
 import { ProductCategoryDetailsSchema } from "@/zod-shema/product-schema";
 import { seoSchema } from "@/zod-shema/seo-schema";
 import { slugify } from "@/services/helpers";
@@ -21,26 +17,16 @@ import { RootState } from "@/store";
 import { baseurl } from "@/config";
 import { useAddProductCategoryMutation } from "@/state/product-category-api";
 import { ProductCategoryFormData } from "@/types/product-type";
-import { GeneralBtn } from "@/components/buttons/general-btn";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import PageHeader from "@/modules/layout/header/page-heander";
-
-const tabs = ["Details", "SEO"];
-
+import { PageFooter } from "@/modules/layout/footer/page-footer";
+import { removeAll } from "@/reducers/file-slice";
 const schema = ProductCategoryDetailsSchema.merge(seoSchema);
 type FormData = z.infer<typeof schema>;
 
-const headerVariants: Variants = {
-  initial: { y: -20, opacity: 0 },
-  animate: {
-    y: 0,
-    opacity: 1,
-    transition: { type: "spring", stiffness: 500, damping: 35, mass: 0.7 },
-  },
-};
-
 const ProductCategoryForm = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [step, setStep] = useState(0);
   const [keywords, setKeywords] = useState<string[]>([]);
   const fileData = useSelector((state: RootState) => state.files?.files);
@@ -54,6 +40,11 @@ const ProductCategoryForm = () => {
     redirectPath: "/dashboard/products/categories",
   });
 
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(removeAll());
+    }
+  }, [isSuccess, dispatch]);
   const {
     control,
     handleSubmit,
@@ -83,11 +74,11 @@ const ProductCategoryForm = () => {
     ];
   }, [values]);
 
-  const handleNext = () => {
-    if (step < tabs.length - 1 && canAccessStep[step + 1]) {
-      setStep((prev) => prev + 1);
-    }
-  };
+  // const handleNext = () => {
+  //   if (step < tabs.length - 1 && canAccessStep[step + 1]) {
+  //     setStep((prev) => prev + 1);
+  //   }
+  // };
 
   const meta_canonical_url = watch("meta_canonical_url", "");
   useEffect(() => {
@@ -125,10 +116,8 @@ const ProductCategoryForm = () => {
             step={step}
             setStep={setStep}
             canAccessStep={canAccessStep}
+            onCancel={() => router.back()}
           />
-      
-          {/* Form */}
-          {/* <form onSubmit={handleSubmit(onSubmit)}> */}
           {step === 0 && <Details control={control} errors={errors} />}
           {step === 1 && (
             <SEOForm
@@ -141,36 +130,16 @@ const ProductCategoryForm = () => {
               description={values.meta_description}
             />
           )}
-
-          {/* Footer */}
-          <div className="fixed z-50 bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-            <div className="max-w-4xl mx-auto flex items-center justify-end gap-3">
-              <motion.div whileTap={{ scale: 0.97 }}>
-                <Button variant="outline" type="button">
-                  Cancel
-                </Button>
-              </motion.div>
-              {step < 1 ? (
-                <motion.div whileTap={{ scale: 0.97 }}>
-                  <Button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={!canAccessStep[step + 1]}
-                    className="bg-gray-900 hover:bg-gray-800"
-                  >
-                    Continue
-                  </Button>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleSubmit(onSubmit)} className="inline">
-                  <motion.div whileTap={{ scale: 0.97 }}>
-                    <GeneralBtn title="Save" loader={isLoading} type="submit" />
-                  </motion.div>
-                </form>
-              )}
-            </div>
-          </div>
-          {/* </form> */}
+          <PageFooter<FormData>
+            step={step}
+            lastStep={1} // or whatever your last step index is
+            canAccessStep={canAccessStep} // example: at least 2 steps
+            handleNext={() => setStep(step + 1)}
+            handleSubmit={handleSubmit}
+            onSubmit={onSubmit}
+            isLoading={isLoading}
+            onCancel={() => router.back()}
+          />
         </div>
       </ScrollArea>
     </DialogPopUp>

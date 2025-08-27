@@ -5,7 +5,9 @@
 html {
   scroll-behavior: smooth;
 }
-
+body{
+pointer-events: auto !important;
+}
 
 @layer base {
   :root {
