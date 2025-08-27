@@ -15,16 +15,23 @@ import { seoSchema } from "@/zod-shema/seo-schema";
 import { slugify } from "@/services/helpers";
 import { RootState } from "@/store";
 import { baseurl } from "@/config";
-import { useAddProductCategoryMutation } from "@/state/product-category-api";
+import {
+  useAddProductCategoryMutation,
+  useGetSingleQuery,
+  useUpdateProductCategoryMutation,
+} from "@/state/product-category-api";
 import { ProductCategoryFormData } from "@/types/product-type";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import PageHeader from "@/modules/layout/header/page-heander";
 import { PageFooter } from "@/modules/layout/footer/page-footer";
-import { removeAll } from "@/reducers/file-slice";
+import { addFile, removeAll } from "@/reducers/file-slice";
 const schema = ProductCategoryDetailsSchema.merge(seoSchema);
 type FormData = z.infer<typeof schema>;
-
-const ProductCategoryForm = () => {
+interface ProductCategoryFormProps {
+  catId?: string;
+}
+const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
+  const { data } = useGetSingleQuery({ id: catId! });
   const router = useRouter();
   const dispatch = useDispatch();
   const [step, setStep] = useState(0);
@@ -32,7 +39,7 @@ const ProductCategoryForm = () => {
   const fileData = useSelector((state: RootState) => state.files?.files);
   const [AddProductCategory, { isLoading, isSuccess, error }] =
     useAddProductCategoryMutation();
-
+  const [UpdateProductCategory] = useUpdateProductCategoryMutation();
   useHandleNotifications({
     error: error,
     isSuccess,
@@ -59,7 +66,7 @@ const ProductCategoryForm = () => {
     },
     resolver: zodResolver(schema),
   });
-
+  const result = data?.result;
   // Step validation logic
   const values = watch();
   const canAccessStep = useMemo(() => {
@@ -95,12 +102,50 @@ const ProductCategoryForm = () => {
         keywords,
         FileData: fileData.map(({ fileType, _id }) => ({ [fileType]: _id })),
       };
-      console.log("Form Submitted:", payload);
+      if (catId) {
+        await UpdateProductCategory({ ...payload, id: catId });
+        return;
+      }
+
       await AddProductCategory(payload);
       // send API request or dispatch action here
     },
-    [AddProductCategory, fileData, keywords]
+    [AddProductCategory, UpdateProductCategory, fileData, keywords, catId]
   );
+
+  useEffect(() => {
+    dispatch(removeAll());
+    if (!result) return;
+
+    setValue("title", result.name!);
+    setValue("description", result.description);
+    setValue("status", result.status);
+    setValue("meta_title", result?.seo_id?.meta_title || "");
+    setValue("meta_description", result?.seo_id?.meta_description || "");
+    setValue("meta_canonical_url", result?.seo_id?.meta_canonical_url || "");
+    setKeywords(result?.seo_id?.keywords || []);
+  }, [result, setValue, dispatch]);
+
+  useEffect(() => {
+    if (!result) return;
+
+    // Process files in a single pass
+    const file = result?.thumbnail;
+    // Ensure the file is an object with required properties
+    if (file && typeof file === "object" && "title" in file && "_id" in file) {
+      dispatch(
+        addFile({
+          title: file.title,
+          public_id: file.public_id,
+          mimetype: file.mimetype,
+          _id: file._id,
+          fileType: "thumbnail",
+          originalname: file.originalname,
+          category: file.category,
+        })
+      );
+    }
+  }, [result, dispatch]);
 
   return (
     <DialogPopUp

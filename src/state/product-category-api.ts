@@ -32,6 +32,18 @@ export const productCategoryApi = createApi({
       },
       invalidatesTags: [{ type: "productCategoryApi", id: "LIST" }],
     }),
+     UpdateProductCategory: build.mutation<void, ProductCategoryFormData>({
+      query: (data) => {
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(data));
+        return {
+          url: `/update-product-category/${data?.id}`,
+          method: "PUT",
+          body: formData,
+        };
+      },
+      invalidatesTags: [{ type: "productCategoryApi", id: "LIST" }],
+    }),
     GetProductCategory: build.query<
       GetResponseProductCategory,
       {
@@ -79,5 +91,6 @@ export const {
   useAddProductCategoryMutation,
   useDeleteProductCategoryMutation,
   useGetProductCategoryQuery,
-  useGetSingleQuery
+  useGetSingleQuery,
+  useUpdateProductCategoryMutation
 } = productCategoryApi;

@@ -1,9 +1,9 @@
 import { FileData } from "./file-types";
+import { SEO } from "./list-type";
 
 interface FiledataKeyAndPair {
     [key: string]: string; // Dynamic keys, but values must be strings
 }
-
 export interface ProductCategoryFormDataChild {
 title:string,
 name?:string,
@@ -36,6 +36,7 @@ rank?:number;
 id?:string;
 isExpanded?:boolean;
 parent_category_id?:string;
+seo_id?:SEO;
 meta_description: string;
 FileData?: FiledataKeyAndPair[];
 thumbnail?:FileData | undefined;

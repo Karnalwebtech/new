@@ -73,7 +73,7 @@ const SubHeader = ({
           Total files: {dataCounter}
         </motion.p>
       </div>
-      <div className="flex gap-2 w-[150px]">
+      <div className="flex gap-2">
         {/* Dropdown for selecting rows per page */}
         <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
           <Select onValueChange={(value) => setRowsPerPage(value)}>

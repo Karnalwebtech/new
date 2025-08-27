@@ -1,6 +1,6 @@
 import { File } from "@/reducers/file-slice";
 import { User } from "./user-type";
-interface SEO {
+export interface SEO {
     meta_canonical_url: string;
     meta_description: string;
     meta_title: string;

@@ -23,6 +23,9 @@ import {
 import { useGetSingleQuery } from "@/state/product-category-api";
 import { Skeleton } from "@/components/ui/skeleton"; // ⬅️ add this
 import { ProductCategoryFormData } from "@/types/product-type";
+import LazyImage from "@/components/LazyImage";
+import { siteName } from "@/config";
+import { useRouter } from "next/navigation";
 
 interface SingleProductCategoryPageProps {
   catId: string;
@@ -156,7 +159,7 @@ const SingleProductCategoryPage = ({
 }: SingleProductCategoryPageProps) => {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const { data, isLoading } = useGetSingleQuery({ id: catId });
-
+  const router = useRouter();
   const result = (data?.result as ProductCategoryFormData) || undefined;
 
   const products = [
@@ -203,9 +206,20 @@ const SingleProductCategoryPage = ({
           {isLoading ? (
             <HeaderSkeleton />
           ) : (
-            <Card className="animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-2xl">{result?.name}</CardTitle>
+            <Card className="animate-in fade-in-50 slide-in-from-bottom-4 duration-700 p-0 m-0">
+              <CardHeader className="flex flex-row items-center justify-between p-0 ">
+                <CardTitle className="text-2xl">
+                  <div className="flex gap-4 items-center p-4">
+                    <div className="w-[70px]">
+                      <LazyImage
+                        src={result?.thumbnail?.public_id || ""}
+                        alt={result?.thumbnail?.altText ?? siteName ?? ""}
+                        style="rounded-full w-[40px] h-[40px] shadow-sm"
+                      />
+                    </div>
+                    <span>{result?.name}</span>
+                  </div>
+                </CardTitle>
                 <div className="flex items-center gap-2">
                   <Badge
                     variant="secondary"
@@ -233,7 +247,15 @@ const SingleProductCategoryPage = ({
                       align="end"
                       className="animate-in fade-in-0 zoom-in-95 duration-200"
                     >
-                      <DropdownMenuItem>Edit category</DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/products/categories/${result?.id}/edit`
+                          )
+                        }
+                      >
+                        Edit category
+                      </DropdownMenuItem>
                       <DropdownMenuItem>Duplicate</DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive">
                         Delete
@@ -242,9 +264,9 @@ const SingleProductCategoryPage = ({
                   </DropdownMenu>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
+              <CardContent className="space-y-4 p-0">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="border-t-2 p-4 pb-2">
                     <label className="text-sm font-medium text-muted-foreground">
                       Description
                     </label>
@@ -252,7 +274,7 @@ const SingleProductCategoryPage = ({
                       {result?.description ? result?.description : "-"}
                     </p>
                   </div>
-                  <div>
+                  <div className="border-t-2 p-4">
                     <label className="text-sm font-medium text-muted-foreground">
                       Handle
                     </label>
