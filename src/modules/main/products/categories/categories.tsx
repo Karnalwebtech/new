@@ -30,6 +30,7 @@ import {
   containerVariants,
   itemVariants,
 } from "@/lib/variants";
+import { useRouter } from "next/navigation";
 
 const statusVariants = {
   inactive: { backgroundColor: "#374151" },
@@ -39,6 +40,7 @@ const statusVariants = {
 };
 
 const Categories = () => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -244,7 +246,7 @@ const Categories = () => {
                   align="end"
                   className="animate-in slide-in-from-top-2 duration-200"
                 >
-                  <DropdownMenuItem className="hover:bg-muted transition-colors duration-150">
+                  <DropdownMenuItem className="hover:bg-muted transition-colors duration-150 cursor-pointer" onClick={()=>router.push(`/dashboard/products/categories/${item?.id}`)}>
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuItem className="hover:bg-muted transition-colors duration-150">
@@ -268,7 +270,7 @@ const Categories = () => {
         ))}
       </AnimatePresence>
     );
-  }, [filteredItems, removeHandler, deletedId]);
+  }, [filteredItems, removeHandler, deletedId,router]);
 
   return (
     <motion.div

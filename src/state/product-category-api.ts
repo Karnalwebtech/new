@@ -1,6 +1,10 @@
 import { apiUrl, apiKey } from "@/config";
 import { getToken } from "@/lib/set-localstorage";
-import { GetResponseProductCategory, ProductCategoryFormData } from "@/types/product-type";
+import {
+  GetResponseProductCategory,
+  GetSingleResponseProductCategory,
+  ProductCategoryFormData,
+} from "@/types/product-type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const productCategoryApi = createApi({
@@ -55,8 +59,15 @@ export const productCategoryApi = createApi({
       },
       providesTags: [{ type: "productCategoryApi", id: "LIST" }],
     }),
-    deleteProductCategory: build.mutation<void, {id:string}>({
-      query: ({id}) => ({
+    getSingle: build.query<GetSingleResponseProductCategory, { id: string }>({
+      query: ({ id }) => ({
+        url: `/product-category-details/${id}`,
+        method: "GET",
+      }),
+      providesTags: [{ type: "productCategoryApi", id: "LIST" }],
+    }),
+    deleteProductCategory: build.mutation<void, { id: string }>({
+      query: ({ id }) => ({
         url: `/product-category-remove/${id}`,
         method: "DELETE", // Use DELETE instead of PUT
       }),
@@ -64,5 +75,9 @@ export const productCategoryApi = createApi({
     }),
   }),
 });
-export const { useAddProductCategoryMutation,useDeleteProductCategoryMutation, useGetProductCategoryQuery } =
-  productCategoryApi;
+export const {
+  useAddProductCategoryMutation,
+  useDeleteProductCategoryMutation,
+  useGetProductCategoryQuery,
+  useGetSingleQuery
+} = productCategoryApi;

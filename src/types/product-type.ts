@@ -4,7 +4,7 @@ interface FiledataKeyAndPair {
     [key: string]: string; // Dynamic keys, but values must be strings
 }
 
-export interface ProductCategoryFormDataChield {
+export interface ProductCategoryFormDataChild {
 title:string,
 name?:string,
 handle?:string,
@@ -40,12 +40,17 @@ meta_description: string;
 FileData?: FiledataKeyAndPair[];
 thumbnail?:FileData | undefined;
 meta_title: string;
-children?:ProductCategoryFormDataChield[];
+children?:ProductCategoryFormDataChild[];
 }
 export interface GetResponseProductCategory {
     result:ProductCategoryFormData[],
     success:boolean,
     dataCounter:number;
+}
+
+export interface GetSingleResponseProductCategory {
+    result:ProductCategoryFormData,
+    success:boolean,
 }
 
 
