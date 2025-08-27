@@ -5,8 +5,8 @@ import { X } from "lucide-react";
 type PageHeaderProps = {
   tabs: string[];
   step: number;
-  setStep: (value: number) => void;
-  canAccessStep: Readonly<boolean[]>;
+  setStep?: (value: number) => void;
+  canAccessStep?: Readonly<boolean[]>;
   onCancel?: () => void;
 };
 const PageHeader = ({
@@ -57,14 +57,14 @@ const PageHeader = ({
         <div className="flex relative">
           {tabs.map((tab, index) => {
             const active = step === index;
-            const disabled = !canAccessStep[index];
+            const disabled = canAccessStep&&!canAccessStep[index];
 
             return (
               <motion.button
                 key={tab}
                 type="button"
                 disabled={disabled}
-                onClick={() => !disabled && setStep(index)}
+                onClick={() => !disabled && setStep?.(index)}
                 className={[
                   "flex items-center justify-center text-sm font-medium w-[180px] py-4 rounded-none border-0 relative transition-colors",
                   "focus:outline-none", // better focus states

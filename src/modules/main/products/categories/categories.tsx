@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import {
@@ -19,11 +19,25 @@ import SubHeader from "@/modules/layout/header/sub-header";
 import Shadcn_table from "@/components/table/table";
 import ShadcnPagination from "@/components/pagination";
 import useWindowWidth from "@/hooks/useWindowWidth";
-import LazyImage from "../../../../components/LazyImage";
+import LazyImage from "@/components/LazyImage";
 import { siteName } from "@/config";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
+import { TruncateText } from "@/components/truncate-text";
+import {
+  buttonVariants,
+  containerVariants,
+  itemVariants,
+} from "@/lib/variants";
+
+const statusVariants = {
+  inactive: { backgroundColor: "#374151" },
+  active: { backgroundColor: "#10b981" },
+  draft: { backgroundColor: "#374151" },
+  published: { backgroundColor: "#10b981" },
+};
+
 const Categories = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
@@ -51,17 +65,12 @@ const Categories = () => {
   const { searchTerm, setSearchTerm, filteredItems } = useTableFilters(result, [
     "name",
   ]);
-  const removeHandler = useCallback(
-    async (remove_id: string) => {
-      setIsOpen(true);
-      setDeletedId(remove_id);
-      // setRemoveId(remove_id);
-      // await deletePost({ id: remove_id });
-    },
-    [
-      // deletePost
-    ]
-  );
+
+  const removeHandler = useCallback(async (remove_id: string) => {
+    setIsOpen(true);
+    setDeletedId(remove_id);
+  }, []);
+
   const DeleteHandler = useCallback(async () => {
     await deleteProductCategory({ id: deletedId! });
   }, [deleteProductCategory, deletedId]);
@@ -72,119 +81,305 @@ const Categories = () => {
       setDeletedId(null);
     }
   }, [isDeleteSuccess]);
+
   const tableBody = useMemo(() => {
     if (!filteredItems || filteredItems.length === 0) {
       return (
         <TableRow>
           <TableCell colSpan={5} className="text-center">
-            No records found
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              className="py-8"
+            >
+              <div className="text-muted-foreground text-lg mb-2">
+                No records found
+              </div>
+              <div className="text-sm text-muted-foreground/70">
+                Try adjusting your search criteria
+              </div>
+            </motion.div>
           </TableCell>
         </TableRow>
       );
     }
-    return filteredItems.map((item, index) => (
-      <TableRow key={index}>
-        <TableCell className="font-medium">
-          <LazyImage
-            src={item?.thumbnail?.public_id || ""}
-            alt={item?.thumbnail?.altText ?? siteName ?? ""}
-            style="rounded-full w-[40px] h-[40px]"
-          />
-        </TableCell>
-        <TableCell className="font-medium">{item.name}</TableCell>
-        <TableCell>{item?.handle}</TableCell>
-        {/* <TableCell>{<TimeAgo time={item.updatedAt} />}</TableCell> */}
-        <TableCell>
-          <div className="flex items-center gap-2">
-            {item?.status === "inactive" ? (
-              <div className="w-2 h-2 bg-black rounded-full"></div>
-            ) : (
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            )}
-            <span className="text-sm text-foreground">{item?.status}</span>
-          </div>
-        </TableCell>
-        <TableCell>
-          <div className="flex items-center gap-2">
-            {item?.visibility === "draft" ? (
-              <div className="w-2 h-2 bg-black rounded-full"></div>
-            ) : (
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            )}
-            <span className="text-sm text-foreground">{item?.visibility}</span>
-          </div>
-        </TableCell>
-        <TableCell className="text-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Duplicate</DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={deletedId === item?._id}
-                className="text-destructive"
-                onClick={() => {
-                  const id = item?._id; // prefer typing properly instead of any
-                  if (!id) return; // or disable the button if no id
-                  removeHandler(id);
-                }}
+
+    return (
+      <AnimatePresence mode="popLayout">
+        {filteredItems.map((item, index) => (
+          <motion.tr
+            key={item._id || index}
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            layout
+            className="group hover:bg-muted/50 transition-colors duration-200"
+            style={{
+              animationDelay: `${index * 0.05}s`,
+              animationFillMode: "both",
+            }}
+          >
+            <TableCell className="font-medium">
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 2 }}
+                transition={{ duration: 0.2 }}
+                className="relative"
               >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </TableCell>
-      </TableRow>
-    ));
+                <LazyImage
+                  src={item?.thumbnail?.public_id || ""}
+                  alt={item?.thumbnail?.altText ?? siteName ?? ""}
+                  style="rounded-full w-[40px] h-[40px] shadow-sm"
+                />
+                <motion.div
+                  className="absolute inset-0 rounded-full bg-black/10 opacity-0 group-hover:opacity-100"
+                  transition={{ duration: 0.2 }}
+                />
+              </motion.div>
+            </TableCell>
+            <TableCell className="font-medium">
+              <motion.span
+                className="group-hover:text-primary transition-colors duration-200"
+                whileHover={{ x: 2 }}
+                transition={{ duration: 0.2 }}
+              >
+                <TruncateText
+                  text={item.name! || ""}
+                  maxLength={25}
+                  className="group-hover:text-primary"
+                  whileHover={{ x: 2 }}
+                  transition={{ duration: 0.2 }}
+                />
+              </motion.span>
+            </TableCell>
+            <TableCell>
+              <motion.span
+                className="text-blue-500 group-hover:text-foreground transition-colors duration-200"
+                whileHover={{ x: 2 }}
+                transition={{ duration: 0.2 }}
+              >
+                /
+                <TruncateText
+                  text={item.handle! || ""}
+                  maxLength={25}
+                  className="group-hover:text-primary"
+                  whileHover={{ x: 2 }}
+                  transition={{ duration: 0.2 }}
+                />
+              </motion.span>
+            </TableCell>
+            <TableCell>
+              <motion.div
+                className="flex items-center gap-2"
+                whileHover={{ x: 2 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.div
+                  className="w-2 h-2 rounded-full"
+                  animate={
+                    item?.status === "inactive"
+                      ? statusVariants.inactive
+                      : statusVariants.active
+                  }
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ scale: 1.2 }}
+                />
+                <motion.span
+                  className="text-sm text-foreground"
+                  animate={{
+                    color: item?.status === "inactive" ? "#6b7280" : "#10b981",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {item?.status}
+                </motion.span>
+              </motion.div>
+            </TableCell>
+            <TableCell>
+              <motion.div
+                className="flex items-center gap-2"
+                whileHover={{ x: 2 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.div
+                  className="w-2 h-2 rounded-full"
+                  animate={
+                    item?.visibility === "draft"
+                      ? statusVariants.draft
+                      : statusVariants.published
+                  }
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ scale: 1.2 }}
+                />
+                <motion.span
+                  className="text-sm text-foreground"
+                  animate={{
+                    color: item?.visibility === "draft" ? "#6b7280" : "#10b981",
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {item?.visibility}
+                </motion.span>
+              </motion.div>
+            </TableCell>
+            <TableCell className="text-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.div
+                    variants={buttonVariants}
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="animate-in slide-in-from-top-2 duration-200"
+                >
+                  <DropdownMenuItem className="hover:bg-muted transition-colors duration-150">
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="hover:bg-muted transition-colors duration-150">
+                    Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={deletedId === item?._id}
+                    className="text-destructive hover:bg-destructive/10 transition-colors duration-150"
+                    onClick={() => {
+                      const id = item?._id;
+                      if (!id) return;
+                      removeHandler(id);
+                    }}
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+          </motion.tr>
+        ))}
+      </AnimatePresence>
+    );
   }, [filteredItems, removeHandler, deletedId]);
+
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div
+      className="min-h-screen bg-background"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       <div className="container mx-auto py-8">
-        <div className="flex px-4 items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground mb-2">
+        <motion.div
+          className="flex px-4 items-center justify-between mb-8"
+          variants={itemVariants}
+        >
+          <motion.div variants={itemVariants}>
+            <motion.h1
+              className="text-2xl font-semibold text-foreground mb-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
               Categories
-            </h1>
-            <p className="text-muted-foreground">
+            </motion.h1>
+            <motion.p
+              className="text-muted-foreground"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               Organize products into categories, and manage those
               categories&apos; ranking and hierarchy.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <motion.div whileTap={{ scale: 0.97 }}>
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            className="flex items-center gap-3"
+            variants={itemVariants}
+          >
+            <motion.div
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
               <NavigateBtn
                 path="/dashboard/products/categories/organize"
                 title="Edit ranking"
-                style="text-sm bg-black cursor-pointer text-white"
+                style="text-sm bg-black cursor-pointer text-white hover:bg-gray-200 transition-colors duration-200"
               />
             </motion.div>
-            <motion.div whileTap={{ scale: 0.97 }}>
+            <motion.div
+              variants={buttonVariants}
+              whileHover="hover"
+              whileTap="tap"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+            >
               <NavigateBtn
                 path="/dashboard/products/categories/create"
                 title="Create"
-                style="text-sm bg-black cursor-pointer text-white"
+                style="text-sm bg-black cursor-pointer text-white hover:bg-gray-200 transition-colors duration-200"
               />
             </motion.div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        <SubHeader
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          setRowsPerPage={setRowsPerPage}
-          dataCounter={data?.dataCounter}
-        />
-        {/* Header Section */}
-        <div
+        <motion.div variants={itemVariants}>
+          <SubHeader
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            setRowsPerPage={setRowsPerPage}
+            dataCounter={data?.dataCounter}
+          />
+        </motion.div>
+
+        <motion.div
           style={{ width: width < 749 ? `${width}px` : "100%" }}
-          className={`min-h-[400px] px-2 lg:px-6 overflow-hidden`}
+          className={`min-h-[400px] px-2 lg:px-2 overflow-hidden`}
+          variants={itemVariants}
         >
-          <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <motion.div
+            className="bg-card border border-border rounded-lg overflow-hidden shadow-sm"
+            whileHover={{
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+              transition: { duration: 0.2 },
+            }}
+          >
             <div className="overflow-x-auto">
+              <AnimatePresence>
+                {isLoading && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center"
+                  >
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: "linear",
+                      }}
+                      className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <Shadcn_table
                 table_header={[
                   "Thumbnail",
@@ -198,8 +393,14 @@ const Categories = () => {
                 isLoading={isLoading}
               />
             </div>
-          </div>
-          <div className="flex-1 text-sm text-muted-foreground">
+          </motion.div>
+
+          <motion.div
+            className="flex-1 text-sm text-muted-foreground"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
+          >
             {data && data?.dataCounter > Number(rowsPerPage) && (
               <ShadcnPagination
                 currentPage={currentPage}
@@ -208,22 +409,33 @@ const Categories = () => {
                 data_length={data?.dataCounter || 10}
               />
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
-      {isOpen && (
-        <AlertDialogComponenet
-          isOpen={isOpen}
-          setIsOpen={setIsOpen}
-          title="Are you absolutely sure?"
-          description="This action cannot be undone. This will permanently delete form Database."
-          action={DeleteHandler}
-          type="danger"
-          setDeletedId={setDeletedId}
-          isLoading={isDeleteLoading}
-        />
-      )}
-    </div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <AlertDialogComponenet
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              title="Are you absolutely sure?"
+              description="This action cannot be undone. This will permanently delete form Database."
+              action={DeleteHandler}
+              type="danger"
+              setDeletedId={setDeletedId}
+              isLoading={isDeleteLoading}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
+
 export default memo(Categories);

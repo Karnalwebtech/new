@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { GeneralBtn } from "@/components/buttons/general-btn";
@@ -10,28 +10,33 @@ import type {
 
 interface PageFooterProps<TForm extends FieldValues> {
   step: number;
-  canAccessStep: ReadonlyArray<boolean>;
-  handleNext: () => void;
-  handleSubmit: UseFormHandleSubmit<TForm>;
-  onSubmit: SubmitHandler<TForm>;
+  canAccessStep?: ReadonlyArray<boolean>;
+  handleNext?: () => void;
+  handleSubmit?: UseFormHandleSubmit<TForm>;
+  onSubmit?: SubmitHandler<TForm>;
   isLoading: boolean;
   onCancel?: () => void;
   lastStep?: number;
 }
 
 export function PageFooter<TForm extends FieldValues>({
-  step,
-  canAccessStep,
+  step = 0,
+  canAccessStep = [],
   handleNext,
   handleSubmit,
   onSubmit,
-  isLoading,
+  isLoading = false,
   onCancel,
   lastStep = 1,
 }: PageFooterProps<TForm>) {
   const isFinalStep = step >= lastStep;
-  const canGoNext = !!canAccessStep[step + 1];
-
+  const canGoNext = canAccessStep && !!canAccessStep[step + 1];
+  const submitHandler = useMemo(() => {
+    if (handleSubmit && onSubmit) {
+      return handleSubmit(onSubmit);
+    }
+    return undefined; // no handler if either is missing
+  }, [handleSubmit, onSubmit]);
   return (
     <div className="fixed z-50 bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
       <div className="max-w-4xl mx-auto flex items-center justify-end gap-3">
@@ -52,12 +57,12 @@ export function PageFooter<TForm extends FieldValues>({
               Continue
             </Button>
           </motion.div>
-        ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="inline">
-            <motion.div whileTap={{ scale: 0.97 }}>
-              <GeneralBtn title="Save" loader={isLoading} type="submit" />
-            </motion.div>
+        ) : submitHandler ? (
+          <form onSubmit={submitHandler} className="inline">
+            <GeneralBtn title="Save" loader={isLoading} type="submit" />
           </form>
+        ) : (
+          <GeneralBtn title="Save" loader={isLoading} type="button" />
         )}
       </div>
     </div>

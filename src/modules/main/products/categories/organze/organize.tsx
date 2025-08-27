@@ -4,8 +4,11 @@ import { useGetProductCategoryQuery } from "@/state/product-category-api";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import React from "react";
 import CategoryDragSystem from "./category-drag-system";
+import PageHeander from "@/modules/layout/header/page-heander";
+import { useRouter } from "next/navigation";
 
 const Organize = () => {
+  const router = useRouter();
   const { data } = useGetProductCategoryQuery({
     rowsPerPage: 200,
     page: 1,
@@ -20,7 +23,8 @@ const Organize = () => {
     >
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
-          <CategoryDragSystem result={result}/>
+          <PageHeander tabs={[]} step={0} onCancel={() => router.back()} />
+          <CategoryDragSystem result={result} />
         </div>
       </ScrollArea>
     </DialogPopUp>
