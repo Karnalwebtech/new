@@ -25,13 +25,18 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import PageHeader from "@/modules/layout/header/page-heander";
 import { PageFooter } from "@/modules/layout/footer/page-footer";
 import { addFile, removeAll } from "@/reducers/file-slice";
+import FormSkeleton from "@/components/skeletons/form-skeleton";
 const schema = ProductCategoryDetailsSchema.merge(seoSchema);
 type FormData = z.infer<typeof schema>;
 interface ProductCategoryFormProps {
   catId?: string;
 }
 const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
-  const { data } = useGetSingleQuery({ id: catId! });
+  const {
+    data,
+    isLoading: dataFetchLoading,
+    error: dataFetchError,
+  } = useGetSingleQuery({ id: catId! });
   const router = useRouter();
   const dispatch = useDispatch();
   const [step, setStep] = useState(0);
@@ -39,11 +44,16 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
   const fileData = useSelector((state: RootState) => state.files?.files);
   const [AddProductCategory, { isLoading, isSuccess, error }] =
     useAddProductCategoryMutation();
-  const [UpdateProductCategory] = useUpdateProductCategoryMutation();
+  const [
+    UpdateProductCategory,
+    { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
+  ] = useUpdateProductCategoryMutation();
   useHandleNotifications({
-    error: error,
-    isSuccess,
-    successMessage: "Product category added successfully!",
+    error: error || updateError || dataFetchError,
+    isSuccess: isSuccess || updateSuccess,
+    successMessage: isSuccess
+      ? "Product category added successfully!"
+      : "Product category updated successfully!",
     redirectPath: "/dashboard/products/categories",
   });
 
@@ -155,37 +165,41 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
       handleClose={() => {}}
     >
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
-        <div className="w-full mx-auto bg-white min-h-screen">
-          <PageHeader
-            tabs={["Details", "SEO"]}
-            step={step}
-            setStep={setStep}
-            canAccessStep={canAccessStep}
-            onCancel={() => router.back()}
-          />
-          {step === 0 && <Details control={control} errors={errors} />}
-          {step === 1 && (
-            <SEOForm
-              control={control}
-              errors={errors}
-              keywords={keywords}
-              setKeywords={setKeywords}
-              disabled_path={"disabled_path"}
-              title={values.meta_title}
-              description={values.meta_description}
+        {dataFetchLoading ? (
+          <FormSkeleton />
+        ) : (
+          <div className="w-full mx-auto bg-white min-h-screen">
+            <PageHeader
+              tabs={["Details", "SEO"]}
+              step={step}
+              setStep={setStep}
+              canAccessStep={canAccessStep}
+              onCancel={() => router.back()}
             />
-          )}
-          <PageFooter<FormData>
-            step={step}
-            lastStep={1} // or whatever your last step index is
-            canAccessStep={canAccessStep} // example: at least 2 steps
-            handleNext={() => setStep(step + 1)}
-            handleSubmit={handleSubmit}
-            onSubmit={onSubmit}
-            isLoading={isLoading}
-            onCancel={() => router.back()}
-          />
-        </div>
+            {step === 0 && <Details control={control} errors={errors} />}
+            {step === 1 && (
+              <SEOForm
+                control={control}
+                errors={errors}
+                keywords={keywords}
+                setKeywords={setKeywords}
+                disabled_path={"disabled_path"}
+                title={values.meta_title}
+                description={values.meta_description}
+              />
+            )}
+            <PageFooter<FormData>
+              step={step}
+              lastStep={1} // or whatever your last step index is
+              canAccessStep={canAccessStep} // example: at least 2 steps
+              handleNext={() => setStep(step + 1)}
+              handleSubmit={handleSubmit}
+              onSubmit={onSubmit}
+              isLoading={isLoading || updateLoading}
+              onCancel={() => router.back()}
+            />
+          </div>
+        )}
       </ScrollArea>
     </DialogPopUp>
   );

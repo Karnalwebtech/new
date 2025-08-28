@@ -32,7 +32,7 @@ export const productCategoryApi = createApi({
       },
       invalidatesTags: [{ type: "productCategoryApi", id: "LIST" }],
     }),
-     UpdateProductCategory: build.mutation<void, ProductCategoryFormData>({
+    UpdateProductCategory: build.mutation<void, ProductCategoryFormData>({
       query: (data) => {
         const formData = new FormData();
         formData.append("data", JSON.stringify(data));
@@ -78,6 +78,15 @@ export const productCategoryApi = createApi({
       }),
       providesTags: [{ type: "productCategoryApi", id: "LIST" }],
     }),
+    dupicateProductCategory: build.mutation<void, { id: string }>({
+      query: (data) => {
+        return {
+          url: `/dublicate-product-category/${data?.id}`,
+          method: "PUT",
+        };
+      },
+      invalidatesTags: [{ type: "productCategoryApi", id: "LIST" }],
+    }),
     deleteProductCategory: build.mutation<void, { id: string }>({
       query: ({ id }) => ({
         url: `/product-category-remove/${id}`,
@@ -92,5 +101,6 @@ export const {
   useDeleteProductCategoryMutation,
   useGetProductCategoryQuery,
   useGetSingleQuery,
-  useUpdateProductCategoryMutation
+  useUpdateProductCategoryMutation,
+  useDupicateProductCategoryMutation
 } = productCategoryApi;

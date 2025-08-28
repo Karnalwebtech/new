@@ -11,6 +11,7 @@ import {
 import NavigateBtn from "@/components/buttons/navigate-btn";
 import {
   useDeleteProductCategoryMutation,
+  useDupicateProductCategoryMutation,
   useGetProductCategoryQuery,
 } from "@/state/product-category-api";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -46,6 +47,14 @@ const Categories = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<string>("10");
   const [
+    dupicateProductCategory,
+    {
+      isLoading: duplicateLoading,
+      isSuccess: duplicateSuccess,
+      error: duplicateError,
+    },
+  ] = useDupicateProductCategoryMutation();
+  const [
     deleteProductCategory,
     {
       isLoading: isDeleteLoading,
@@ -59,7 +68,13 @@ const Categories = () => {
   });
 
   useHandleNotifications({
-    error: isDeleteError || error,
+    error: isDeleteError || error || duplicateError,
+    isSuccess: duplicateSuccess || isDeleteSuccess,
+    successMessage: duplicateSuccess
+      ? "Category duplicated successfully!"
+      : isDeleteSuccess
+      ? "Category deleted successfully!"
+      : "",
   });
 
   const width = useWindowWidth();
@@ -76,6 +91,13 @@ const Categories = () => {
   const DeleteHandler = useCallback(async () => {
     await deleteProductCategory({ id: deletedId! });
   }, [deleteProductCategory, deletedId]);
+
+  const DuplicateHandler = useCallback(
+    async (id: string) => {
+      await dupicateProductCategory({ id: id! });
+    },
+    [dupicateProductCategory]
+  );
 
   useEffect(() => {
     if (isDeleteSuccess) {
@@ -246,15 +268,27 @@ const Categories = () => {
                   align="end"
                   className="animate-in slide-in-from-top-2 duration-200"
                 >
-                  <DropdownMenuItem className="hover:bg-muted transition-colors duration-150 cursor-pointer" onClick={()=>router.push(`/dashboard/products/categories/${item?.id}`)}>
+                  <DropdownMenuItem
+                    className="hover:bg-muted transition-colors duration-150 cursor-pointer"
+                    onClick={() =>
+                      router.push(`/dashboard/products/categories/${item?.id}`)
+                    }
+                  >
                     Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-muted transition-colors duration-150">
+                  <DropdownMenuItem
+                    className="hover:bg-muted cursor-pointer transition-colors duration-150"
+                    onClick={() => {
+                      const id = item?.id;
+                      if (!id) return;
+                      DuplicateHandler(id);
+                    }}
+                  >
                     Duplicate
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     disabled={deletedId === item?._id}
-                    className="text-destructive hover:bg-destructive/10 transition-colors duration-150"
+                    className="text-destructive hover:bg-destructive/10 cursor-pointer transition-colors duration-150"
                     onClick={() => {
                       const id = item?._id;
                       if (!id) return;
@@ -270,7 +304,7 @@ const Categories = () => {
         ))}
       </AnimatePresence>
     );
-  }, [filteredItems, removeHandler, deletedId,router]);
+  }, [filteredItems, removeHandler, deletedId, router, DuplicateHandler]);
 
   return (
     <motion.div
@@ -362,7 +396,7 @@ const Categories = () => {
           >
             <div className="overflow-x-auto">
               <AnimatePresence>
-                {isLoading && (
+                {isLoading || isDeleteLoading || duplicateLoading&& (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -392,7 +426,7 @@ const Categories = () => {
                   "Action",
                 ]}
                 tabel_body={() => tableBody}
-                isLoading={isLoading}
+                isLoading={isLoading ||isDeleteLoading || duplicateLoading }
               />
             </div>
           </motion.div>
@@ -431,7 +465,7 @@ const Categories = () => {
               action={DeleteHandler}
               type="danger"
               setDeletedId={setDeletedId}
-              isLoading={isDeleteLoading}
+              isLoading={isLoading || isDeleteLoading || duplicateLoading}
             />
           </motion.div>
         )}
