@@ -50,18 +50,17 @@ export const productCategoryApi = createApi({
         type?: string;
         rowsPerPage?: number;
         page?: number;
+        has_parent?: boolean;
       } | void
     >({
       query: (filters) => {
         const params: Record<string, string | number | boolean> = {};
         // Add filters to the query parameters if they are present
         if (filters) {
-          if (filters.rowsPerPage) {
-            params.rowsPerPage = filters.rowsPerPage; // Convert number to string
-          }
-          if (filters.page) {
-            params.page = filters.page; // Convert number to string
-          }
+          const { rowsPerPage, page, has_parent } = filters;
+          if (typeof rowsPerPage === "number") params.rowsPerPage = rowsPerPage;
+          if (typeof page === "number") params.page = page;
+          if (typeof has_parent === "boolean") params.has_parent = has_parent; // ✅ pass true OR false
         }
         return {
           url: "/product-categorys",
@@ -102,5 +101,5 @@ export const {
   useGetProductCategoryQuery,
   useGetSingleQuery,
   useUpdateProductCategoryMutation,
-  useDupicateProductCategoryMutation
+  useDupicateProductCategoryMutation,
 } = productCategoryApi;

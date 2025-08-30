@@ -14,7 +14,6 @@ import { ProductCategoryDetailsSchema } from "@/zod-shema/product-schema";
 import { seoSchema } from "@/zod-shema/seo-schema";
 import { slugify } from "@/services/helpers";
 import { RootState } from "@/store";
-import { baseurl } from "@/config";
 import {
   useAddProductCategoryMutation,
   useGetSingleQuery,
@@ -36,12 +35,14 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
     data,
     isLoading: dataFetchLoading,
     error: dataFetchError,
-  } = useGetSingleQuery({ id: catId! });
+  } = useGetSingleQuery({ id: catId as string }, { skip: !catId });
+
   const router = useRouter();
   const dispatch = useDispatch();
   const [step, setStep] = useState(0);
   const [keywords, setKeywords] = useState<string[]>([]);
   const fileData = useSelector((state: RootState) => state.files?.files);
+  const [categoryId, setCategoryId] = useState<string[]>([]);
   const [AddProductCategory, { isLoading, isSuccess, error }] =
     useAddProductCategoryMutation();
   const [
@@ -72,7 +73,6 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
     defaultValues: {
       status: "active",
       visibility: "publish",
-      meta_canonical_url: baseurl,
     },
     resolver: zodResolver(schema),
   });
@@ -110,6 +110,7 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
       const payload: ProductCategoryFormData = {
         ...data,
         keywords,
+        categoryId,
         FileData: fileData.map(({ fileType, _id }) => ({ [fileType]: _id })),
       };
       if (catId) {
@@ -120,7 +121,7 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
       await AddProductCategory(payload);
       // send API request or dispatch action here
     },
-    [AddProductCategory, UpdateProductCategory, fileData, keywords, catId]
+    [AddProductCategory, categoryId,UpdateProductCategory, fileData, keywords, catId]
   );
 
   useEffect(() => {
@@ -176,7 +177,14 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
               canAccessStep={canAccessStep}
               onCancel={() => router.back()}
             />
-            {step === 0 && <Details control={control} errors={errors} />}
+            {step === 0 && (
+              <Details
+                control={control}
+                errors={errors}
+                categoryId={categoryId}
+                setCategoryId={setCategoryId}
+              />
+            )}
             {step === 1 && (
               <SEOForm
                 control={control}

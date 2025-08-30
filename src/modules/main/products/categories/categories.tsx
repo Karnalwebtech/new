@@ -65,6 +65,7 @@ const Categories = () => {
   const { data, isLoading, error } = useGetProductCategoryQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
+    has_parent:false,
   });
 
   useHandleNotifications({

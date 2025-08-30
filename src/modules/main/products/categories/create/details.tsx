@@ -1,26 +1,27 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import Media from "./media";
 import HoverTooltip from "@/components/tooltip/hover-tooltip";
-import {
-  Control,
-  FieldErrors,
-  FieldValues,
-  Path,
-} from "react-hook-form";
+import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
 import SelectFields from "@/components/fields/select-field";
 import InputField from "@/components/fields/input-field";
 import TextareaField from "@/components/fields/textarea-field";
+import CategoryList from "./category-list";
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
   errors: FieldErrors<T>;
+  categoryId: string[];
+  setCategoryId: React.Dispatch<React.SetStateAction<string[]>>;
 }
 const Details = <T extends FieldValues>({
   control,
   errors,
+  categoryId,
+  setCategoryId,
 }: DetailsProps<T>) => {
-  
+
+
   return (
     <>
       {/* Form Content */}
@@ -150,7 +151,7 @@ const Details = <T extends FieldValues>({
               />
             </div>
           </div>
-
+          <CategoryList selected={categoryId} setSelected={setCategoryId} />
           <Media />
         </div>
       </div>
