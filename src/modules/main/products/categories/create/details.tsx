@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { Label } from "@/components/ui/label";
 import Media from "./media";
 import HoverTooltip from "@/components/tooltip/hover-tooltip";
@@ -13,11 +13,13 @@ interface DetailsProps<T extends FieldValues> {
   errors: FieldErrors<T>;
   categoryId: string[];
   setCategoryId: React.Dispatch<React.SetStateAction<string[]>>;
+  catId?:string;
 }
 const Details = <T extends FieldValues>({
   control,
   errors,
   categoryId,
+  catId,
   setCategoryId,
 }: DetailsProps<T>) => {
 
@@ -151,7 +153,7 @@ const Details = <T extends FieldValues>({
               />
             </div>
           </div>
-          <CategoryList selected={categoryId} setSelected={setCategoryId} />
+          <CategoryList selected={categoryId} catId={catId} setSelected={setCategoryId} />
           <Media />
         </div>
       </div>

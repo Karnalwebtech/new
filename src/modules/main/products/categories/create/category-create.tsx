@@ -121,7 +121,14 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
       await AddProductCategory(payload);
       // send API request or dispatch action here
     },
-    [AddProductCategory, categoryId,UpdateProductCategory, fileData, keywords, catId]
+    [
+      AddProductCategory,
+      categoryId,
+      UpdateProductCategory,
+      fileData,
+      keywords,
+      catId,
+    ]
   );
 
   useEffect(() => {
@@ -135,7 +142,12 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
     setValue("meta_description", result?.seo_id?.meta_description || "");
     setValue("meta_canonical_url", result?.seo_id?.meta_canonical_url || "");
     setKeywords(result?.seo_id?.keywords || []);
-  }, [result, setValue, dispatch]);
+    setCategoryId(
+      Array.isArray(result?.parent_category_id)
+        ? result?.parent_category_id.map((item) => item?._id)
+        : []
+    );
+  }, [result, setValue, dispatch, catId]);
 
   useEffect(() => {
     if (!result) return;
@@ -183,6 +195,7 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
                 errors={errors}
                 categoryId={categoryId}
                 setCategoryId={setCategoryId}
+                catId={catId}
               />
             )}
             {step === 1 && (

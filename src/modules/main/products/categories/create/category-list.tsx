@@ -5,9 +5,11 @@ import { useGetProductCategoryQuery } from "@/state/product-category-api";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { ProductCategoryFormData } from "@/types/product-type";
 
 interface CategoryListProps {
   selected: string[];
+  catId?: string;
   setSelected: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
@@ -24,26 +26,87 @@ const itemVariants: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.18, ease: "easeOut" } },
 };
 
-const CategoryList = ({ selected, setSelected }: CategoryListProps) => {
+const CategoryNode = ({
+  item,
+  depth,
+  catId,
+  selectedSet,
+  onSelect,
+}: {
+  item: ProductCategoryFormData;
+  catId?: string;
+  depth: number;
+  selectedSet: Set<string>;
+  onSelect: (id: string) => void;
+}) => {
+  const { _id: id, name, children = [] } = item;
+  const hasChildren = children.length > 0;
+
+  return (
+    <motion.li key={id} variants={itemVariants}>
+      <div
+        className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted"
+        style={{ paddingLeft: 8 + depth * 16 }}
+      >
+        <Checkbox
+          id={id}
+          checked={selectedSet.has(id!)}
+          onCheckedChange={() => onSelect(id!)}
+        />
+        <Label htmlFor={id} className="flex-1 cursor-pointer text-sm">
+          {name}
+        </Label>
+      </div>
+
+      {hasChildren && (
+        <AnimatePresence initial={false}>
+          {/* {isOpen && ( */}
+          <motion.ul
+            key={`${id}-children`}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="mt-1"
+          >
+            {children
+              .filter((item) => item?.id !== catId)
+              .map((child) => (
+                <CategoryNode
+                  key={child._id!}
+                  item={child}
+                  catId={catId}
+                  depth={depth + 1}
+                  selectedSet={selectedSet}
+                  onSelect={onSelect}
+                />
+              ))}
+          </motion.ul>
+        </AnimatePresence>
+      )}
+    </motion.li>
+  );
+};
+
+const CategoryList = ({ selected, catId, setSelected }: CategoryListProps) => {
   const { data, isLoading, error } = useGetProductCategoryQuery({
     rowsPerPage: 100,
     page: 1,
   });
   const result = useMemo(() => data?.result ?? [], [data?.result]);
 
-  const allIds = useMemo(
-    () => result.map((r) => r._id).filter(Boolean),
-    [result]
-  );
+  // const allIds = useMemo(
+  //   () => result.map((r) => r._id).filter(Boolean),
+  //   [result]
+  // );
   const selectedSet = useMemo(() => new Set(selected), [selected]);
 
-  const allChecked = allIds.length > 0 && selected.length === allIds.length;
-  const someChecked = selected.length > 0 && selected.length < allIds.length;
-  const selectAllState: boolean | "indeterminate" = allChecked
-    ? true
-    : someChecked
-    ? "indeterminate"
-    : false;
+  // const allChecked = allIds.length > 0 && selected.length === allIds.length;
+  // const someChecked = selected.length > 0 && selected.length < allIds.length;
+  // const selectAllState: boolean | "indeterminate" = allChecked
+  //   ? true
+  //   : someChecked
+  //   ? "indeterminate"
+  //   : false;
 
   const handleSelectOne = useCallback(
     (id: string) => {
@@ -95,28 +158,18 @@ const CategoryList = ({ selected, setSelected }: CategoryListProps) => {
             animate="show"
             className="mt-2"
           >
-            {result.map((item) => (
-              <motion.li
-                key={item._id}
-                variants={itemVariants}
-                layout
-                className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted"
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.995 }}
-              >
-                <Checkbox
-                  id={item._id}
-                  checked={selectedSet.has(item._id!)}
-                  onCheckedChange={() => handleSelectOne(item._id!)}
+            {result
+              .filter((item) => item?.id !== catId)
+              .map((item) => (
+                <CategoryNode
+                  key={item._id}
+                  item={item}
+                  depth={0}
+                  catId={catId}
+                  selectedSet={selectedSet}
+                  onSelect={handleSelectOne}
                 />
-                <Label
-                  htmlFor={item._id}
-                  className="flex-1 cursor-pointer text-sm"
-                >
-                  <span className="block">{item.name}</span>
-                </Label>
-              </motion.li>
-            ))}
+              ))}
           </motion.ul>
         </AnimatePresence>
       )}

@@ -1,7 +1,16 @@
 "use client";
+
+import type React from "react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import {
+  MoreHorizontal,
+  ChevronRight,
+  ChevronDown,
+  Copy,
+  Trash2,
+  Pencil,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,12 +35,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { TruncateText } from "@/components/truncate-text";
-import {
-  buttonVariants,
-  containerVariants,
-  itemVariants,
-} from "@/lib/variants";
+import { containerVariants, itemVariants } from "@/lib/variants";
 import { useRouter } from "next/navigation";
+import { ProductCategoryFormData } from "@/types/product-type";
 
 const statusVariants = {
   inactive: { backgroundColor: "#374151" },
@@ -40,12 +46,212 @@ const statusVariants = {
   published: { backgroundColor: "#10b981" },
 };
 
+// 🔹 Optimized reusable CategoryRow component
+const CategoryRow = memo(
+  ({
+    item,
+    depth,
+    expandedIds,
+    toggleExpand,
+    removeHandler,
+    DuplicateHandler,
+    deletedId,
+    router,
+  }: {
+    item: ProductCategoryFormData;
+    depth: number;
+    expandedIds: Set<string>;
+    toggleExpand: (id: string) => void;
+    removeHandler: (id: string) => void;
+    DuplicateHandler: (id: string) => void;
+    deletedId: string | null;
+    router: ReturnType<typeof useRouter>;
+  }) => {
+    const rowId = `${item._id || item.id}-${depth}`;
+
+    const hasChildren =
+      Array.isArray(item?.children) && item.children.length > 0;
+    const isExpanded = expandedIds.has(rowId);
+
+    return (
+      <>
+        <motion.tr
+          key={rowId}
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          layout
+          className="group hover:bg-muted/40 transition-colors duration-200"
+        >
+          {/* Thumbnail */}
+          <TableCell>
+            <motion.div className="relative">
+              <LazyImage
+                src={item?.thumbnail?.public_id || ""}
+                alt={item?.thumbnail?.altText ?? siteName ?? ""}
+                style="rounded-full w-[40px] h-[40px] shadow-sm"
+              />
+            </motion.div>
+          </TableCell>
+
+          {/* Title + Expand */}
+          <TableCell>
+            <div
+              className="flex items-center gap-2"
+              style={{ paddingLeft: depth * 16 }}
+            >
+              {hasChildren ? (
+                <button
+                  type="button"
+                  aria-label={isExpanded ? "Collapse" : "Expand"}
+                  className="h-6 w-6 inline-flex items-center justify-center rounded hover:bg-muted"
+                  onClick={() => toggleExpand(rowId)}
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </button>
+              ) : (
+                <span className="h-6 w-6 inline-block" />
+              )}
+              <TruncateText
+                text={item.name! || ""}
+                maxLength={25}
+                className="group-hover:text-primary transition-colors duration-200"
+              />
+            </div>
+          </TableCell>
+
+          {/* Handle */}
+          <TableCell>
+            <span className="text-muted-foreground">
+              /<TruncateText text={item.handle! || ""} maxLength={25} />
+            </span>
+          </TableCell>
+
+          {/* Status */}
+          <TableCell>
+            <div className="flex items-center gap-2">
+              <motion.div
+                className="w-2 h-2 rounded-full"
+                animate={
+                  item?.status === "inactive"
+                    ? statusVariants.inactive
+                    : statusVariants.active
+                }
+                transition={{ duration: 0.3 }}
+              />
+              <span
+                className={`text-sm ${
+                  item?.status === "inactive"
+                    ? "text-gray-400"
+                    : "text-emerald-500"
+                }`}
+              >
+                {item?.status}
+              </span>
+            </div>
+          </TableCell>
+
+          {/* Visibility */}
+          <TableCell>
+            <div className="flex items-center gap-2">
+              <motion.div
+                className="w-2 h-2 rounded-full"
+                animate={
+                  item?.visibility === "draft"
+                    ? statusVariants.draft
+                    : statusVariants.published
+                }
+                transition={{ duration: 0.3 }}
+              />
+              <span
+                className={`text-sm ${
+                  item?.visibility === "draft"
+                    ? "text-gray-400"
+                    : "text-emerald-500"
+                }`}
+              >
+                {item?.visibility}
+              </span>
+            </div>
+          </TableCell>
+
+          {/* Actions */}
+          <TableCell className="text-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="animate-in fade-in">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() =>
+                    router.push(`/dashboard/products/categories/${item?.id}`)
+                  }
+                >
+                  <Pencil className="h-4 w-4 mr-2" /> Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => item?.id && DuplicateHandler(item.id)}
+                >
+                  <Copy className="h-4 w-4 mr-2" /> Duplicate
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={deletedId === item?._id}
+                  className="text-destructive cursor-pointer"
+                  onClick={() => item?._id && removeHandler(item._id)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </TableCell>
+        </motion.tr>
+
+        {/* Children */}
+        <AnimatePresence>
+          {hasChildren &&
+            isExpanded &&
+            item.children!.map((child, i) => (
+              <CategoryRow
+                key={`${child._id}-${depth + 1}-${i}`}
+                item={child}
+                depth={depth + 1}
+                expandedIds={expandedIds}
+                toggleExpand={toggleExpand}
+                removeHandler={removeHandler}
+                DuplicateHandler={DuplicateHandler}
+                deletedId={deletedId}
+                router={router}
+              />
+            ))}
+        </AnimatePresence>
+      </>
+    );
+  }
+);
+CategoryRow.displayName = "CategoryRow";
+
+// 🔹 Main Component
 const Categories = () => {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [rowsPerPage, setRowsPerPage] = useState<string>("10");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState("10");
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
   const [
     dupicateProductCategory,
     {
@@ -62,10 +268,10 @@ const Categories = () => {
       error: isDeleteError,
     },
   ] = useDeleteProductCategoryMutation();
+
   const { data, isLoading, error } = useGetProductCategoryQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
-    has_parent:false,
   });
 
   useHandleNotifications({
@@ -84,18 +290,18 @@ const Categories = () => {
     "name",
   ]);
 
-  const removeHandler = useCallback(async (remove_id: string) => {
+  const removeHandler = useCallback((id: string) => {
     setIsOpen(true);
-    setDeletedId(remove_id);
+    setDeletedId(id);
   }, []);
 
   const DeleteHandler = useCallback(async () => {
-    await deleteProductCategory({ id: deletedId! });
+    if (deletedId) await deleteProductCategory({ id: deletedId });
   }, [deleteProductCategory, deletedId]);
 
   const DuplicateHandler = useCallback(
     async (id: string) => {
-      await dupicateProductCategory({ id: id! });
+      await dupicateProductCategory({ id });
     },
     [dupicateProductCategory]
   );
@@ -107,19 +313,31 @@ const Categories = () => {
     }
   }, [isDeleteSuccess]);
 
+  const toggleExpand = useCallback((id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  // Memoized Table Body
   const tableBody = useMemo(() => {
-    if (!filteredItems || filteredItems.length === 0) {
+    if (!filteredItems.length) {
       return (
         <TableRow>
-          <TableCell colSpan={5} className="text-center">
+          <TableCell colSpan={6} className="text-center">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="py-8"
             >
               <div className="text-muted-foreground text-lg mb-2">
-                No records found
+                No categories found
               </div>
               <div className="text-sm text-muted-foreground/70">
                 Try adjusting your search criteria
@@ -129,183 +347,32 @@ const Categories = () => {
         </TableRow>
       );
     }
-
     return (
-      <AnimatePresence mode="popLayout">
-        {filteredItems.map((item, index) => (
-          <motion.tr
-            key={item._id || index}
-            variants={itemVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            layout
-            className="group hover:bg-muted/50 transition-colors duration-200"
-            style={{
-              animationDelay: `${index * 0.05}s`,
-              animationFillMode: "both",
-            }}
-          >
-            <TableCell className="font-medium">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 2 }}
-                transition={{ duration: 0.2 }}
-                className="relative"
-              >
-                <LazyImage
-                  src={item?.thumbnail?.public_id || ""}
-                  alt={item?.thumbnail?.altText ?? siteName ?? ""}
-                  style="rounded-full w-[40px] h-[40px] shadow-sm"
-                />
-                <motion.div
-                  className="absolute inset-0 rounded-full bg-black/10 opacity-0 group-hover:opacity-100"
-                  transition={{ duration: 0.2 }}
-                />
-              </motion.div>
-            </TableCell>
-            <TableCell className="font-medium">
-              <motion.span
-                className="group-hover:text-primary transition-colors duration-200"
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.2 }}
-              >
-                <TruncateText
-                  text={item.name! || ""}
-                  maxLength={25}
-                  className="group-hover:text-primary"
-                  whileHover={{ x: 2 }}
-                  transition={{ duration: 0.2 }}
-                />
-              </motion.span>
-            </TableCell>
-            <TableCell>
-              <motion.span
-                className="text-blue-500 group-hover:text-foreground transition-colors duration-200"
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.2 }}
-              >
-                /
-                <TruncateText
-                  text={item.handle! || ""}
-                  maxLength={25}
-                  className="group-hover:text-primary"
-                  whileHover={{ x: 2 }}
-                  transition={{ duration: 0.2 }}
-                />
-              </motion.span>
-            </TableCell>
-            <TableCell>
-              <motion.div
-                className="flex items-center gap-2"
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.2 }}
-              >
-                <motion.div
-                  className="w-2 h-2 rounded-full"
-                  animate={
-                    item?.status === "inactive"
-                      ? statusVariants.inactive
-                      : statusVariants.active
-                  }
-                  transition={{ duration: 0.3 }}
-                  whileHover={{ scale: 1.2 }}
-                />
-                <motion.span
-                  className="text-sm text-foreground"
-                  animate={{
-                    color: item?.status === "inactive" ? "#6b7280" : "#10b981",
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {item?.status}
-                </motion.span>
-              </motion.div>
-            </TableCell>
-            <TableCell>
-              <motion.div
-                className="flex items-center gap-2"
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.2 }}
-              >
-                <motion.div
-                  className="w-2 h-2 rounded-full"
-                  animate={
-                    item?.visibility === "draft"
-                      ? statusVariants.draft
-                      : statusVariants.published
-                  }
-                  transition={{ duration: 0.3 }}
-                  whileHover={{ scale: 1.2 }}
-                />
-                <motion.span
-                  className="text-sm text-foreground"
-                  animate={{
-                    color: item?.visibility === "draft" ? "#6b7280" : "#10b981",
-                  }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {item?.visibility}
-                </motion.span>
-              </motion.div>
-            </TableCell>
-            <TableCell className="text-end">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <motion.div
-                    variants={buttonVariants}
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </motion.div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="animate-in slide-in-from-top-2 duration-200"
-                >
-                  <DropdownMenuItem
-                    className="hover:bg-muted transition-colors duration-150 cursor-pointer"
-                    onClick={() =>
-                      router.push(`/dashboard/products/categories/${item?.id}`)
-                    }
-                  >
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="hover:bg-muted cursor-pointer transition-colors duration-150"
-                    onClick={() => {
-                      const id = item?.id;
-                      if (!id) return;
-                      DuplicateHandler(id);
-                    }}
-                  >
-                    Duplicate
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    disabled={deletedId === item?._id}
-                    className="text-destructive hover:bg-destructive/10 cursor-pointer transition-colors duration-150"
-                    onClick={() => {
-                      const id = item?._id;
-                      if (!id) return;
-                      removeHandler(id);
-                    }}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </motion.tr>
+      <AnimatePresence>
+        {filteredItems.map((item, i) => (
+          <CategoryRow
+            key={`${item._id}-0-${i}`}
+            item={item}
+            depth={0}
+            expandedIds={expandedIds}
+            toggleExpand={toggleExpand}
+            removeHandler={removeHandler}
+            DuplicateHandler={DuplicateHandler}
+            deletedId={deletedId}
+            router={router}
+          />
         ))}
       </AnimatePresence>
     );
-  }, [filteredItems, removeHandler, deletedId, router, DuplicateHandler]);
+  }, [
+    filteredItems,
+    expandedIds,
+    deletedId,
+    router,
+    DuplicateHandler,
+    removeHandler,
+    toggleExpand,
+  ]);
 
   return (
     <motion.div
@@ -315,160 +382,108 @@ const Categories = () => {
       animate="visible"
     >
       <div className="container mx-auto py-8">
+        {/* Header */}
         <motion.div
           className="flex px-4 items-center justify-between mb-8"
           variants={itemVariants}
         >
-          <motion.div variants={itemVariants}>
-            <motion.h1
-              className="text-2xl font-semibold text-foreground mb-2"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
+          <motion.div>
+            <motion.h1 className="text-2xl font-semibold text-foreground mb-2">
               Categories
             </motion.h1>
-            <motion.p
-              className="text-muted-foreground"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              Organize products into categories, and manage those
-              categories&apos; ranking and hierarchy.
+            <motion.p className="text-muted-foreground">
+              Manage and organize product categories.
             </motion.p>
           </motion.div>
-
-          <motion.div
-            className="flex items-center gap-3"
-            variants={itemVariants}
-          >
-            <motion.div
-              variants={buttonVariants}
-              whileHover="hover"
-              whileTap="tap"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-            >
-              <NavigateBtn
-                path="/dashboard/products/categories/organize"
-                title="Edit ranking"
-                style="text-sm bg-black cursor-pointer text-white hover:bg-gray-200 transition-colors duration-200"
-              />
-            </motion.div>
-            <motion.div
-              variants={buttonVariants}
-              whileHover="hover"
-              whileTap="tap"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.4 }}
-            >
-              <NavigateBtn
-                path="/dashboard/products/categories/create"
-                title="Create"
-                style="text-sm bg-black cursor-pointer text-white hover:bg-gray-200 transition-colors duration-200"
-              />
-            </motion.div>
+          <motion.div className="flex items-center gap-3">
+            <NavigateBtn
+              path="/dashboard/products/categories/organize"
+              title="Edit ranking"
+              style="btn-primary"
+            />
+            <NavigateBtn
+              path="/dashboard/products/categories/create"
+              title="Create"
+              style="btn-primary"
+            />
           </motion.div>
         </motion.div>
 
-        <motion.div variants={itemVariants}>
-          <SubHeader
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            setRowsPerPage={setRowsPerPage}
-            dataCounter={data?.dataCounter}
-          />
-        </motion.div>
+        {/* SubHeader */}
+        <SubHeader
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          setRowsPerPage={setRowsPerPage}
+          dataCounter={data?.dataCounter}
+        />
 
+        {/* Table */}
         <motion.div
           style={{ width: width < 749 ? `${width}px` : "100%" }}
-          className={`min-h-[400px] px-2 lg:px-2 overflow-hidden`}
-          variants={itemVariants}
+          className="min-h-[400px] px-2"
         >
-          <motion.div
-            className="bg-card border border-border rounded-lg overflow-hidden shadow-sm"
-            whileHover={{
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-              transition: { duration: 0.2 },
-            }}
-          >
-            <div className="overflow-x-auto">
-              <AnimatePresence>
-                {isLoading || isDeleteLoading || duplicateLoading&& (
+          <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
+            {/* Loader Overlay */}
+            <AnimatePresence>
+              {(isLoading || isDeleteLoading || duplicateLoading) && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10"
+                >
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center"
-                  >
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 1,
-                        repeat: Number.POSITIVE_INFINITY,
-                        ease: "linear",
-                      }}
-                      className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-              <Shadcn_table
-                table_header={[
-                  "Thumbnail",
-                  "Title",
-                  "Handle",
-                  "Status",
-                  "Visibility",
-                  "Action",
-                ]}
-                tabel_body={() => tableBody}
-                isLoading={isLoading ||isDeleteLoading || duplicateLoading }
-              />
-            </div>
-          </motion.div>
+            <Shadcn_table
+              table_header={[
+                "Thumbnail",
+                "Title",
+                "Handle",
+                "Status",
+                "Visibility",
+                "Action",
+              ]}
+              tabel_body={() => tableBody}
+              isLoading={isLoading}
+            />
+          </div>
 
-          <motion.div
-            className="flex-1 text-sm text-muted-foreground"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.5 }}
-          >
-            {data && data?.dataCounter > Number(rowsPerPage) && (
-              <ShadcnPagination
-                currentPage={currentPage}
-                totalPages={Number(rowsPerPage)}
-                setCurrentPage={setCurrentPage}
-                data_length={data?.dataCounter || 10}
-              />
-            )}
-          </motion.div>
+          {/* Pagination */}
+          {data && data?.dataCounter > Number(rowsPerPage) && (
+            <ShadcnPagination
+              currentPage={currentPage}
+              totalPages={Number(rowsPerPage)}
+              setCurrentPage={setCurrentPage}
+              data_length={data?.dataCounter || 10}
+            />
+          )}
         </motion.div>
       </div>
 
+      {/* Delete Confirmation */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <AlertDialogComponenet
-              isOpen={isOpen}
-              setIsOpen={setIsOpen}
-              title="Are you absolutely sure?"
-              description="This action cannot be undone. This will permanently delete form Database."
-              action={DeleteHandler}
-              type="danger"
-              setDeletedId={setDeletedId}
-              isLoading={isLoading || isDeleteLoading || duplicateLoading}
-            />
-          </motion.div>
+          <AlertDialogComponenet
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            title="Are you sure?"
+            description="This action cannot be undone. This will permanently delete the category."
+            action={DeleteHandler}
+            type="danger"
+            setDeletedId={setDeletedId}
+            isLoading={isDeleteLoading}
+          />
         )}
       </AnimatePresence>
     </motion.div>

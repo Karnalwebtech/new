@@ -41,8 +41,8 @@ export interface ProductCategoryFormData {
   FileData?: FiledataKeyAndPair[];
   thumbnail?: FileData | undefined;
   meta_title: string;
-  categoryId: string[];
-  children?: ProductCategoryFormDataChild[];
+  categoryId?: string[];
+  children?: ProductCategoryFormData[];
 }
 export interface GetResponseProductCategory {
   result: ProductCategoryFormData[];
