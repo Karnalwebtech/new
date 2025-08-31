@@ -35,7 +35,7 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
     data,
     isLoading: dataFetchLoading,
     error: dataFetchError,
-  } = useGetSingleQuery({ id: catId as string }, { skip: !catId });
+  } = useGetSingleQuery({ id: catId as string,query:"edit" }, { skip: !catId });
 
   const router = useRouter();
   const dispatch = useDispatch();

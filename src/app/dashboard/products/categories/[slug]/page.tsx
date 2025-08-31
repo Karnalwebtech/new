@@ -1,7 +1,7 @@
 import { siteName } from "@/config";
 import { buildMetadata } from "@/lib/metadata";
 import { Header } from "@/modules/layout/header/header";
-import SingleProductCategoryPage from "@/modules/main/products/categories/single-page";
+import SingleProductCategoryPage from "@/modules/main/products/categories/single-page/single-page";
 import React from "react";
 export const metadata = buildMetadata({
   title: "Product Categories Preview",

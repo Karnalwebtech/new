@@ -70,11 +70,14 @@ export const productCategoryApi = createApi({
       },
       providesTags: [{ type: "productCategoryApi", id: "LIST" }],
     }),
-    getSingle: build.query<GetSingleResponseProductCategory, { id: string }>({
-      query: ({ id }) => ({
-        url: `/product-category-details/${id}`,
-        method: "GET",
-      }),
+    getSingle: build.query<GetSingleResponseProductCategory, { id: string,query?:string }>({
+      query: ({ id,query="" }) => {
+        const url = query?`/product-category-details/${id}?q=${query}`:`/product-category-details/${id}`
+        return{
+          url,
+          method: "GET",
+        }
+      },
       providesTags: [{ type: "productCategoryApi", id: "LIST" }],
     }),
     dupicateProductCategory: build.mutation<void, { id: string }>({

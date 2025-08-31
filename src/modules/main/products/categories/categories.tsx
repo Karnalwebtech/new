@@ -10,6 +10,7 @@ import {
   Copy,
   Trash2,
   Pencil,
+  Eye,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -145,7 +146,7 @@ const CategoryRow = memo(
                 transition={{ duration: 0.3 }}
               />
               <span
-                className={`text-sm ${
+                className={`text-sm capitalize ${
                   item?.status === "inactive"
                     ? "text-gray-400"
                     : "text-emerald-500"
@@ -169,7 +170,7 @@ const CategoryRow = memo(
                 transition={{ duration: 0.3 }}
               />
               <span
-                className={`text-sm ${
+                className={`text-sm capitalize ${
                   item?.visibility === "draft"
                     ? "text-gray-400"
                     : "text-emerald-500"
@@ -196,10 +197,18 @@ const CategoryRow = memo(
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() =>
-                    router.push(`/dashboard/products/categories/${item?.id}`)
+                    router.push(`/dashboard/products/categories/${item?.id}/edit`)
                   }
                 >
                   <Pencil className="h-4 w-4 mr-2" /> Edit
+                </DropdownMenuItem>
+                 <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() =>
+                    router.push(`/dashboard/products/categories/${item?.id}`)
+                  }
+                >
+                  <Eye className="h-4 w-4 mr-2" /> Preview
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer"
