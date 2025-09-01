@@ -47,6 +47,7 @@ import { postEventTrackingApi } from "./state/post-event-tracking-api";
 import { contactsApi } from "./state/contactsApi";
 import { upstashRedisApi } from "./state/upstash-redis-api";
 import { productCategoryApi } from "./state/product-category-api";
+import { productCollectionsApi } from "./state/product-collections-api";
 
 const createNoopStorage = () => ({
   getItem: () => Promise.resolve(null),
@@ -83,6 +84,8 @@ const persistConfig = {
     contactsApi.reducerPath,
     upstashRedisApi.reducerPath,
     productCategoryApi.reducerPath,
+    productCollectionsApi.reducerPath,
+
     //superme
     cloudStorageApi.reducerPath,
   ],
@@ -114,8 +117,7 @@ const rootReducer = combineReducers({
   [contactsApi.reducerPath]: contactsApi.reducer,
   [upstashRedisApi.reducerPath]: upstashRedisApi.reducer,
   [productCategoryApi.reducerPath]: productCategoryApi.reducer,
-
-
+  [productCollectionsApi.reducerPath]: productCollectionsApi.reducer,
 
   //superme
   [cloudStorageApi.reducerPath]: cloudStorageApi.reducer,
@@ -155,7 +157,8 @@ const makeStore = () => {
         contactsApi.middleware,
         upstashRedisApi.middleware,
         productCategoryApi.middleware,
-        
+        productCollectionsApi.middleware,
+
         //superme
         cloudStorageApi.middleware,
       ]),

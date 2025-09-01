@@ -58,7 +58,7 @@ const InputField = <T extends FieldValues>({
   }
 
   return (
-    <div>
+    <div className="w-full">
       <Label className={inputStyle} htmlFor={name}>
         {label}
       </Label>
