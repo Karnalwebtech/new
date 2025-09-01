@@ -4,8 +4,8 @@ import { Header } from "@/modules/layout/header/header";
 import Collection from "@/modules/main/collections/collection";
 import React from "react";
 export const metadata = buildMetadata({
-  title: "collections",
-  description: "collections",
+  title: "Collections",
+  description: "Collections",
   siteName: siteName,
 });
 const Page = () => {

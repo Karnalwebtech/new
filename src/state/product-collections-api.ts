@@ -1,9 +1,8 @@
 import { apiUrl, apiKey } from "@/config";
 import { getToken } from "@/lib/set-localstorage";
 import {
-  GetResponseProductCategory,
-  GetSingleResponseProductCategory,
-  ProductCategoryFormData,
+  GetResponseProductCollection,
+  GetSingleResponseProductCollection,
   ProductCollectionsFormData,
 } from "@/types/product-type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
@@ -33,12 +32,12 @@ export const productCollectionsApi = createApi({
       },
       invalidatesTags: [{ type: "productCollectionsApi", id: "LIST" }],
     }),
-    UpdateProductCategory: build.mutation<void, ProductCategoryFormData>({
+    UpdateProductCollections: build.mutation<void, ProductCollectionsFormData>({
       query: (data) => {
         const formData = new FormData();
         formData.append("data", JSON.stringify(data));
         return {
-          url: `/update-product-category/${data?.id}`,
+          url: `/update-product-collections/${data?.id}`,
           method: "PUT",
           body: formData,
         };
@@ -46,7 +45,7 @@ export const productCollectionsApi = createApi({
       invalidatesTags: [{ type: "productCollectionsApi", id: "LIST" }],
     }),
     GetProductCollections: build.query<
-      GetResponseProductCategory,
+      GetResponseProductCollection,
       {
         type?: string;
         rowsPerPage?: number;
@@ -70,32 +69,29 @@ export const productCollectionsApi = createApi({
       providesTags: [{ type: "productCollectionsApi", id: "LIST" }],
     }),
     getSingle: build.query<
-      GetSingleResponseProductCategory,
+      GetSingleResponseProductCollection,
       { id: string; query?: string }
     >({
-      query: ({ id, query = "" }) => {
-        const url = query
-          ? `/product-category-details/${id}?q=${query}`
-          : `/product-category-details/${id}`;
+      query: ({ id}) => {
         return {
-          url,
+          url:`/product-collection-details/${id}`,
           method: "GET",
         };
       },
       providesTags: [{ type: "productCollectionsApi", id: "LIST" }],
     }),
-    dupicateProductCategory: build.mutation<void, { id: string }>({
+    dupicateProductCollection: build.mutation<void, { id: string }>({
       query: (data) => {
         return {
-          url: `/dublicate-product-category/${data?.id}`,
+          url: `/dublicate-product-collection/${data?.id}`,
           method: "PUT",
         };
       },
       invalidatesTags: [{ type: "productCollectionsApi", id: "LIST" }],
     }),
-    deleteProductCategory: build.mutation<void, { id: string }>({
+    deleteProductCollction: build.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `/product-category-remove/${id}`,
+        url: `/product-collection-remove/${id}`,
         method: "DELETE", // Use DELETE instead of PUT
       }),
       invalidatesTags: [{ type: "productCollectionsApi", id: "LIST" }],
@@ -104,9 +100,9 @@ export const productCollectionsApi = createApi({
 });
 export const {
   useAddProductCollectionsMutation,
-  useDeleteProductCategoryMutation,
+  useDeleteProductCollctionMutation,
   useGetProductCollectionsQuery,
   useGetSingleQuery,
-  useUpdateProductCategoryMutation,
-  useDupicateProductCategoryMutation,
+  useUpdateProductCollectionsMutation,
+  useDupicateProductCollectionMutation,
 } = productCollectionsApi;

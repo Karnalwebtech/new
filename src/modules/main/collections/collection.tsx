@@ -19,11 +19,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import NavigateBtn from "@/components/buttons/navigate-btn";
-import {
-  useDeleteProductCategoryMutation,
-  useDupicateProductCategoryMutation,
-  useGetProductCategoryQuery,
-} from "@/state/product-category-api";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useTableFilters } from "@/hooks/useTableFilters";
 import SubHeader from "@/modules/layout/header/sub-header";
@@ -39,14 +34,10 @@ import { TruncateText } from "@/components/truncate-text";
 import { containerVariants, itemVariants } from "@/lib/variants";
 import { useRouter } from "next/navigation";
 import { ProductCategoryFormData } from "@/types/product-type";
-import { useGetProductCollectionsQuery } from "@/state/product-collections-api";
-
-const statusVariants = {
-  inactive: { backgroundColor: "#374151" },
-  active: { backgroundColor: "#10b981" },
-  draft: { backgroundColor: "#374151" },
-  published: { backgroundColor: "#10b981" },
-};
+import {useDeleteProductCollctionMutation, 
+  useDupicateProductCollectionMutation,
+  useGetProductCollectionsQuery,
+} from "@/state/product-collections-api";
 
 // 🔹 Optimized reusable Row component
 const Row = memo(
@@ -134,54 +125,6 @@ const Row = memo(
             </span>
           </TableCell>
 
-          {/* Status */}
-          <TableCell>
-            <div className="flex items-center gap-2">
-              <motion.div
-                className="w-2 h-2 rounded-full"
-                animate={
-                  item?.status === "inactive"
-                    ? statusVariants.inactive
-                    : statusVariants.active
-                }
-                transition={{ duration: 0.3 }}
-              />
-              <span
-                className={`text-sm capitalize ${
-                  item?.status === "inactive"
-                    ? "text-gray-400"
-                    : "text-emerald-500"
-                }`}
-              >
-                {item?.status}
-              </span>
-            </div>
-          </TableCell>
-
-          {/* Visibility */}
-          <TableCell>
-            <div className="flex items-center gap-2">
-              <motion.div
-                className="w-2 h-2 rounded-full"
-                animate={
-                  item?.visibility === "draft"
-                    ? statusVariants.draft
-                    : statusVariants.published
-                }
-                transition={{ duration: 0.3 }}
-              />
-              <span
-                className={`text-sm capitalize ${
-                  item?.visibility === "draft"
-                    ? "text-gray-400"
-                    : "text-emerald-500"
-                }`}
-              >
-                {item?.visibility}
-              </span>
-            </div>
-          </TableCell>
-
           {/* Actions */}
           <TableCell className="text-end">
             <DropdownMenu>
@@ -198,9 +141,7 @@ const Row = memo(
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() =>
-                    router.push(
-                      `/dashboard/products/Collection/${item?.id}/edit`
-                    )
+                    router.push(`/dashboard/collections/${item?.id}/edit`)
                   }
                 >
                   <Pencil className="h-4 w-4 mr-2" /> Edit
@@ -208,7 +149,7 @@ const Row = memo(
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() =>
-                    router.push(`/dashboard/products/Collection/${item?.id}`)
+                    router.push(`/dashboard/collections/${item?.id}`)
                   }
                 >
                   <Eye className="h-4 w-4 mr-2" /> Preview
@@ -271,7 +212,7 @@ const Collection = () => {
       isSuccess: duplicateSuccess,
       error: duplicateError,
     },
-  ] = useDupicateProductCategoryMutation();
+  ] = useDupicateProductCollectionMutation();
   const [
     deleteProductCategory,
     {
@@ -279,7 +220,7 @@ const Collection = () => {
       isSuccess: isDeleteSuccess,
       error: isDeleteError,
     },
-  ] = useDeleteProductCategoryMutation();
+  ] = useDeleteProductCollctionMutation();
 
   const { data, isLoading, error } = useGetProductCollectionsQuery({
     rowsPerPage: Number(rowsPerPage),
@@ -290,9 +231,9 @@ const Collection = () => {
     error: isDeleteError || error || duplicateError,
     isSuccess: duplicateSuccess || isDeleteSuccess,
     successMessage: duplicateSuccess
-      ? "Category duplicated successfully!"
+      ? "Collection duplicated successfully!"
       : isDeleteSuccess
-      ? "Category deleted successfully!"
+      ? "Collection deleted successfully!"
       : "",
   });
 
@@ -453,14 +394,7 @@ const Collection = () => {
             </AnimatePresence>
 
             <Shadcn_table
-              table_header={[
-                "Thumbnail",
-                "Title",
-                "Handle",
-                "Status",
-                "Visibility",
-                "Action",
-              ]}
+              table_header={["Thumbnail", "Title", "Handle", "Action"]}
               tabel_body={() => tableBody}
               isLoading={isLoading}
             />

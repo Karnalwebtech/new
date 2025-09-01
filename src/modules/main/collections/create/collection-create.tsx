@@ -14,30 +14,30 @@ import { ProductCollectionsDetailsSchema } from "@/zod-shema/product-schema";
 import { seoSchema } from "@/zod-shema/seo-schema";
 import { slugify } from "@/services/helpers";
 import { RootState } from "@/store";
-import {
-  useGetSingleQuery,
-  useUpdateProductCategoryMutation,
-} from "@/state/product-category-api";
-import { ProductCategoryFormData } from "@/types/product-type";
+import { ProductCollectionsFormData } from "@/types/product-type";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import PageHeader from "@/modules/layout/header/page-heander";
 import { PageFooter } from "@/modules/layout/footer/page-footer";
 import { addFile, removeAll } from "@/reducers/file-slice";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import { useAddProductCollectionsMutation } from "@/state/product-collections-api";
+import {
+  useAddProductCollectionsMutation,
+  useGetSingleQuery,
+  useUpdateProductCollectionsMutation,
+} from "@/state/product-collections-api";
 const schema = ProductCollectionsDetailsSchema.merge(seoSchema);
 type FormData = z.infer<typeof schema>;
 interface CollectionFormProps {
-  catId?: string;
+  ItemId?: string;
 }
-const CollectionForm = ({ catId }: CollectionFormProps) => {
+const CollectionForm = ({ ItemId }: CollectionFormProps) => {
   const {
     data,
     isLoading: dataFetchLoading,
     error: dataFetchError,
   } = useGetSingleQuery(
-    { id: catId as string, query: "edit" },
-    { skip: !catId }
+    { id: ItemId as string, query: "edit" },
+    { skip: !ItemId }
   );
 
   const router = useRouter();
@@ -48,9 +48,9 @@ const CollectionForm = ({ catId }: CollectionFormProps) => {
   const [AddProductCategory, { isLoading, isSuccess, error }] =
     useAddProductCollectionsMutation();
   const [
-    UpdateProductCategory,
+    UpdateProductCollections,
     { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
-  ] = useUpdateProductCategoryMutation();
+  ] = useUpdateProductCollectionsMutation();
   useHandleNotifications({
     error: error || updateError || dataFetchError,
     isSuccess: isSuccess || updateSuccess,
@@ -105,20 +105,20 @@ const CollectionForm = ({ catId }: CollectionFormProps) => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      const payload: ProductCategoryFormData = {
+      const payload: ProductCollectionsFormData = {
         ...data,
         keywords,
         FileData: fileData.map(({ fileType, _id }) => ({ [fileType]: _id })),
       };
-      if (catId) {
-        await UpdateProductCategory({ ...payload, id: catId });
+      if (ItemId) {
+        await UpdateProductCollections({ ...payload, id: ItemId });
         return;
       }
 
       await AddProductCategory(payload);
       // send API request or dispatch action here
     },
-    [AddProductCategory, UpdateProductCategory, fileData, keywords, catId]
+    [AddProductCategory, UpdateProductCollections, fileData, keywords, ItemId]
   );
 
   useEffect(() => {
@@ -131,7 +131,7 @@ const CollectionForm = ({ catId }: CollectionFormProps) => {
     setValue("meta_description", result?.seo_id?.meta_description || "");
     setValue("meta_canonical_url", result?.seo_id?.meta_canonical_url || "");
     setKeywords(result?.seo_id?.keywords || []);
-  }, [result, setValue, dispatch, catId]);
+  }, [result, setValue, dispatch, ItemId]);
 
   useEffect(() => {
     if (!result) return;

@@ -1,7 +1,7 @@
 import { siteName } from "@/config";
 import { buildMetadata } from "@/lib/metadata";
 import { Header } from "@/modules/layout/header/header";
-import ProductCategoryForm from "@/modules/main/products/categories/create/category-create";
+import CollectionForm from "@/modules/main/collections/create/collection-create";
 import React from "react";
 export const metadata = buildMetadata({
   title: "Edit product Category",
@@ -17,19 +17,18 @@ const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
       <Header
         breadcrumbData={[
           { label: "Dashboard", path: "/dashboard" },
-          { label: "Products", path: "/dashboard/products" },
-          { label: "Categories", path: "/dashboard/products/categories" },
-            {
-            label: "Categories Preview",
-            path: `/dashboard/products/categories/${slug}`,
+          { label: "Collections", path: "/dashboard/collections" },
+          {
+            label: "Collections Preview",
+            path: `/dashboard/collections/${slug}`,
           },
-   {
-            label: "Edit Category",
-            path: `/dashboard/products/categories/${slug}/edit`,
+          {
+            label: "Edit Collection",
+            path: `/dashboard/collections/${slug}/edit`,
           },
         ]}
       />
-      <ProductCategoryForm catId={slug}/>
+      <CollectionForm ItemId={slug} />
     </>
   );
 };

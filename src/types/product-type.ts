@@ -78,3 +78,12 @@ export interface ProductCollectionsFormData {
   thumbnail?: FileData | undefined;
   meta_title: string;
 }
+export interface GetResponseProductCollection {
+  result: ProductCollectionsFormData[];
+  success: boolean;
+  dataCounter: number;
+}
+export interface GetSingleResponseProductCollection {
+  result: ProductCollectionsFormData;
+  success: boolean;
+}

@@ -1,7 +1,7 @@
 import { siteName } from "@/config";
 import { buildMetadata } from "@/lib/metadata";
 import { Header } from "@/modules/layout/header/header";
-import SingleProductCategoryPage from "@/modules/main/products/categories/single-page/single-page";
+import SingleProductCollectionPage from "@/modules/main/collections/single-page/single-page";
 import React from "react";
 export const metadata = buildMetadata({
   title: "Product Categories Preview",
@@ -15,15 +15,14 @@ const Page = async ({ params }: { params: Promise<{ slug: string }> }) => {
       <Header
         breadcrumbData={[
           { label: "Dashboard", path: "/dashboard" },
-          { label: "Products", path: "/dashboard/products" },
-          { label: "Categories", path: "/dashboard/products/categories" },
+          { label: "Collections", path: "/dashboard/collections" },
           {
-            label: "Categories Preview",
-            path: `/dashboard/products/categories/${slug}`,
+            label: "Collections Preview",
+            path: `/dashboard/collections/${slug}`,
           },
         ]}
       />
-      <SingleProductCategoryPage catId={slug} />
+      <SingleProductCollectionPage ItemId={slug} />
     </>
   );
 };
