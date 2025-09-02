@@ -138,6 +138,7 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
     setValue("title", result.name!);
     setValue("description", result.description);
     setValue("status", result.status);
+    setValue("visibility", result.visibility);
     setValue("meta_title", result?.seo_id?.meta_title || "");
     setValue("meta_description", result?.seo_id?.meta_description || "");
     setValue("meta_canonical_url", result?.seo_id?.meta_canonical_url || "");
