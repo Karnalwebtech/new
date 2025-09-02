@@ -1,91 +1,124 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { X, Upload } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { DrawerComponent } from "@/components/drawer/drawer-component";
 import { useRouter } from "next/navigation";
 import Details from "./details";
+import PageHeander from "@/modules/layout/header/page-heander";
+import Organize from "./organize";
+import { PageFooter } from "@/modules/layout/footer/page-footer";
+import { useForm } from "react-hook-form";
+import DialogPopUp from "@/components/drawer/dialog-component";
+import { ProductSchema } from "@/zod-shema/product-schema";
+import { seoSchema } from "@/zod-shema/seo-schema";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import SEOForm from "@/components/forms/SEO-form";
+
+const schema = ProductSchema.merge(seoSchema);
+type FormData = z.infer<typeof schema>;
 export function ProductCreateForm() {
   const router = useRouter();
+  const [step, setStep] = useState(0);
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData>({
+    // defaultValues: {
+    //   status: "active",
+    //   visibility: "publish",
+    // },
+    resolver: zodResolver(schema),
+  });
 
-  const tabs = ["Details", "Organize", "Variants"];
+  const values = watch();
+  const canAccessStep = useMemo(() => {
+    return [
+      true,
+      !!values.title?.trim(),
+      values.meta_title?.trim().length > 0 &&
+        values.meta_title?.trim().length <= 60 &&
+        values.meta_canonical_url?.trim().length > 0 &&
+        values.meta_description?.trim().length > 50 &&
+        values.meta_description?.trim().length <= 160,
+    ];
+  }, [values]);
+
+  const onSubmit = useCallback(
+    async (data: FormData) => {
+      // const payload: ProductCategoryFormData = {
+      //   ...data,
+      //   keywords,
+      //   categoryId,
+      //   FileData: fileData.map(({ fileType, _id }) => ({ [fileType]: _id })),
+      // };
+      // if (catId) {
+      //   await UpdateProductCategory({ ...payload, id: catId });
+      //   return;
+      // }
+      // await AddProductCategory(payload);
+      // send API request or dispatch action here
+    },
+    [
+      // AddProductCategory,
+      // categoryId,
+      // UpdateProductCategory,
+      // fileData,
+      // keywords,
+      // catId,
+    ]
+  );
 
   return (
-    <DrawerComponent
-      title="Create Product"
-      description="Fill in the details to create a new product."
+    <DialogPopUp
+      title="Create Product Category"
+      description="Fill in the details to create a new product category."
       isOpen={true}
       handleClose={() => {}}
     >
-      <ScrollArea className="h-[97vh] w-full p-0">
+      <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-200 bg-white sticky top-0">
-            <div>
-              <div className="flex items-center">
-                <div className="pr-6 p-2 flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push("/dashboard/products")}
-                  >
-                    <X className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="text-gray-500"
-                  >
-                    esc
-                  </Button>
-                </div>
-                <div className="flex">
-                  {tabs.map((tab) => (
-                    <Button
-                      key={tab}
-                      //   onClick={() => setActiveTab(tab)}
-                      className={`flex text-sm font-medium bg-white  text-gray-800 w-[180px] py-6 rounded-[0px] border-0
-                      `}
-                    >
-                      {/* {tab === "Details" && (
-                        <div className="w-2 h-2 bg-blue-600 rounded-full" />
-                      )}
-                      {tab === "Organize" && (
-                        <div className="w-4 h-4 border border-gray-300 rounded" />
-                      )}
-                      {tab === "Variants" && (
-                        <div className="w-4 h-4 border border-gray-300 rounded" />
-                      )} */}
-                      {tab}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div></div>
-          </div>
-
-          <Details />
-
+          <PageHeander
+            tabs={["Details", "Organize", "Variants","SEO"]}
+            step={step}
+            setStep={setStep}
+            canAccessStep={canAccessStep}
+            onCancel={() => router.back()}
+          />
+          {step === 0 && <Details control={control} errors={errors} />}
+          {step === 1 && <Organize control={control} errors={errors}/>}
+          {step === 2 && <p>sss</p>}
+          {/* {step === 2 && (
+            <Variants />
+          )} */}
+          {step === 3 && (
+            <SEOForm
+              control={control}
+              errors={errors}
+              keywords={keywords}
+              setKeywords={setKeywords}
+              disabled_path={"disabled_path"}
+              title={values.meta_title}
+              description={values.meta_description}
+            />
+          )}
           {/* Footer Actions */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-            <div className="max-w-4xl mx-auto flex items-center justify-end gap-3">
-              <Button variant="outline">Cancel</Button>
-              <Button variant="outline">Save as draft</Button>
-              <Button className="bg-gray-900 hover:bg-gray-800">
-                Continue
-              </Button>
-            </div>
-          </div>
+          <PageFooter<FormData>
+            step={step}
+            lastStep={3} // or whatever your last step index is
+            canAccessStep={canAccessStep} // example: at least 2 steps
+            handleNext={() => setStep(step + 1)}
+            handleSubmit={handleSubmit}
+            onSubmit={onSubmit}
+            isLoading={false}
+            onCancel={() => router.back()}
+          />
         </div>
       </ScrollArea>
-    </DrawerComponent>
+    </DialogPopUp>
   );
 }

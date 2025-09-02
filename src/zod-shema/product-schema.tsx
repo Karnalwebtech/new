@@ -13,3 +13,9 @@ export const ProductCollectionsDetailsSchema = z.object({
   handle: z.string().optional(),
   description: z.string().optional(),
 });
+
+export const ProductSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  handle: z.string().optional(),
+  description: z.string().optional(),
+});

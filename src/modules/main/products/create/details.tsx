@@ -1,25 +1,21 @@
 "use client";
-import React, { useState } from "react";
-import { Input } from "@/components/ui/input";
+import React, { memo } from "react";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { X, Upload } from "lucide-react";
 import Media from "./media";
 import Variants from "./variants";
-const Details = () => {
-  const [hasVariants, setHasVariants] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "Winter jacket",
-    subtitle: "Warm and cosy",
-    handle: "winter-jacket",
-    description: "A warm and cozy jacket",
-  });
+import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
+import InputField from "@/components/fields/input-field";
+import HoverTooltip from "@/components/tooltip/hover-tooltip";
+import TextareaField from "@/components/fields/textarea-field";
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+interface DetailsProps<T extends FieldValues> {
+  control: Control<T>;
+  errors: FieldErrors<T>;
+}
+const Details = <T extends FieldValues>({
+  control,
+  errors,
+}: DetailsProps<T>) => {
   return (
     <>
       {/* Form Content */}
@@ -36,11 +32,14 @@ const Details = () => {
               >
                 Title
               </Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                className="w-full"
+              <InputField
+                control={control}
+                errors={errors}
+                name={"title" as Path<T>}
+                placeholder="Title"
+                inputStyle={
+                  "placeholder-gray-200 bg-transparent border-zinc-300"
+                }
               />
             </div>
 
@@ -51,11 +50,14 @@ const Details = () => {
               >
                 Subtitle <span className="text-gray-400">Optional</span>
               </Label>
-              <Input
-                id="subtitle"
-                value={formData.subtitle}
-                onChange={(e) => handleInputChange("subtitle", e.target.value)}
-                className="w-full"
+              <InputField
+                control={control}
+                errors={errors}
+                name={"subtitle" as Path<T>}
+                placeholder="Subtitle"
+                inputStyle={
+                  "placeholder-gray-200 bg-transparent border-zinc-300"
+                }
               />
             </div>
 
@@ -66,17 +68,24 @@ const Details = () => {
               >
                 Handle
                 <div className="w-4 h-4 bg-gray-400 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">i</span>
+                  <HoverTooltip
+                    className="text-white text-xs cursor-pointer"
+                    title="i"
+                    description="The handle is used to reference the collection in your storefront. If not specified, the handle will be generated from the collection title."
+                  />
                 </div>
                 <span className="text-gray-400">Optional</span>
               </Label>
               <div className="flex items-center">
                 <span className="text-gray-500 text-sm mr-1">/</span>
-                <Input
-                  id="handle"
-                  value={formData.handle}
-                  onChange={(e) => handleInputChange("handle", e.target.value)}
-                  className="w-full"
+                <InputField
+                  control={control}
+                  errors={errors}
+                  name={"meta_canonical_url" as Path<T>}
+                  placeholder="Handle"
+                  inputStyle={
+                    "placeholder-gray-200 bg-transparent border-zinc-300"
+                  }
                 />
               </div>
             </div>
@@ -90,11 +99,14 @@ const Details = () => {
             >
               Description <span className="text-gray-400">Optional</span>
             </Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              className="w-full min-h-[100px] resize-none"
+            <TextareaField
+              control={control}
+              errors={errors}
+              name={"description" as Path<T>}
+              placeholder="Description"
+              inputStyle={
+                "placeholder-gray-200 bg-transparent border-zinc-300 min-h-[100px]"
+              }
             />
           </div>
           <Media />
@@ -105,4 +117,4 @@ const Details = () => {
   );
 };
 
-export default Details;
+export default memo(Details);
