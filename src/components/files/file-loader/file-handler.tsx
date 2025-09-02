@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Card, CardContent } from "../../ui/card";
 import { useDispatch, useSelector } from "react-redux";
 import {
   open,
@@ -15,12 +15,14 @@ interface FileHandlerProps {
   typeId: string;
   maxLimit: number;
   category: string;
+  isgallery?: boolean;
 }
 export const FileHandler = ({
   title,
   typeId,
   maxLimit,
   category,
+  isgallery = true,
 }: FileHandlerProps) => {
   const dispatch = useDispatch();
   const filesData = useSelector((state: RootState) => state.files.files);
@@ -41,7 +43,7 @@ export const FileHandler = ({
           onClick={handelEvent}
           // className="flex justify-center items-center cursor-pointer border-dashed border-gray-400 w-full rounded-sm border-2"
         >
-          {filteredFiles.length > 0 ? (
+          {isgallery && filteredFiles.length > 0 ? (
             filteredFiles.map((item) => (
               <div key={item._id}>
                 <FileLoaderCards item={item} />
