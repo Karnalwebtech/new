@@ -16,6 +16,9 @@ import {
 import { projectList } from "./project-list";
 import { mainNavList } from "./main-nav-list";
 import { teamList } from "./teams-list";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // This is sample data.
 const data = {
@@ -26,10 +29,11 @@ const data = {
   },
   teams: teamList,
   navMain: mainNavList,
-  projects: projectList
+  projects: projectList,
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const router = useRouter();
   return (
     <Sidebar collapsible="icon" {...props} variant={"floating"}>
       <SidebarHeader>
@@ -40,6 +44,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
+        <Button
+          className="bg-transparent hover:bg-gray-100 shadow-none text-gray-700 mb-2 w-full flex justify-start"
+          onClick={() => router.push("/settings/store")}
+        >
+          <Settings />
+          Settings
+        </Button>
         <NavUser />
       </SidebarFooter>
       <SidebarRail />

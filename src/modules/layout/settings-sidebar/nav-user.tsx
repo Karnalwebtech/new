@@ -37,7 +37,7 @@ export function NavUser() {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user.user);
   const [logout, { error, isLoading, isSuccess }] = useLogoutMutation();
-
+  
   useHandleNotifications({
     error: error,
     isSuccess,
@@ -50,12 +50,13 @@ export function NavUser() {
     return null;
   }
   const logOutHandler = async () => {
-    await fetch("/api/cookie", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  
+      await fetch("/api/cookie", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     await logout().unwrap();
     dispatch(stateLogOut());
     router.push("/auth/sign-in");
@@ -113,11 +114,8 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem
-                onClick={() => router.push("/dashboard/account")}
-                className="cursor-pointer"
-              >
+            <DropdownMenuGroup >
+              <DropdownMenuItem onClick={() => router.push("/dashboard/account")} className="cursor-pointer">
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
@@ -131,10 +129,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={logOutHandler}
-              className="cursor-pointer"
-            >
+            <DropdownMenuItem onClick={logOutHandler} className="cursor-pointer">
               {isLoading ? (
                 <Loader2 className="animate-spin w-5 h-5 mr-2" />
               ) : (

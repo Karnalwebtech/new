@@ -14,6 +14,7 @@ import { seoSchema } from "@/zod-shema/seo-schema";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SEOForm from "@/components/forms/SEO-form";
+import VariantsDetails from "./variants-details";
 
 const schema = ProductSchema.merge(seoSchema);
 type FormData = z.infer<typeof schema>;
@@ -83,14 +84,16 @@ export function ProductCreateForm() {
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
-            tabs={["Details", "Organize", "Variants","SEO"]}
+            tabs={["Details", "Organize", "Variants", "SEO"]}
             step={step}
             setStep={setStep}
             canAccessStep={canAccessStep}
             onCancel={() => router.back()}
           />
           {step === 0 && <Details control={control} errors={errors} />}
-          {step === 1 && <Organize control={control} errors={errors}/>}
+          {step === 1 && <VariantsDetails />}
+          {/* {step === 1 && <Organize control={control} errors={errors}/>} */}
+
           {step === 2 && <p>sss</p>}
           {/* {step === 2 && (
             <Variants />
