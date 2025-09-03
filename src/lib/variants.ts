@@ -39,3 +39,10 @@ export const buttonVariants: Variants = {
     transition: { duration: 0.1 },
   },
 };
+
+export const statusVariants = {
+  inactive: { backgroundColor: "#374151" },
+  active: { backgroundColor: "#10b981" },
+  draft: { backgroundColor: "#374151" },
+  published: { backgroundColor: "#10b981" },
+};

@@ -5,17 +5,27 @@ import { PageFooter } from "@/modules/layout/footer/page-footer";
 import PageHeander from "@/modules/layout/header/page-heander";
 import { storeSchema } from "@/zod-shema/store-schema";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Details from "./details";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEditStoreMutation, useGetStoreDataQuery } from "@/state/store-api";
+import { useHandleNotifications } from "@/hooks/use-notification-handler";
 
 type FormData = z.infer<typeof storeSchema>;
 const StoreEdit = () => {
   const router = useRouter();
   const [step, setStep] = React.useState<number>(0);
-
+  const { data } = useGetStoreDataQuery();
+  const result = data?.result;
+  const [EditStore, { isLoading, error, isSuccess }] = useEditStoreMutation();
+  useHandleNotifications({
+    error,
+    isSuccess,
+    successMessage: "Store updated successfully!",
+    redirectPath: "/settings/store",
+  });
   const {
     control,
     handleSubmit,
@@ -40,29 +50,16 @@ const StoreEdit = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      // const payload: ProductCategoryFormData = {
-      //   ...data,
-      //   keywords,
-      //   categoryId,
-      //   FileData: fileData.map(({ fileType, _id }) => ({ [fileType]: _id })),
-      // };
-      // if (catId) {
-      //   await UpdateProductCategory({ ...payload, id: catId });
-      //   return;
-      // }
-      // await AddProductCategory(payload);
-      // send API request or dispatch action here
+      await EditStore(data);
     },
-    [
-      // AddProductCategory,
-      // categoryId,
-      // UpdateProductCategory,
-      // fileData,
-      // keywords,
-      // catId,
-    ]
+    [EditStore]
   );
 
+  useEffect(() => {
+    if (result) {
+      setValue("name", result.name);
+    }
+  }, [result, setValue]);
   return (
     <DialogPopUp
       title="Add Currencies"
@@ -87,7 +84,7 @@ const StoreEdit = () => {
             handleNext={() => setStep(step + 1)}
             handleSubmit={handleSubmit}
             onSubmit={onSubmit}
-            isLoading={false}
+            isLoading={isLoading}
             onCancel={() => router.back()}
           />
         </div>

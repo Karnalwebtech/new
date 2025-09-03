@@ -48,6 +48,7 @@ import { contactsApi } from "./state/contactsApi";
 import { upstashRedisApi } from "./state/upstash-redis-api";
 import { productCategoryApi } from "./state/product-category-api";
 import { productCollectionsApi } from "./state/product-collections-api";
+import { storeApi } from "./state/store-api";
 
 const createNoopStorage = () => ({
   getItem: () => Promise.resolve(null),
@@ -85,6 +86,7 @@ const persistConfig = {
     upstashRedisApi.reducerPath,
     productCategoryApi.reducerPath,
     productCollectionsApi.reducerPath,
+    storeApi.reducerPath,
 
     //superme
     cloudStorageApi.reducerPath,
@@ -118,6 +120,7 @@ const rootReducer = combineReducers({
   [upstashRedisApi.reducerPath]: upstashRedisApi.reducer,
   [productCategoryApi.reducerPath]: productCategoryApi.reducer,
   [productCollectionsApi.reducerPath]: productCollectionsApi.reducer,
+  [storeApi.reducerPath]: storeApi.reducer,
 
   //superme
   [cloudStorageApi.reducerPath]: cloudStorageApi.reducer,
@@ -157,7 +160,7 @@ const makeStore = () => {
         contactsApi.middleware,
         upstashRedisApi.middleware,
         productCategoryApi.middleware,
-        productCollectionsApi.middleware,
+        storeApi.middleware,
 
         //superme
         cloudStorageApi.middleware,

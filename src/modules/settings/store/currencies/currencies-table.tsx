@@ -319,9 +319,6 @@ const CurrenciesTable = ({
               </div>
             </div>
           </div>
-
-          {/* Optional: Debug selected codes */}
-          {/* <pre className="mt-3 text-xs text-muted-foreground">{JSON.stringify(selected, null, 2)}</pre> */}
         </div>
       </div>
     </motion.div>
