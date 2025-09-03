@@ -1,41 +1,41 @@
 "use client";
 import DialogPopUp from "@/components/drawer/dialog-component";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { PageFooter } from "@/modules/layout/footer/page-footer";
 import PageHeander from "@/modules/layout/header/page-heander";
 import { useRouter } from "next/navigation";
 import React, { memo, useCallback, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
 import CurrenciesTable from "./currencies-table";
-
+import currencyCodes from "currency-codes";
+import { NormalPageFooter } from "@/modules/layout/footer/normal-page-footer";
+export type CurrencyItem = {
+  code: string;
+  name: string;
+  countries?: string[];
+  tax_inclusive_pricing?: boolean;
+};
 const Currencies = () => {
   const [step, setStep] = useState<number>(0);
+  const [taxMap, setTaxMap] = useState<Record<string, boolean>>({});
+  const [selected, setSelected] = useState<string[]>([]);
   const router = useRouter();
-  const {
-    control,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<FormData>({
-    // resolver: zodResolver(schema),
-  });
-  //   const result = data?.result;
-  // Step validation logic
-  const values = watch();
-  const canAccessStep = useMemo(() => {
-    return [
-      true,
-      //   !!values.title?.trim(),
-      //   values.meta_title?.trim().length > 0 &&
-      //     values.meta_title?.trim().length <= 60 &&
-      //     values.meta_canonical_url?.trim().length > 0 &&
-      //     values.meta_description?.trim().length > 50 &&
-      //     values.meta_description?.trim().length <= 160,
-    ];
-  }, [values]);
+  // Normalize data once
+  const allCurrencies: CurrencyItem[] = useMemo(
+    () =>
+      (currencyCodes?.data ?? []).map((c) => ({
+        code: c.code,
+        name: c.currency,
+        countries: c.countries,
+      })),
+    []
+  );
 
-  const onSubmit = useCallback(async (data: FormData) => {}, []);
+  const onSubmit = useCallback(async () => {
+    const newData = allCurrencies.map((currency) => ({
+      ...currency,
+      tax_inclusive_pricing: taxMap[currency.code] || false,  // Default to false if not set
+    })).filter(currency => selected.includes(currency.code));
+    console.log("Submitted Currencies:", newData);
+  }, [selected, taxMap,allCurrencies]);
   return (
     <DialogPopUp
       title="Add Currencies"
@@ -52,19 +52,20 @@ const Currencies = () => {
             tabs={[]}
             step={step}
             setStep={setStep}
-            canAccessStep={canAccessStep}
+            canAccessStep={[true]}
             onCancel={() => router.back()}
           />
-          <CurrenciesTable />
-          <PageFooter<FormData>
-            step={step}
-            lastStep={0} // or whatever your last step index is
-            canAccessStep={canAccessStep} // example: at least 2 steps
-            handleNext={() => setStep(step + 1)}
-            handleSubmit={handleSubmit}
-            onSubmit={onSubmit}
+          <CurrenciesTable
+            selected={selected}
+            setSelected={setSelected}
+            taxMap={taxMap}
+            setTaxMap={setTaxMap}
+            allCurrencies={allCurrencies}
+          />
+          <NormalPageFooter
             isLoading={false}
             onCancel={() => router.back()}
+            onSubmit={onSubmit}
           />
         </div>
       </ScrollArea>

@@ -1,7 +1,6 @@
 "use client";
 
-import React, { memo, useMemo, useState, useCallback } from "react";
-import currencyCodes from "currency-codes";
+import React, { memo, useMemo, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // shadcn ui
@@ -23,49 +22,46 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
-// optional helpers you already have
+// helpers
 import { TruncateText } from "@/components/truncate-text";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import { containerVariants } from "@/lib/variants";
-import { Checkbox } from "@/components/ui/checkbox";
+import { CurrencyItem } from "./currencies";
 
 // ---- Row (animated) ---------------------------------------------------------
 
-type CurrencyItem = {
-  code: string;
-  name: string;
-  countries?: string[];
-};
-
 const Row = memo(function Row({
   item,
+  isChecked,
+  onCheckChange,
   taxInclusive,
-  onToggle,
-  currencyHandler,
+  onToggleTax,
 }: {
   item: CurrencyItem;
+  isChecked: boolean;
+  onCheckChange: (next: boolean) => void;
   taxInclusive: boolean;
-  onToggle: (code: string, next: boolean) => void;
-  currencyHandler: (item: CurrencyItem) => void;
+  onToggleTax: (code: string, next: boolean) => void;
 }) {
   return (
     <motion.tr
       layout
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
+      exit={{ opacity: 0, y: -6 }}
       className="group hover:bg-muted/40 transition-colors"
     >
-      <TableCell className="w-[140px]">
-        <span className="text-muted-foreground">
-          <Checkbox
-            onCheckedChange={() => currencyHandler(item)}
-            id="toggle-2"
-            className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
-          />
-        </span>
+      <TableCell className="w-[56px]">
+        <Checkbox
+          checked={isChecked}
+          onCheckedChange={(v) => onCheckChange(!!v)}
+          aria-label={`Select ${item.code}`}
+          className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
+        />
       </TableCell>
+
       <TableCell className="w-[140px]">
         <span className="text-muted-foreground">
           <TruncateText text={item.code} maxLength={25} />
@@ -81,7 +77,7 @@ const Row = memo(function Row({
       <TableCell className="text-right pr-6">
         <Switch
           checked={taxInclusive}
-          onCheckedChange={(v) => onToggle(item.code, v)}
+          onCheckedChange={(v) => onToggleTax(item.code, v)}
           aria-label={`Toggle tax inclusive pricing for ${item.code}`}
         />
       </TableCell>
@@ -90,71 +86,108 @@ const Row = memo(function Row({
 });
 
 // ---- Main -------------------------------------------------------------------
-
-const CurrenciesTable = () => {
+interface CurrenciesTableProps {
+  selected: string[];
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
+  taxMap: Record<string, boolean>;
+  setTaxMap: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  allCurrencies?: CurrencyItem[];
+}
+const CurrenciesTable = ({
+  selected,
+  setSelected,
+  taxMap,
+  setTaxMap,
+  allCurrencies = [],
+}: CurrenciesTableProps) => {
   const width = useWindowWidth();
-  const [selected, setSelected] = useState<CurrencyItem[]>([]);
-  console.log(selected);
-  // source data (normalize once)
-  const allCurrencies: CurrencyItem[] = useMemo(
-    () =>
-      (currencyCodes?.data ?? []).map((c) => ({
-        code: c.code,
-        name: c.currency,
-        countries: c.countries,
-      })),
-    []
-  );
-  // search
+
+  // Search
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
-    if (!query.trim()) return allCurrencies;
     const q = query.trim().toLowerCase();
+    if (!q) return allCurrencies;
     return allCurrencies.filter(
       (x) =>
         x.code.toLowerCase().includes(q) ||
         x.name.toLowerCase().includes(q) ||
-        (x.countries?.some((cty) => cty.toLowerCase().includes(q)) ?? false)
+        (x.countries?.some((cty: string) => cty.toLowerCase().includes(q)) ??
+          false)
     );
   }, [allCurrencies, query]);
 
-  // pagination
+  // Pagination
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10); // default 50 like your screenshot
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
 
   const totalItems = filtered.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / rowsPerPage));
   const clampedPage = Math.min(page, totalPages);
   const startIndex = (clampedPage - 1) * rowsPerPage;
   const endIndex = Math.min(startIndex + rowsPerPage, totalItems);
-  const slice = filtered.slice(startIndex, endIndex);
+  const pageSlice = useMemo(
+    () => filtered.slice(startIndex, endIndex),
+    [filtered, startIndex, endIndex]
+  );
 
-  // reset to page 1 whenever search or page size changes
-  React.useEffect(() => setPage(1), [query, rowsPerPage]);
+  // Reset page when query or page size changes
+  useEffect(() => setPage(1), [query, rowsPerPage]);
 
-  // tax inclusive state (per code)
-  const [taxMap, setTaxMap] = useState<Record<string, boolean>>({
-    AED: true,
-    AFN: true,
-  });
-  const handleToggle = useCallback((code: string, next: boolean) => {
-    setTaxMap((m) => ({ ...m, [code]: next }));
-  }, []);
+  // Tax map per code
 
-  const currencyHandler = (item: CurrencyItem, checked: boolean) => {
-    setSelected((prev) => {
-      if (checked) {
-        // Add if not already in array
-        if (!prev.find((x) => x.code === item.code)) {
-          return [...prev, item];
+  const handleToggleTax = useCallback(
+    (code: string, next: boolean) => {
+      setTaxMap((m) => (m[code] === next ? m : { ...m, [code]: next }));
+    },
+    [setTaxMap]
+  );
+
+  // Selection (store only codes)
+
+  const toggleCode = useCallback(
+    (code: string, checked: boolean) => {
+      setSelected((prev) =>
+        checked
+          ? prev.includes(code)
+            ? prev
+            : [...prev, code]
+          : prev.filter((c) => c !== code)
+      );
+    },
+    [setSelected]
+  );
+
+  // Header select-all (per current page)
+  const pageCodes = useMemo(() => pageSlice.map((x) => x.code), [pageSlice]);
+  const selectedOnPageCount = useMemo(
+    () => pageCodes.filter((c) => selected.includes(c)).length,
+    [pageCodes, selected]
+  );
+
+  const headerCheckedState: boolean | "indeterminate" = useMemo(() => {
+    if (pageSlice.length === 0) return false;
+    if (selectedOnPageCount === 0) return false;
+    if (selectedOnPageCount === pageSlice.length) return true;
+    return "indeterminate";
+  }, [pageSlice.length, selectedOnPageCount]);
+
+  const toggleSelectAllOnPage = useCallback(
+    (nextChecked: boolean) => {
+      setSelected((prev) => {
+        if (nextChecked) {
+          // add all codes on this page
+          const set = new Set(prev);
+          pageCodes.forEach((c) => set.add(c));
+          return Array.from(set);
+        } else {
+          // remove all codes on this page
+          return prev.filter((c) => !pageCodes.includes(c));
         }
-        return prev; // already exists
-      } else {
-        // Remove if unchecked
-        return prev.filter((x) => x.code !== item.code);
-      }
-    });
-  };
+      });
+    },
+    [pageCodes, setSelected]
+  );
+
   return (
     <motion.div
       className="min-h-screen bg-background"
@@ -167,7 +200,7 @@ const CurrenciesTable = () => {
           style={{ width: width < 749 ? `${width}px` : "100%" }}
           className="min-h-[400px] px-2"
         >
-          <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
+          <div className="bg-card rounded-lg overflow-hidden relative">
             {/* Toolbar */}
             <div className="flex items-center justify-between gap-2 p-3 border-b">
               <div className="text-sm font-medium px-1">Add new Currencies</div>
@@ -199,9 +232,11 @@ const CurrenciesTable = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[140px]">
+                  <TableHead className="w-[56px]">
                     <Checkbox
-                      id="toggle-2"
+                      checked={headerCheckedState}
+                      onCheckedChange={(v) => toggleSelectAllOnPage(!!v)}
+                      aria-label="Select all on this page"
                       className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
                     />
                   </TableHead>
@@ -214,9 +249,9 @@ const CurrenciesTable = () => {
               </TableHeader>
 
               <TableBody>
-                {slice.length === 0 ? (
+                {pageSlice.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center">
+                    <TableCell colSpan={4} className="text-center">
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -233,13 +268,14 @@ const CurrenciesTable = () => {
                   </TableRow>
                 ) : (
                   <AnimatePresence initial={false}>
-                    {slice.map((item) => (
+                    {pageSlice.map((item) => (
                       <Row
                         key={item.code}
                         item={item}
+                        isChecked={selected.includes(item.code)}
+                        onCheckChange={(next) => toggleCode(item.code, next)}
                         taxInclusive={!!taxMap[item.code]}
-                        onToggle={handleToggle}
-                        currencyHandler={currencyHandler}
+                        onToggleTax={handleToggleTax}
                       />
                     ))}
                   </AnimatePresence>
@@ -249,10 +285,15 @@ const CurrenciesTable = () => {
 
             {/* Footer / Pagination */}
             <div className="flex items-center justify-between gap-3 p-3 border-t text-sm text-muted-foreground">
-              <div>
+              <div className="flex items-center gap-2">
                 {totalItems === 0
                   ? "0 results"
                   : `${startIndex + 1}–${endIndex} of ${totalItems} results`}
+                {!!selected.length && (
+                  <span className="text-foreground/70">
+                    • Selected: {selected.length}
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center gap-3">
@@ -278,6 +319,9 @@ const CurrenciesTable = () => {
               </div>
             </div>
           </div>
+
+          {/* Optional: Debug selected codes */}
+          {/* <pre className="mt-3 text-xs text-muted-foreground">{JSON.stringify(selected, null, 2)}</pre> */}
         </div>
       </div>
     </motion.div>
