@@ -12,6 +12,8 @@ export type CurrencyItem = {
   name: string;
   countries?: string[];
   tax_inclusive_pricing?: boolean;
+  digits?: number;
+  number?: string;
 };
 const Currencies = () => {
   const [step, setStep] = useState<number>(0);
@@ -25,17 +27,23 @@ const Currencies = () => {
         code: c.code,
         name: c.currency,
         countries: c.countries,
+        digits: c.digits,
+        number: c.number,
       })),
     []
   );
 
   const onSubmit = useCallback(async () => {
-    const newData = allCurrencies.map((currency) => ({
-      ...currency,
-      tax_inclusive_pricing: taxMap[currency.code] || false,  // Default to false if not set
-    })).filter(currency => selected.includes(currency.code));
+    const newData = allCurrencies
+      .map((currency) => ({
+        ...currency,
+        digits: currency.digits,
+        number: currency.number,
+        tax_inclusive_pricing: taxMap[currency.code] || false, // Default to false if not set
+      }))
+      .filter((currency) => selected.includes(currency.code));
     console.log("Submitted Currencies:", newData);
-  }, [selected, taxMap,allCurrencies]);
+  }, [selected, taxMap, allCurrencies]);
   return (
     <DialogPopUp
       title="Add Currencies"
