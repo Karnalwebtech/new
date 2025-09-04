@@ -67,7 +67,9 @@ const Shadcn_table = ({
                   <TableHead
                     key={header}
                     className={`${
-                      header === "Action" ? "text-end" : ""
+                      header === "Action" || header === "Tax inclusive pricing"
+                        ? "text-end"
+                        : ""
                     } font-semibold text-muted-foreground`}
                   >
                     <motion.span

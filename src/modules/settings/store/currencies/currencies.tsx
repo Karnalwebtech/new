@@ -7,43 +7,37 @@ import React, { memo, useCallback, useMemo, useState } from "react";
 import CurrenciesTable from "./currencies-table";
 import currencyCodes from "currency-codes";
 import { NormalPageFooter } from "@/modules/layout/footer/normal-page-footer";
-export type CurrencyItem = {
-  code: string;
-  name: string;
-  countries?: string[];
-  tax_inclusive_pricing?: boolean;
-  digits?: number;
-  number?: string;
-};
+import {
+  useEditCurrencyMutation,
+  useGetAllCurrenciesQuery,
+} from "@/state/currency-api";
+import { CurrencyItem } from "@/types/currency-type";
+
 const Currencies = () => {
   const [step, setStep] = useState<number>(0);
   const [taxMap, setTaxMap] = useState<Record<string, boolean>>({});
   const [selected, setSelected] = useState<string[]>([]);
   const router = useRouter();
+  const [EditCurrency] = useEditCurrencyMutation();
   // Normalize data once
-  const allCurrencies: CurrencyItem[] = useMemo(
-    () =>
-      (currencyCodes?.data ?? []).map((c) => ({
-        code: c.code,
-        name: c.currency,
-        countries: c.countries,
-        digits: c.digits,
-        number: c.number,
-      })),
-    []
-  );
+  const { data, isLoading } = useGetAllCurrenciesQuery({
+    rowsPerPage: 10,
+    page: 10,
+  });
+  const allCurrencies = useMemo(() => data?.result || [], [data]);
 
   const onSubmit = useCallback(async () => {
     const newData = allCurrencies
       .map((currency) => ({
         ...currency,
-        digits: currency.digits,
-        number: currency.number,
+        digits: currency.digits || 2,
+        number: currency.number || "000",
         tax_inclusive_pricing: taxMap[currency.code] || false, // Default to false if not set
       }))
       .filter((currency) => selected.includes(currency.code));
-    console.log("Submitted Currencies:", newData);
-  }, [selected, taxMap, allCurrencies]);
+    console.log(newData, "newData");
+    await EditCurrency(newData);
+  }, [selected, taxMap, allCurrencies, EditCurrency]);
   return (
     <DialogPopUp
       title="Add Currencies"
@@ -68,7 +62,6 @@ const Currencies = () => {
             setSelected={setSelected}
             taxMap={taxMap}
             setTaxMap={setTaxMap}
-            allCurrencies={allCurrencies}
           />
           <NormalPageFooter
             isLoading={false}

@@ -49,6 +49,7 @@ import { upstashRedisApi } from "./state/upstash-redis-api";
 import { productCategoryApi } from "./state/product-category-api";
 import { productCollectionsApi } from "./state/product-collections-api";
 import { storeApi } from "./state/store-api";
+import { currencyApi } from "./state/currency-api";
 
 const createNoopStorage = () => ({
   getItem: () => Promise.resolve(null),
@@ -87,6 +88,7 @@ const persistConfig = {
     productCategoryApi.reducerPath,
     productCollectionsApi.reducerPath,
     storeApi.reducerPath,
+    currencyApi.reducerPath,
 
     //superme
     cloudStorageApi.reducerPath,
@@ -121,6 +123,7 @@ const rootReducer = combineReducers({
   [productCategoryApi.reducerPath]: productCategoryApi.reducer,
   [productCollectionsApi.reducerPath]: productCollectionsApi.reducer,
   [storeApi.reducerPath]: storeApi.reducer,
+  [currencyApi.reducerPath]: currencyApi.reducer,
 
   //superme
   [cloudStorageApi.reducerPath]: cloudStorageApi.reducer,
@@ -161,6 +164,7 @@ const makeStore = () => {
         upstashRedisApi.middleware,
         productCategoryApi.middleware,
         storeApi.middleware,
+        currencyApi.middleware,
 
         //superme
         cloudStorageApi.middleware,

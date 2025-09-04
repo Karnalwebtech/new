@@ -1,325 +1,218 @@
 "use client";
 
-import React, { memo, useMemo, useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-
-// shadcn ui
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-
-// helpers
-import { TruncateText } from "@/components/truncate-text";
+import type React from "react";
+import { memo, useMemo, useState } from "react";
+import NavigateBtn from "@/components/buttons/navigate-btn";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { useTableFilters } from "@/hooks/useTableFilters";
+import Shadcn_table from "@/components/table/table";
 import useWindowWidth from "@/hooks/useWindowWidth";
-import { containerVariants } from "@/lib/variants";
-import { CurrencyItem } from "./currencies";
+import { motion, AnimatePresence } from "framer-motion";
+import { TruncateText } from "@/components/truncate-text";
+import { containerVariants, itemVariants } from "@/lib/variants";
+import ShadcnPagination from "@/components/pagination";
+import { useGetAllCurrenciesQuery } from "@/state/currency-api";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CurrencyItem } from "@/types/currency-type";
+import { Switch } from "@/components/ui/switch";
 
-// ---- Row (animated) ---------------------------------------------------------
+// 🔹 Optimized reusable Row component
+const Row = memo(({ item, index }: { item: CurrencyItem; index: number }) => {
+  const rowId = `${item._id || item.code}-${index}`;
 
-const Row = memo(function Row({
-  item,
-  isChecked,
-  onCheckChange,
-  taxInclusive,
-  onToggleTax,
-}: {
-  item: CurrencyItem;
-  isChecked: boolean;
-  onCheckChange: (next: boolean) => void;
-  taxInclusive: boolean;
-  onToggleTax: (code: string, next: boolean) => void;
-}) {
   return (
-    <motion.tr
-      layout
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      className="group hover:bg-muted/40 transition-colors"
-    >
-      <TableCell className="w-[56px]">
-        <Checkbox
-          checked={isChecked}
-          onCheckedChange={(v) => onCheckChange(!!v)}
-          aria-label={`Select ${item.code}`}
-          className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
-        />
-      </TableCell>
-
-      <TableCell className="w-[140px]">
-        <span className="text-muted-foreground">
-          <TruncateText text={item.code} maxLength={25} />
-        </span>
-      </TableCell>
-
-      <TableCell>
-        <span className="text-muted-foreground">
-          <TruncateText text={item.name} maxLength={48} />
-        </span>
-      </TableCell>
-
-      <TableCell className="text-right pr-6">
-        <Switch
-          checked={taxInclusive}
-          onCheckedChange={(v) => onToggleTax(item.code, v)}
-          aria-label={`Toggle tax inclusive pricing for ${item.code}`}
-        />
-      </TableCell>
-    </motion.tr>
+    <>
+      <motion.tr
+        key={rowId}
+        variants={itemVariants}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="group hover:bg-muted/40 transition-colors duration-200"
+      >
+        <TableCell>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1, duration: 0.3 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Checkbox
+              // checked={isChecked}
+              // onCheckedChange={(v) => onCheckChange(!!v)}
+              // aria-label={`Select ${item.code}`}
+              className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
+            />
+          </motion.div>
+        </TableCell>
+        <TableCell>
+          <span className="text-muted-foreground">
+            <TruncateText text={item.code! || ""} maxLength={25} />
+          </span>
+        </TableCell>
+        <TableCell>
+          <span className="text-muted-foreground">
+            <TruncateText text={item.name! || ""} maxLength={25} />
+          </span>
+        </TableCell>
+        <TableCell className="text-right pr-6">
+          <Switch
+            // checked={taxInclusive}
+            // onCheckedChange={(v) => onToggleTax(item.code, v)}
+            aria-label={`Toggle tax inclusive pricing for ${item.code}`}
+          />
+        </TableCell>
+      </motion.tr>
+    </>
   );
 });
-
-// ---- Main -------------------------------------------------------------------
+Row.displayName = "Row";
 interface CurrenciesTableProps {
   selected: string[];
-  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
-  taxMap: Record<string, boolean>;
-  setTaxMap: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  allCurrencies?: CurrencyItem[];
+  setSelected?: (selected: string[]) => void;
+  taxMap?: Record<string, boolean>;
+  setTaxMap?: (map: Record<string, boolean>) => void;
 }
+// 🔹 Main Component
 const CurrenciesTable = ({
   selected,
   setSelected,
   taxMap,
   setTaxMap,
-  allCurrencies = [],
 }: CurrenciesTableProps) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState("20");
+  const { data, isLoading } = useGetAllCurrenciesQuery({
+    rowsPerPage: Number(rowsPerPage),
+    page: currentPage,
+  });
   const width = useWindowWidth();
+  const result = useMemo(() => data?.result || [], [data]);
+  const { searchTerm, setSearchTerm, filteredItems } = useTableFilters(result, [
+    "name",
+  ]);
 
-  // Search
-  const [query, setQuery] = useState("");
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return allCurrencies;
-    return allCurrencies.filter(
-      (x) =>
-        x.code.toLowerCase().includes(q) ||
-        x.name.toLowerCase().includes(q) ||
-        (x.countries?.some((cty: string) => cty.toLowerCase().includes(q)) ??
-          false)
-    );
-  }, [allCurrencies, query]);
-
-  // Pagination
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-
-  const totalItems = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / rowsPerPage));
-  const clampedPage = Math.min(page, totalPages);
-  const startIndex = (clampedPage - 1) * rowsPerPage;
-  const endIndex = Math.min(startIndex + rowsPerPage, totalItems);
-  const pageSlice = useMemo(
-    () => filtered.slice(startIndex, endIndex),
-    [filtered, startIndex, endIndex]
-  );
-
-  // Reset page when query or page size changes
-  useEffect(() => setPage(1), [query, rowsPerPage]);
-
-  // Tax map per code
-
-  const handleToggleTax = useCallback(
-    (code: string, next: boolean) => {
-      setTaxMap((m) => (m[code] === next ? m : { ...m, [code]: next }));
-    },
-    [setTaxMap]
-  );
-
-  // Selection (store only codes)
-
-  const toggleCode = useCallback(
-    (code: string, checked: boolean) => {
-      setSelected((prev) =>
-        checked
-          ? prev.includes(code)
-            ? prev
-            : [...prev, code]
-          : prev.filter((c) => c !== code)
+  // Memoized Table Body
+  const tableBody = useMemo(() => {
+    if (!filteredItems.length) {
+      return (
+        <TableRow>
+          <TableCell colSpan={6} className="text-center">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="py-8"
+            >
+              <div className="text-muted-foreground text-lg mb-2">
+                No CurrenciesTable found
+              </div>
+              <div className="text-sm text-muted-foreground/70">
+                Try adjusting your search criteria
+              </div>
+            </motion.div>
+          </TableCell>
+        </TableRow>
       );
-    },
-    [setSelected]
-  );
-
-  // Header select-all (per current page)
-  const pageCodes = useMemo(() => pageSlice.map((x) => x.code), [pageSlice]);
-  const selectedOnPageCount = useMemo(
-    () => pageCodes.filter((c) => selected.includes(c)).length,
-    [pageCodes, selected]
-  );
-
-  const headerCheckedState: boolean | "indeterminate" = useMemo(() => {
-    if (pageSlice.length === 0) return false;
-    if (selectedOnPageCount === 0) return false;
-    if (selectedOnPageCount === pageSlice.length) return true;
-    return "indeterminate";
-  }, [pageSlice.length, selectedOnPageCount]);
-
-  const toggleSelectAllOnPage = useCallback(
-    (nextChecked: boolean) => {
-      setSelected((prev) => {
-        if (nextChecked) {
-          // add all codes on this page
-          const set = new Set(prev);
-          pageCodes.forEach((c) => set.add(c));
-          return Array.from(set);
-        } else {
-          // remove all codes on this page
-          return prev.filter((c) => !pageCodes.includes(c));
-        }
-      });
-    },
-    [pageCodes, setSelected]
-  );
+    }
+    return (
+      <AnimatePresence>
+        {filteredItems.map((item, i) => (
+          <Row key={i} item={item} index={i} 
+          
+          />
+        ))}
+      </AnimatePresence>
+    );
+  }, [filteredItems]);
 
   return (
     <motion.div
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-background mb-14"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <div className="container mx-auto">
-        <div
+      <div className="container mx-auto py-8">
+        {/* Header */}
+        <motion.div
+          className="flex px-4 items-center justify-between mb-8"
+          variants={itemVariants}
+        >
+          <motion.div>
+            <motion.h1 className="text-2xl font-semibold text-foreground mb-2">
+              CurrenciesTable
+            </motion.h1>
+            <motion.p className="text-muted-foreground">
+              Manage and organize product CurrenciesTable.
+            </motion.p>
+          </motion.div>
+          <motion.div className="flex items-center gap-3">
+            <NavigateBtn
+              path="/dashboard/products/CurrenciesTable/organize"
+              title="Edit ranking"
+              style="btn-primary"
+            />
+            <NavigateBtn
+              path="/dashboard/products/CurrenciesTable/create"
+              title="Create"
+              style="btn-primary"
+            />
+          </motion.div>
+        </motion.div>
+
+        {/* Table */}
+        <motion.div
           style={{ width: width < 749 ? `${width}px` : "100%" }}
           className="min-h-[400px] px-2"
         >
-          <div className="bg-card rounded-lg overflow-hidden relative">
-            {/* Toolbar */}
-            <div className="flex items-center justify-between gap-2 p-3 border-b">
-              <div className="text-sm font-medium px-1">Add new Currencies</div>
-              <div className="flex items-center gap-2">
-                <Input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search"
-                  className="h-9 w-[220px]"
-                />
-                <Select
-                  value={String(rowsPerPage)}
-                  onValueChange={(v) => setRowsPerPage(Number(v))}
+          <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
+            {/* Loader Overlay */}
+            <AnimatePresence>
+              {isLoading && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10"
                 >
-                  <SelectTrigger className="h-9 w-[120px]">
-                    <SelectValue placeholder="Rows/page" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="10">10 / page</SelectItem>
-                    <SelectItem value="25">25 / page</SelectItem>
-                    <SelectItem value="50">50 / page</SelectItem>
-                    <SelectItem value="100">100 / page</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            {/* Table */}
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[56px]">
-                    <Checkbox
-                      checked={headerCheckedState}
-                      onCheckedChange={(v) => toggleSelectAllOnPage(!!v)}
-                      aria-label="Select all on this page"
-                      className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
-                    />
-                  </TableHead>
-                  <TableHead className="w-[140px]">Code</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="text-right pr-6">
-                    Tax inclusive pricing
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {pageSlice.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center">
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="py-8"
-                      >
-                        <div className="text-muted-foreground text-lg mb-2">
-                          No currency found
-                        </div>
-                        <div className="text-sm text-muted-foreground/70">
-                          Try adjusting your search
-                        </div>
-                      </motion.div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  <AnimatePresence initial={false}>
-                    {pageSlice.map((item) => (
-                      <Row
-                        key={item.code}
-                        item={item}
-                        isChecked={selected.includes(item.code)}
-                        onCheckChange={(next) => toggleCode(item.code, next)}
-                        taxInclusive={!!taxMap[item.code]}
-                        onToggleTax={handleToggleTax}
-                      />
-                    ))}
-                  </AnimatePresence>
-                )}
-              </TableBody>
-            </Table>
-
-            {/* Footer / Pagination */}
-            <div className="flex items-center justify-between gap-3 p-3 border-t text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                {totalItems === 0
-                  ? "0 results"
-                  : `${startIndex + 1}–${endIndex} of ${totalItems} results`}
-                {!!selected.length && (
-                  <span className="text-foreground/70">
-                    • Selected: {selected.length}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div>{`${clampedPage} of ${totalPages} pages`}</div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={clampedPage <= 1}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  >
-                    Prev
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={clampedPage >= totalPages}
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <Shadcn_table
+              table_header={[
+                "checkbox",
+                "Code",
+                "Name",
+                "Tax inclusive pricing",
+              ]}
+              isCheckbox={true}
+              tabel_body={() => tableBody}
+              isLoading={isLoading}
+            />
           </div>
-        </div>
+
+          {/* Pagination */}
+          {data && data?.dataCounter > Number(rowsPerPage) && (
+            <ShadcnPagination
+              leftRightBtn={true}
+              currentPage={currentPage}
+              totalPages={Number(rowsPerPage)}
+              setCurrentPage={setCurrentPage}
+              data_length={data?.dataCounter || 10}
+            />
+          )}
+        </motion.div>
       </div>
     </motion.div>
   );

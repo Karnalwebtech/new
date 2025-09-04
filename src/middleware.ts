@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
     "/auth/forgot-password",
   ].includes(url.pathname);
   const isProtectedRoute =
-    url.pathname === "/" || url.pathname.startsWith("/dashboard");
+    url.pathname === "/" || url.pathname.startsWith("/dashboard") || url.pathname.startsWith("/settings");
 
   // Prepare response early
   const res = NextResponse.next();
@@ -77,6 +77,7 @@ export const config = {
     "/auth/forgot-password",
     "/auth/verify",
     "/dashboard/:path*",
+    "/settings/:path*",
     "/auth/error",
   ],
 };
