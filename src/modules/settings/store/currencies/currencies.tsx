@@ -5,13 +5,11 @@ import PageHeander from "@/modules/layout/header/page-heander";
 import { useRouter } from "next/navigation";
 import React, { memo, useCallback, useMemo, useState } from "react";
 import CurrenciesTable from "./currencies-table";
-import currencyCodes from "currency-codes";
 import { NormalPageFooter } from "@/modules/layout/footer/normal-page-footer";
 import {
   useEditCurrencyMutation,
   useGetAllCurrenciesQuery,
 } from "@/state/currency-api";
-import { CurrencyItem } from "@/types/currency-type";
 
 const Currencies = () => {
   const [step, setStep] = useState<number>(0);
