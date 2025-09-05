@@ -46,3 +46,7 @@ export const statusVariants = {
   draft: { backgroundColor: "#374151" },
   published: { backgroundColor: "#10b981" },
 };
+export const controls = {
+  hidden: { opacity: 0, y: 8 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.25 } },
+};

@@ -18,7 +18,7 @@ interface Shadcn_table_props {
   table_header: string[];
   tabel_body: () => React.ReactNode;
   isLoading: boolean;
-  isAllSelected?: boolean;
+isAllSelected?: boolean | "indeterminate"; 
   handleSelectAll?: (value: boolean) => void;
   isCheckbox?: boolean;
 }

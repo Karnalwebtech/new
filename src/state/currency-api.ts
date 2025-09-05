@@ -33,6 +33,7 @@ export const currencyApi = createApi({
       {
         rowsPerPage?: number;
         page?: number;
+        keywords?: string;
       } | void
     >({
       query: (filters) => {
@@ -43,6 +44,9 @@ export const currencyApi = createApi({
           }
           if (filters.page) {
             params.page = filters.page; // Convert number to string
+          }
+          if (filters.keywords) {
+            params.keyword = filters.keywords; // Convert number to string
           }
         }
 
