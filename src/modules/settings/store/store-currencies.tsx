@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { controls } from "@/lib/variants";
 import { useDebounced } from "@/hooks/useDebounced";
+import { useGetAllStoreCurrenciesQuery } from "@/state/store-currency-api";
 
 const Row = memo(
   ({
@@ -52,18 +53,18 @@ const Row = memo(
           <Checkbox
             checked={isChecked}
             onCheckedChange={(v) => onCheckChange(!!v)}
-            aria-label={`Select ${item.code}`}
+            aria-label={`Select ${item._id}`}
             className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
           />
         </TableCell>
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item.code || ""} maxLength={25} />
+            <TruncateText text={item.currency_id?.code || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item.name || ""} maxLength={25} />
+            <TruncateText text={item.currency_id?.name || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell className="text-right pr-6">
@@ -79,23 +80,13 @@ const Row = memo(
 );
 Row.displayName = "Row";
 
-interface CurrenciesTableProps {
-  selected: string[];
-  setSelected: Dispatch<SetStateAction<string[]>>;
-  taxMap: Record<string, boolean>;
-  setTaxMap: Dispatch<SetStateAction<Record<string, boolean>>>;
-}
-
-const CurrenciesTable = ({
-  selected,
-  setSelected,
-  taxMap = {},
-  setTaxMap,
-}: CurrenciesTableProps) => {
+const StoreCurrencies = () => {
+  const [taxMap, setTaxMap] = useState<Record<string, boolean>>({});
+  const [selected, setSelected] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const [search, setSearch] = useState<string>("");
-  const { data, isLoading } = useGetAllCurrenciesQuery({
+  const { data, isLoading } = useGetAllStoreCurrenciesQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
     keywords: useDebounced(search, 500),
@@ -104,8 +95,8 @@ const CurrenciesTable = ({
   const width = useWindowWidth();
   const result = useMemo(() => data?.result || [], [data?.result]);
 
-  const { filteredItems } = useTableFilters(result, ["name"]);
-
+  const { filteredItems } = useTableFilters(result, ["id"]);
+  console.log(filteredItems)
   const handleToggleTax = useCallback(
     (code: string, next: boolean) => {
       if (!setTaxMap) return;
@@ -118,19 +109,19 @@ const CurrenciesTable = ({
   );
 
   const toggleCode = useCallback(
-    (code: string, checked: boolean) => {
+    (id: string, checked: boolean) => {
       if (!setSelected) return;
       setSelected((prev) => {
         if (checked) {
-          return prev.includes(code) ? prev : [...prev, code];
+          return prev.includes(id) ? prev : [...prev, id];
         }
-        return prev.filter((c) => c !== code);
+        return prev.filter((c) => c !== id);
       });
     },
     [setSelected]
   );
   const selectedOnPageCount = useMemo(
-    () => filteredItems.filter((c) => selected.includes(c.code)).length,
+    () => filteredItems.filter((c) => selected.includes(c._id)).length,
     [filteredItems, selected]
   );
   const headerCheckedState: boolean | "indeterminate" = useMemo(() => {
@@ -161,9 +152,9 @@ const CurrenciesTable = ({
         item={item}
         index={i}
         onToggleTax={handleToggleTax}
-        isChecked={selected.includes(item.code)}
-        onCheckChange={(next) => toggleCode(item.code, next)}
-        taxInclusive={taxMap[item.code] || false}
+        isChecked={selected.includes(item._id)}
+        onCheckChange={(next) => toggleCode(item._id, next)}
+        taxInclusive={taxMap[item._id] || false}
       />
     ));
   }, [filteredItems, handleToggleTax, toggleCode, taxMap, selected]);
@@ -174,7 +165,7 @@ const CurrenciesTable = ({
         if (nextChecked) {
           // add all codes on this page
           const set = new Set(prev);
-          result.forEach((c) => set.add(c?.code));
+          result.forEach((c) => set.add(c?._id));
           return Array.from(set);
         } else {
           // remove all codes on this page
@@ -309,4 +300,4 @@ const CurrenciesTable = ({
   );
 };
 
-export default memo(CurrenciesTable);
+export default memo(StoreCurrencies);

@@ -1,8 +1,8 @@
 "use client";
 import React, { memo } from "react";
-import { CurrenciesTable } from "./currencies-table";
 import { useGetStoreDataQuery } from "@/state/store-api";
 import { StoreDetails } from "./store-details";
+import StoreCurrencies from "./store-currencies";
 
 const Store = () => {
   const { data, isLoading } = useGetStoreDataQuery();
@@ -10,7 +10,7 @@ const Store = () => {
   return (
     <div className="space-y-6">
       <StoreDetails store={result!} isLoading={isLoading} />
-      <CurrenciesTable />
+      <StoreCurrencies />
     </div>
   );
 };

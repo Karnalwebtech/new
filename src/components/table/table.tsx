@@ -87,7 +87,7 @@ const Shadcn_table = ({
           </TableHeader>
 
           <TableBody className="relative">
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               {isLoading ? (
                 <TableLoaderSkeleton
                   length={40}

@@ -3,39 +3,27 @@ import DialogPopUp from "@/components/drawer/dialog-component";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PageHeander from "@/modules/layout/header/page-heander";
 import { useRouter } from "next/navigation";
-import React, { memo, useCallback, useMemo, useState } from "react";
+import React, { memo, useCallback, useState } from "react";
 import CurrenciesTable from "./currencies-table";
 import { NormalPageFooter } from "@/modules/layout/footer/normal-page-footer";
-import {
-  useEditCurrencyMutation,
-  useGetAllCurrenciesQuery,
-} from "@/state/currency-api";
+import { useAddCurrencyMutation } from "@/state/store-currency-api";
+import { useHandleNotifications } from "@/hooks/use-notification-handler";
 
 const Currencies = () => {
   const [step, setStep] = useState<number>(0);
   const [taxMap, setTaxMap] = useState<Record<string, boolean>>({});
   const [selected, setSelected] = useState<string[]>([]);
+  const [addCurrency,{isLoading,isSuccess,error}] = useAddCurrencyMutation();
   const router = useRouter();
-  const [EditCurrency] = useEditCurrencyMutation();
-  // Normalize data once
-  const { data, isLoading } = useGetAllCurrenciesQuery({
-    rowsPerPage: 10,
-    page: 10,
+  useHandleNotifications({
+    error,
+    isSuccess,
+    successMessage:"Currency added successfully!",
+    redirectPath: "/settings/store",
   });
-  const allCurrencies = useMemo(() => data?.result || [], [data]);
-
   const onSubmit = useCallback(async () => {
-    const newData = allCurrencies
-      .map((currency) => ({
-        ...currency,
-        digits: currency.digits || 2,
-        number: currency.number || "000",
-        tax_inclusive_pricing: taxMap[currency.code] || false, // Default to false if not set
-      }))
-      .filter((currency) => selected.includes(currency.code));
-    console.log(newData, "newData");
-    await EditCurrency(newData);
-  }, [selected, taxMap, allCurrencies, EditCurrency]);
+    await addCurrency({ currencies: selected, tax: taxMap });
+  }, [selected, taxMap, addCurrency]);
   return (
     <DialogPopUp
       title="Add Currencies"
@@ -62,7 +50,7 @@ const Currencies = () => {
             setTaxMap={setTaxMap}
           />
           <NormalPageFooter
-            isLoading={false}
+            isLoading={isLoading}
             onCancel={() => router.back()}
             onSubmit={onSubmit}
           />
