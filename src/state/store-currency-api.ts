@@ -36,36 +36,55 @@ export const storecurrencyApi = createApi({
       invalidatesTags: [{ type: "Storecurrency", id: "LIST" }],
     }),
     getAllStoreCurrencies: builder.query<
-          GetAllResponseStoreCurrencies,
-          {
-            rowsPerPage?: number;
-            page?: number;
-            keywords?: string;
-          } | void
-        >({
-          query: (filters) => {
-            const params: Record<string, string | number | boolean> = {};
-            if (filters) {
-              if (filters.rowsPerPage) {
-                params.rowsPerPage = filters.rowsPerPage; // Convert number to string
-              }
-              if (filters.page) {
-                params.page = filters.page; // Convert number to string
-              }
-              if (filters.keywords) {
-                params.keyword = filters.keywords; // Convert number to string
-              }
-            }
-    
-            return {
-              url: "/store-currencies",
-              params, // Use the dynamically constructed params
-              method: "GET",
-            };
-          },
-          providesTags: [{ type: "Storecurrency", id: "LIST" }],
-        }),
+      GetAllResponseStoreCurrencies,
+      {
+        rowsPerPage?: number;
+        page?: number;
+        keywords?: string;
+      } | void
+    >({
+      query: (filters) => {
+        const params: Record<string, string | number | boolean> = {};
+        if (filters) {
+          if (filters.rowsPerPage) {
+            params.rowsPerPage = filters.rowsPerPage; // Convert number to string
+          }
+          if (filters.page) {
+            params.page = filters.page; // Convert number to string
+          }
+          if (filters.keywords) {
+            params.keyword = filters.keywords; // Convert number to string
+          }
+        }
+
+        return {
+          url: "/store-currencies",
+          params, // Use the dynamically constructed params
+          method: "GET",
+        };
+      },
+      providesTags: [{ type: "Storecurrency", id: "LIST" }],
+    }),
+    deleteStoreCurrency: builder.mutation<void, { id: string }>({
+      query: ({ id }) => ({
+        url: `remove-store-currency/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "Storecurrency", id: "LIST" }],
+    }),
+    updateTaxPriceStoreCurrency: builder.mutation<void, { id: string }>({
+      query: ({ id }) => ({
+        url: `update-tax-store-currency/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: [{ type: "Storecurrency", id: "LIST" }],
+    }),
   }),
 });
 
-export const { useAddCurrencyMutation,useGetAllStoreCurrenciesQuery } = storecurrencyApi;
+export const {
+  useAddCurrencyMutation,
+  useGetAllStoreCurrenciesQuery,
+  useDeleteStoreCurrencyMutation,
+  useUpdateTaxPriceStoreCurrencyMutation,
+} = storecurrencyApi;

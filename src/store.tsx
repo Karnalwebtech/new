@@ -166,6 +166,7 @@ const makeStore = () => {
         contactsApi.middleware,
         upstashRedisApi.middleware,
         productCategoryApi.middleware,
+        productCollectionsApi.middleware,
         storeApi.middleware,
         currencyApi.middleware,
         storecurrencyApi.middleware,
