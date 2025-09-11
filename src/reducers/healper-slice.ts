@@ -20,9 +20,14 @@ interface SelectCategory {
 }
 interface initialStateTypes
   extends ToggleState,
-  Type,
-  MaxLimit,
-  SelectCategory, SidebarToggle, SetDashboard { }
+    Type,
+    MaxLimit,
+    SelectCategory,
+    SidebarToggle,
+    SetDashboard {
+  taxMap: Record<string, boolean>;
+  selected: string[];
+}
 
 const initialState: initialStateTypes = {
   isOpen: false,
@@ -30,8 +35,9 @@ const initialState: initialStateTypes = {
   limit: 0,
   category: "all",
   isSidebarOpen: true,
-  dashboardType: "dashboard"
-
+  dashboardType: "dashboard",
+  taxMap: {},
+  selected: [],
 };
 const helperSlice = createSlice({
   name: "helper",
@@ -48,7 +54,10 @@ const helperSlice = createSlice({
     },
     sidebarToggle: (state) => {
       state.isSidebarOpen = !state.isSidebarOpen;
-       localStorage.setItem("isSidebarOpen", JSON.stringify(!state.isSidebarOpen));
+      localStorage.setItem(
+        "isSidebarOpen",
+        JSON.stringify(!state.isSidebarOpen)
+      );
     },
     setDashboardType: (state, action: PayloadAction<string>) => {
       state.dashboardType = action.payload;
@@ -69,6 +78,52 @@ const helperSlice = createSlice({
     clearTypeid: (state) => {
       state.typeid = "default";
     },
+   toggleTax: (
+      state,
+      action: PayloadAction<{ code: string; checked: boolean }>
+    ) => {
+      state.taxMap = state.taxMap ?? {};
+      const { code, checked } = action.payload;
+      state.taxMap[code] = checked;
+    },
+
+    toggleCode: (
+      state,
+      action: PayloadAction<{ code: string; checked: boolean }>
+    ) => {
+      state.selected = state.selected ?? []; // ✅ Ensure it's always an array
+      const { code, checked } = action.payload;
+
+      if (checked) {
+        if (!state.selected.includes(code)) {
+          state.selected.push(code);
+        }
+      } else {
+        state.selected = state.selected.filter((c) => c !== code);
+      }
+    },
+
+    bulkToggleCodes: (
+      state,
+      action: PayloadAction<{ codes: string[]; checked: boolean }>
+    ) => {
+      state.selected = state.selected ?? []; // ✅ Ensure it's always an array
+      const { codes, checked } = action.payload;
+
+      if (checked) {
+        const set = new Set([...state.selected, ...codes]);
+        state.selected = Array.from(set);
+      } else {
+        state.selected = state.selected.filter((c) => !codes.includes(c));
+      }
+    },
+
+    clearTaxMap: (state) => {
+      state.taxMap = {};
+    },
+    clearSelected: (state) => {
+      state.selected = [];
+    },
   },
 });
 export const {
@@ -79,6 +134,13 @@ export const {
   clearTypeid,
   setMaxLimit,
   clearMaxLimit,
-  setCategory, sidebarToggle, setDashboardType
+  setCategory,
+  sidebarToggle,
+  setDashboardType,
+  toggleTax,
+  toggleCode,
+  clearTaxMap,
+  clearSelected,
+  bulkToggleCodes,
 } = helperSlice.actions;
 export default helperSlice.reducer;

@@ -30,13 +30,8 @@ import {
 } from "@/components/ui/select";
 import { controls } from "@/lib/variants";
 import { useDebounced } from "@/hooks/useDebounced";
-import {
-  bulkToggleCodes,
-  toggleCode,
-  toggleTax,
-} from "@/reducers/healper-slice";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store";
+import { Button } from "@/components/ui/button";
+import NavigateBtn from "@/components/buttons/navigate-btn";
 
 const Row = memo(
   ({
@@ -44,7 +39,7 @@ const Row = memo(
     onToggleTax,
     onCheckChange,
     taxInclusive,
-    isChecked,isTaxPrice
+    isChecked,
   }: {
     item: CurrencyItem;
     isChecked: boolean;
@@ -52,7 +47,6 @@ const Row = memo(
     onCheckChange: (next: boolean) => void;
     onToggleTax: (code: string, next: boolean) => void;
     taxInclusive: boolean;
-    isTaxPrice:boolean;
   }) => {
     return (
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
@@ -74,31 +68,25 @@ const Row = memo(
             <TruncateText text={item.name || ""} maxLength={25} />
           </span>
         </TableCell>
-        {isTaxPrice &&
         <TableCell className="text-right pr-6">
-         
           <Switch
             checked={taxInclusive}
             onCheckedChange={(v) => onToggleTax(item.code, v)}
             aria-label={`Toggle tax inclusive pricing for ${item.code}`}
           />
         </TableCell>
-        }
       </TableRow>
     );
   }
 );
 Row.displayName = "Row";
-interface CurrenciesTableProps{
-  isTaxPrice?:boolean;
-}
-const CurrenciesTable = ({isTaxPrice=true}:CurrenciesTableProps) => {
+
+const Region = () => {
+  const [taxMap, setTaxMap] = useState<Record<string, boolean>>({});
+  const [selected, setSelected] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const [search, setSearch] = useState<string>("");
-  const dispatch = useDispatch();
-  const { taxMap, selected } = useSelector((state: RootState) => state.helper);
-
   const { data, isLoading } = useGetAllCurrenciesQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
@@ -112,34 +100,31 @@ const CurrenciesTable = ({isTaxPrice=true}:CurrenciesTableProps) => {
 
   const handleToggleTax = useCallback(
     (code: string, next: boolean) => {
-      // if (!setTaxMap) return;
-      // setTaxMap((prev) => {
-      //   if (prev[code] === next) return prev;
-      //   return { ...prev, [code]: next };
-      // });
-      dispatch(toggleTax({ code: code, checked: next }));
+      if (!setTaxMap) return;
+      setTaxMap((prev) => {
+        if (prev[code] === next) return prev;
+        return { ...prev, [code]: next };
+      });
     },
-    [dispatch]
+    [setTaxMap]
   );
 
-  const handleToggleCode = useCallback(
+  const toggleCode = useCallback(
     (code: string, checked: boolean) => {
-      // if (!setSelected) return;
-      // setSelected((prev) => {
-      //   if (checked) {
-      //     return prev.includes(code) ? prev : [...prev, code];
-      //   }
-      //   return prev.filter((c) => c !== code);
-      // });
-      dispatch(toggleCode({ code, checked }));
+      if (!setSelected) return;
+      setSelected((prev) => {
+        if (checked) {
+          return prev.includes(code) ? prev : [...prev, code];
+        }
+        return prev.filter((c) => c !== code);
+      });
     },
-    [dispatch]
+    [setSelected]
   );
-  const selectedOnPageCount = useMemo(() => {
-    if (!selected) return 0;
-    return result.filter((c) => selected.includes(c.code)).length;
-  }, [result, selected]);
-
+  const selectedOnPageCount = useMemo(
+    () => filteredItems.filter((c) => selected.includes(c.code)).length,
+    [filteredItems, selected]
+  );
   const headerCheckedState: boolean | "indeterminate" = useMemo(() => {
     if (filteredItems.length === 0) return false;
     if (selectedOnPageCount === 0) return false;
@@ -168,40 +153,49 @@ const CurrenciesTable = ({isTaxPrice=true}:CurrenciesTableProps) => {
         item={item}
         index={i}
         onToggleTax={handleToggleTax}
-        isChecked={Array.isArray(selected) && selected.includes(item.code)}
-        onCheckChange={(next) => handleToggleCode(item.code, next)}
-        taxInclusive={taxMap?.[item.code] ?? false}
-        isTaxPrice={isTaxPrice}
+        isChecked={selected.includes(item.code)}
+        onCheckChange={(next) => toggleCode(item.code, next)}
+        taxInclusive={taxMap[item.code] || false}
       />
     ));
-  }, [filteredItems, handleToggleTax, handleToggleCode,isTaxPrice, taxMap, selected]);
+  }, [filteredItems, handleToggleTax, toggleCode, taxMap, selected]);
 
   const toggleSelectAllOnPage = useCallback(
     (nextChecked: boolean) => {
-      // setSelected((prev) => {
-      //   if (nextChecked) {
-      //     // add all codes on this page
-      //     const set = new Set(prev);
-      //     result.forEach((c) => set.add(c?.code));
-      //     return Array.from(set);
-      //   } else {
-      //     // remove all codes on this page
-      //     return [];
-      //   }
-      // });
-      dispatch(
-        bulkToggleCodes({
-          codes: result.map((c) => c.code),
-          checked: nextChecked,
-        })
-      );
+      setSelected((prev) => {
+        if (nextChecked) {
+          // add all codes on this page
+          const set = new Set(prev);
+          result.forEach((c) => set.add(c?.code));
+          return Array.from(set);
+        } else {
+          // remove all codes on this page
+          return [];
+        }
+      });
     },
-    [dispatch, result]
+    [result, setSelected]
   );
 
   return (
     <div className="min-h-screen bg-background mb-14">
       <div className="container mx-auto py-8">
+        <div className="flex px-4 items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground mb-2">
+              Regions
+            </h1>
+            <p className="text-muted-foreground">
+              A region is an area that you sell products in. It can cover
+              multiple countries, and has different tax rates, providers, and
+              currency.
+            </p>
+          </div>
+
+          <NavigateBtn path={"/settings/regions/create"} title={"Create"} />
+          
+          
+        </div>
         <div className="flex px-4 items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold text-foreground mb-2">
@@ -293,15 +287,11 @@ const CurrenciesTable = ({isTaxPrice=true}:CurrenciesTableProps) => {
             )}
 
             <Shadcn_table
-              table_header={isTaxPrice?[
+              table_header={[
                 "checkbox",
                 "Code",
                 "Name",
                 "Tax inclusive pricing",
-              ]:[
-                "checkbox",
-                "Code",
-                "Name",
               ]}
               isAllSelected={headerCheckedState}
               isCheckbox={true}
@@ -327,4 +317,4 @@ const CurrenciesTable = ({isTaxPrice=true}:CurrenciesTableProps) => {
   );
 };
 
-export default memo(CurrenciesTable);
+export default memo(Region);
