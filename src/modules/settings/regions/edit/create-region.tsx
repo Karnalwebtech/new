@@ -12,16 +12,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEditStoreMutation, useGetStoreDataQuery } from "@/state/store-api";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
-import CurrenciesTable from "../../store/currencies/currencies-table";
-import Currencies from "../../store/currencies/currencies";
 import { Label } from "@/components/ui/label";
 import ButtonEvent from "@/components/buttons/btn-event";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
+import CountryStateCity from "../../country-state-city/country-state-city";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { clearSelected, toggleCode } from "@/reducers/healper-slice";
 
 type FormData = z.infer<typeof storeSchema>;
 const CreateRegion = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const { selected } = useSelector((state: RootState) => state.helper);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [step, setStep] = React.useState<number>(0);
@@ -68,6 +72,18 @@ const CreateRegion = () => {
       setValue("name", result.name);
     }
   }, [result, setValue]);
+  const handleRemove = useCallback(
+    (id: string) => {
+      dispatch(
+        toggleCode({
+          code: id, // ✅ single string
+          checked: false,
+        })
+      );
+    },
+    [dispatch]
+  );
+
   return (
     <DialogPopUp
       title="Add Currencies"
@@ -86,26 +102,54 @@ const CreateRegion = () => {
           />
           <Details control={control} errors={errors} />
           <div className="p-8 pb-32 max-w-[800px] m-auto">
+            <div className="flex flex-col">
+              <Label
+                htmlFor="currency"
+                className="text-sm font-medium text-gray-700"
+              >
+                Countries
+              </Label>
+              <p className="text-sm font-medium text-gray-700">
+                Add the countries included in this region.
+              </p>
+            </div>
             <div className="flex items-center justify-between gap-4 mt-4">
-              <div className="flex flex-col">
-                <Label
-                  htmlFor="currency"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Countries
-                </Label>
-                <p className="text-sm font-medium text-gray-700">
-                  Add the countries included in this region.
-                </p>
+              {/* Selected countries badges */}
+              <div className="flex flex-wrap gap-2">
+                {selected?.map((item) => (
+                  <Badge
+                    key={item}
+                    variant="secondary"
+                    className="flex items-center gap-2 px-3 py-1 text-sm rounded-full bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition"
+                  >
+                    <span className="truncate max-w-[100px]">{item}</span>
+                    <Button
+                      onClick={() => handleRemove(item)} // ✅ add remove logic
+                      className="p-0 h-6 w-6 rounded-full text-gray-700 bg-gray-100 hover:bg-gray-300 hover:text-gray-900 transition"
+                    >
+                      <X size={14} />
+                    </Button>
+                  </Badge>
+                ))}
+                {selected?.length > 0 && (
+                  <ButtonEvent
+                    title="Clear all"
+                    event={() => dispatch(clearSelected())}
+                    // style="bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow px-4 py-2 transition"
+                  />
+                )}
               </div>
 
+              {/* Add countries button */}
               <div className="flex justify-end">
                 <ButtonEvent
-                  title={"Add countries"}
+                  title="Add Countries"
                   event={() => setIsOpen(true)}
+                  // style="bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow px-4 py-2 transition"
                 />
               </div>
             </div>
+            <hr className="border-gray-500 mt-2 dark:border-white"></hr>
           </div>
           <PageFooter<FormData>
             step={step}
@@ -118,7 +162,7 @@ const CreateRegion = () => {
             onCancel={() => router.back()}
           />
         </div>
-        <Currencies
+        <CountryStateCity
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           isChild={true}

@@ -51,6 +51,7 @@ import { productCollectionsApi } from "./state/product-collections-api";
 import { storeApi } from "./state/store-api";
 import { currencyApi } from "./state/currency-api";
 import { storecurrencyApi } from "./state/store-currency-api";
+import { countriesStatesCitiesApi } from "./state/counrtries-states-cities-api";
 
 const createNoopStorage = () => ({
   getItem: () => Promise.resolve(null),
@@ -91,7 +92,7 @@ const persistConfig = {
     storeApi.reducerPath,
     currencyApi.reducerPath,
     storecurrencyApi.reducerPath,
-
+countriesStatesCitiesApi.reducerPath,
     //superme
     cloudStorageApi.reducerPath,
   ],
@@ -127,6 +128,7 @@ const rootReducer = combineReducers({
   [storeApi.reducerPath]: storeApi.reducer,
   [currencyApi.reducerPath]: currencyApi.reducer,
   [storecurrencyApi.reducerPath]: storecurrencyApi.reducer,
+  [countriesStatesCitiesApi.reducerPath]: countriesStatesCitiesApi.reducer,
 
   //superme
   [cloudStorageApi.reducerPath]: cloudStorageApi.reducer,
@@ -170,6 +172,8 @@ const makeStore = () => {
         storeApi.middleware,
         currencyApi.middleware,
         storecurrencyApi.middleware,
+        countriesStatesCitiesApi.middleware,
+        
         //superme
         cloudStorageApi.middleware,
       ]),

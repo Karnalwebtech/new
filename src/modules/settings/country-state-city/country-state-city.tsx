@@ -4,49 +4,52 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import PageHeander from "@/modules/layout/header/page-heander";
 import { useRouter } from "next/navigation";
 import React, { memo, useCallback, useEffect, useState } from "react";
-import CurrenciesTable from "./currencies-table";
-import { NormalPageFooter } from "@/modules/layout/footer/normal-page-footer";
 import { useAddCurrencyMutation } from "@/state/store-currency-api";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { clearSelected, clearTaxMap } from "@/reducers/healper-slice";
 import { toast } from "sonner";
+import CountryStateCityTable from "./country-state-city-table";
+import { NormalPageFooter } from "@/modules/layout/footer/normal-page-footer";
+import { useGetAllCountoriesQuery } from "@/state/counrtries-states-cities-api";
 
-interface CurrenciesProps {
+interface CountryStateCityProps {
   isOpen?: boolean;
   setIsOpen?: (value: boolean) => void;
   isChild?: boolean;
   isTaxPrice?: boolean;
 }
-const Currencies = ({
+const CountryStateCity = ({
   isOpen = true,
   setIsOpen,
   isChild = false,
   isTaxPrice = true,
-}: CurrenciesProps) => {
+}: CountryStateCityProps) => {
   const [step, setStep] = useState<number>(0);
   const dispatch = useDispatch();
-  const { taxMap, selected } = useSelector((state: RootState) => state.helper);
-  const [addCurrency, { isLoading, isSuccess, error }] =
-    useAddCurrencyMutation();
-  const router = useRouter();
-  useHandleNotifications({
-    error,
-    isSuccess,
-    successMessage: "Currency added successfully!",
-    redirectPath: "/settings/store",
-  });
-  const onSubmit = useCallback(async () => {
-    await addCurrency({ currencies: selected, tax: taxMap });
-  }, [selected, taxMap, addCurrency]);
+  const { selected } = useSelector((state: RootState) => state.helper);
 
-  useEffect(() => {
-    if (isSuccess) {
-      dispatch(clearTaxMap());
-      dispatch(clearSelected());
-    }
-  }, [dispatch, isSuccess]);
+  // const [addCurrency, { isLoading, isSuccess, error }] =
+  //   useAddCurrencyMutation();
+  const router = useRouter();
+  console.log(selected);
+  // useHandleNotifications({
+  //   error,
+  //   isSuccess,
+  //   successMessage: "Currency added successfully!",
+  //   redirectPath: "/settings/store",
+  // });
+  const onSubmit = useCallback(async () => {
+    // await addCurrency({ CountryStateCity: selected});
+  }, []);
+
+  // useEffect(() => {
+  //   if (isSuccess) {
+  //     dispatch(clearTaxMap());
+  //     dispatch(clearSelected());
+  //   }
+  // }, [dispatch, isSuccess]);
 
   const closeHandler = useCallback(() => {
     if (selected.length === 0) {
@@ -58,8 +61,8 @@ const Currencies = ({
 
   return (
     <DialogPopUp
-      title="Add Currencies"
-      description="Add Currencies for your store"
+      title="Add CountryStateCity"
+      description="Add CountryStateCity for your store"
       isOpen={isOpen}
       handleClose={() => {}}
     >
@@ -75,9 +78,9 @@ const Currencies = ({
             canAccessStep={[true]}
             onCancel={() => (isChild ? setIsOpen?.(!isOpen) : router.back())}
           />
-          <CurrenciesTable isTaxPrice={isTaxPrice} />
+          <CountryStateCityTable isTaxPrice={isTaxPrice} />
           <NormalPageFooter
-            isLoading={isLoading}
+            isLoading={false}
             onCancel={() => (isChild ? setIsOpen?.(!isOpen) : router.back())}
             onSubmit={() => (isChild ? closeHandler() : onSubmit())}
           />
@@ -87,4 +90,4 @@ const Currencies = ({
   );
 };
 
-export default memo(Currencies);
+export default memo(CountryStateCity);
