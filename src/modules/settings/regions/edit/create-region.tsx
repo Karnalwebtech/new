@@ -21,6 +21,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { clearSelected, toggleCode } from "@/reducers/healper-slice";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 type FormData = z.infer<typeof storeSchema>;
 const CreateRegion = () => {
@@ -84,6 +85,18 @@ const CreateRegion = () => {
     [dispatch]
   );
 
+  const countries = [
+    { value: "stripe", label: "Stripe (STRIPE)" },
+    { value: "stripe-bancontact", label: "Stripe Bancontact (STRIPE)" },
+    { value: "stripe-blik", label: "Stripe Blik (STRIPE)" },
+    { value: "stripe-giropay", label: "Stripe Giropay (STRIPE)" },
+    { value: "stripe-ideal", label: "Stripe Ideal (STRIPE)" },
+    { value: "stripe-przelewy24", label: "Stripe Przelewy24 (STRIPE)" },
+    { value: "system-default", label: "System (DEFAULT)" },
+  ];
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([
+    "stripe-przelewy24",
+  ]);
   return (
     <DialogPopUp
       title="Add Currencies"
@@ -150,6 +163,26 @@ const CreateRegion = () => {
               </div>
             </div>
             <hr className="border-gray-500 mt-2 dark:border-white"></hr>
+            <div className="mt-6 ">
+              <div className="mb-4">
+                <Label
+                  htmlFor="Providers"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Providers
+                </Label>
+                <p className="text-sm font-medium text-gray-700">
+                  Add which payment providers are available in this region.
+                </p>
+              </div>
+              <MultiSelect
+                options={countries}
+                selected={selectedCountries}
+                onChange={setSelectedCountries}
+                placeholder="Select countries..."
+                maxDisplay={3}
+              />
+            </div>
           </div>
           <PageFooter<FormData>
             step={step}
