@@ -5,7 +5,6 @@ import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
 import SelectFields from "@/components/fields/select-field";
 import InputField from "@/components/fields/input-field";
 import { useGetAllStoreCurrenciesQuery } from "@/state/store-currency-api";
-import RadioGroupfield from "@/components/fields/radio-group-field";
 import SwitchField from "@/components/fields/switch-field";
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
@@ -59,7 +58,7 @@ const Details = <T extends FieldValues>({
                 <SelectFields
                   control={control}
                   errors={errors}
-                  name={"default_currency" as Path<T>}
+                  name={"currency" as Path<T>}
                   placeholder="Select currency" // Default placeholder
                   drop_down_selector={
                     data?.result?.length
@@ -91,7 +90,7 @@ const Details = <T extends FieldValues>({
                 <SwitchField
                   control={control}
                   errors={errors}
-                  name={"default_currency" as Path<T>}
+                  name={"automatic_taxes" as Path<T>}
                 />
               </div>
             </div>
@@ -112,7 +111,7 @@ const Details = <T extends FieldValues>({
                 <SwitchField
                   control={control}
                   errors={errors}
-                  name={"default_currency" as Path<T>}
+                  name={"tax_inclusive_pricing" as Path<T>}
                 />
               </div>
             </div>

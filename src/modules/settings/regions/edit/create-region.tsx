@@ -3,7 +3,6 @@ import DialogPopUp from "@/components/drawer/dialog-component";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageFooter } from "@/modules/layout/footer/page-footer";
 import PageHeander from "@/modules/layout/header/page-heander";
-import { storeSchema } from "@/zod-shema/store-schema";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -22,8 +21,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { clearSelected, toggleCode } from "@/reducers/healper-slice";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { regionSchema } from "@/zod-shema/region-schema";
+import { useAddRegionMutation } from "@/state/regions-api";
 
-type FormData = z.infer<typeof storeSchema>;
+type FormData = z.infer<typeof regionSchema>;
 const CreateRegion = () => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -32,12 +33,12 @@ const CreateRegion = () => {
   const [step, setStep] = React.useState<number>(0);
   const { data } = useGetStoreDataQuery();
   const result = data?.result;
-  const [EditStore, { isLoading, error, isSuccess }] = useEditStoreMutation();
+  const [addRegion, { isLoading, error, isSuccess }] = useAddRegionMutation();
   useHandleNotifications({
     error,
     isSuccess,
     successMessage: "Store updated successfully!",
-    redirectPath: "/settings/store",
+    // redirectPath: "/settings/store",
   });
   const {
     control,
@@ -46,10 +47,8 @@ const CreateRegion = () => {
     setValue,
     formState: { errors },
   } = useForm<FormData>({
-    defaultValues: {
-      name: "MyStore",
-    },
-    resolver: zodResolver(storeSchema),
+    defaultValues: {},
+    resolver: zodResolver(regionSchema),
   });
 
   const values = watch();
@@ -63,9 +62,14 @@ const CreateRegion = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      await EditStore(data);
+      const payload = {
+        ...data,
+        countries: selected,
+        providers: ["selected", "B"],
+      };
+      await addRegion(payload);
     },
-    [EditStore]
+    [addRegion, selected]
   );
 
   useEffect(() => {

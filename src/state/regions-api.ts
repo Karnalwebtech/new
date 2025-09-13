@@ -1,6 +1,6 @@
 import { apiUrl, apiKey } from "@/config";
 import { getToken } from "@/lib/set-localstorage";
-import { GetAllRegionsResponse } from "@/types/regions-type";
+import { GetAllRegionsResponse, RegionFrom } from "@/types/regions-type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const regionsApi = createApi({
@@ -25,6 +25,18 @@ export const regionsApi = createApi({
       },
       providesTags: [{ type: "regionsApi", id: "LIST" }],
     }),
+    addRegion: build.mutation<void, RegionFrom>({
+      query: (data) => {
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(data));
+        return {
+          url: "/create-region",
+          method: "post",
+          body: formData,
+        };
+      },
+      invalidatesTags: [{ type: "regionsApi", id: "LIST" }],
+    }),
   }),
 });
-export const {  useGetRegionseDataQuery } = regionsApi;
+export const { useGetRegionseDataQuery, useAddRegionMutation } = regionsApi;
