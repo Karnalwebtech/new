@@ -18,9 +18,10 @@ interface Shadcn_table_props {
   table_header: string[];
   tabel_body: () => React.ReactNode;
   isLoading: boolean;
-isAllSelected?: boolean | "indeterminate"; 
+  isAllSelected?: boolean | "indeterminate";
   handleSelectAll?: (value: boolean) => void;
   isCheckbox?: boolean;
+  textend?: string;
 }
 
 const Shadcn_table = ({
@@ -30,6 +31,7 @@ const Shadcn_table = ({
   handleSelectAll,
   isAllSelected,
   isCheckbox = false,
+  textend = "action",
 }: Shadcn_table_props) => {
   return (
     <motion.div
@@ -67,7 +69,9 @@ const Shadcn_table = ({
                   <TableHead
                     key={header}
                     className={`${
-                      header === "Action" || header === "Tax inclusive pricing"
+                      header === "Action" ||
+                      header === "Tax inclusive pricing" ||
+                      header === textend
                         ? "text-end"
                         : ""
                     } font-semibold text-muted-foreground`}

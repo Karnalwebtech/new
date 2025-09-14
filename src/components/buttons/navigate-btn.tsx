@@ -30,10 +30,10 @@ const NavigateBtn = ({
 
   return (
     <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 },
-      }}
+      // variants={{
+      //   hidden: { opacity: 0, y: 20 },
+      //   show: { opacity: 1, y: 0 },
+      // }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <motion.div whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.05 }}>
