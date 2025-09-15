@@ -14,7 +14,12 @@ export interface RegionFrom {
 export interface RegionCountryData {
   _id?: string;
   id?: string;
+  name?: string;
+  currency_id?: string;
+  automatic_taxes?: boolean;
+  includes_tax?: boolean;
   country_id:CountryStateCityType;
+  countries:CountryStateCityType[];
   region_id:RegionFrom;
 }
 

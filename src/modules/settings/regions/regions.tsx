@@ -44,12 +44,22 @@ const Row = memo(
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item?.region_id?.name || ""} maxLength={25} />
+            <TruncateText text={item?.name || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item?.country_id?.name || ""} maxLength={25} />
+            <TruncateText
+              text={
+                item?.countries?.length <= 3
+                  ? item.countries.map((c) => c?.name).join(", ")
+                  : `${item.countries
+                      .slice(0, 3)
+                      .map((c) => c?.name)
+                      .join(", ")}... more`
+              }
+              maxLength={25}
+            />
           </span>
         </TableCell>
         <TableCell className="text-right pr-6">
@@ -168,10 +178,12 @@ const Region = () => {
               Regions
             </motion.h1>
             <motion.p className="text-muted-foreground">
-              A region is an area that you sell products in. It can cover multiple countries, and has different tax rates, providers, and currency.
+              A region is an area that you sell products in. It can cover
+              multiple countries, and has different tax rates, providers, and
+              currency.
             </motion.p>
           </motion.div>
-          
+
           <NavigateBtn path={"/settings/regions/create"} title={"Create"} />
         </motion.div>
 
