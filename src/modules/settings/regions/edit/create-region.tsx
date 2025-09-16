@@ -23,17 +23,23 @@ import { clearSelected, toggleCode } from "@/reducers/healper-slice";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { regionSchema } from "@/zod-shema/region-schema";
 import { useAddRegionMutation } from "@/state/regions-api";
+import { useGetRegionDetailsQuery } from "../../../../state/regions-api";
 
 type FormData = z.infer<typeof regionSchema>;
-const CreateRegion = () => {
+interface CreateRegionProps {
+  ItemId?: string;
+}
+const CreateRegion = ({ ItemId }: CreateRegionProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const { selected } = useSelector((state: RootState) => state.helper);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [step, setStep] = React.useState<number>(0);
-  const { data } = useGetStoreDataQuery();
-  const result = data?.result;
   const [addRegion, { isLoading, error, isSuccess }] = useAddRegionMutation();
+  const { data } = useGetRegionDetailsQuery(
+    { id: ItemId as string},
+    { skip: !ItemId }
+  );
   useHandleNotifications({
     error,
     isSuccess,

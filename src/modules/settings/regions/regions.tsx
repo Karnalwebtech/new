@@ -90,7 +90,7 @@ const Row = memo(
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/dashboard/regions/${item?.region_id}/edit`)
+                  router.push(`/settings/regions/${item?.id}/edit`)
                 }
               >
                 <Pencil className="h-4 w-4 mr-2" /> Edit
@@ -98,7 +98,7 @@ const Row = memo(
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/dashboard/regions/${item?.region_id}`)
+                  router.push(`/settings/regions/${item?.id}`)
                 }
               >
                 <Eye className="h-4 w-4 mr-2" /> Preview

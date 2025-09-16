@@ -67,10 +67,21 @@ export const regionsApi = createApi({
       }),
       invalidatesTags: [{ type: "regionsApi", id: "LIST" }],
     }),
+    getRegionDetails: build.query<void, { id: string }>({
+      query: ({id}) => {
+        return {
+          url: `/regions/${id}`,
+          method: "GET",
+        };
+      },
+      providesTags: [{ type: "regionsApi", id: "LIST" }],
+    }),
   }),
 });
 export const {
   useGetAllRegionseDataQuery,
+  useGetRegionDetailsQuery,
   useDeleteRegionMutation,
   useAddRegionMutation,
+  
 } = regionsApi;
