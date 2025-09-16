@@ -1,5 +1,5 @@
 "use client";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -19,9 +19,12 @@ import {
 } from "@/components/ui/select";
 import { containerVariants, controls, itemVariants } from "@/lib/variants";
 import NavigateBtn from "@/components/buttons/navigate-btn";
-import { useGetAllRegionseDataQuery } from "../../../state/regions-api";
+import {
+  useDeleteRegionMutation,
+  useGetAllRegionseDataQuery,
+} from "../../../state/regions-api";
 import { RegionCountryData } from "@/types/regions-type";
-import { Copy, Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,14 +34,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
+import { useHandleNotifications } from "@/hooks/use-notification-handler";
 
 const Row = memo(
   ({
     item,
     router,
+    removeHandler,
+    deletedId,
   }: {
     router: ReturnType<typeof useRouter>;
     item: RegionCountryData;
+    removeHandler: (id: string) => void;
+    deletedId: string;
   }) => {
     return (
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
@@ -82,22 +90,24 @@ const Row = memo(
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/dashboard/regions/${item?.id}/edit`)
+                  router.push(`/dashboard/regions/${item?.region_id}/edit`)
                 }
               >
                 <Pencil className="h-4 w-4 mr-2" /> Edit
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => router.push(`/dashboard/regions/${item?.id}`)}
+                onClick={() =>
+                  router.push(`/dashboard/regions/${item?.region_id}`)
+                }
               >
                 <Eye className="h-4 w-4 mr-2" /> Preview
               </DropdownMenuItem>
 
               <DropdownMenuItem
-                // disabled={deletedId === item?._id}
+                disabled={deletedId === item?.region_id}
                 className="text-destructive cursor-pointer"
-                // onClick={() => item?._id && removeHandler(item._id)}
+                onClick={() => item?.region_id && removeHandler(item.region_id)}
               >
                 <Trash2 className="h-4 w-4 mr-2" /> Delete
               </DropdownMenuItem>
@@ -116,9 +126,19 @@ const Region = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
   const [rowsPerPage, setRowsPerPage] = useState("20");
-  const { data, isLoading } = useGetAllRegionseDataQuery({
+  const [
+    deleteRegion,
+    { isLoading: deleteLoading, isSuccess: deleteSuccess, error: deteError },
+  ] = useDeleteRegionMutation();
+  const { data, isLoading, error } = useGetAllRegionseDataQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
+  });
+
+  useHandleNotifications({
+    error: deteError || error,
+    isSuccess: deleteSuccess,
+    successMessage: deleteSuccess ? "Regoin deleted successfully!" : "",
   });
 
   const width = useWindowWidth();
@@ -132,14 +152,21 @@ const Region = () => {
   ]);
 
   const removeHandler = useCallback((id: string) => {
+    console.log("click");
     setIsOpen(true);
     setDeletedId(id);
   }, []);
 
   const DeleteHandler = useCallback(async () => {
-    // if (deletedId) await deleteProductCategory({ id: deletedId });
-  }, []);
+    if (deletedId) await deleteRegion({ id: deletedId });
+  }, [deleteRegion, deletedId]);
 
+  useEffect(() => {
+    if (deleteSuccess) {
+      setIsOpen(false);
+      setDeletedId(null);
+    }
+  }, [deleteSuccess]);
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
       return (
@@ -157,9 +184,15 @@ const Region = () => {
     }
 
     return filteredItems.map((item, i) => (
-      <Row key={`${item._id!}-${i}`} item={item} router={router} />
+      <Row
+        key={`${item._id!}-${i}`}
+        item={item}
+        router={router}
+        removeHandler={removeHandler}
+        deletedId={deletedId!}
+      />
     ));
-  }, [filteredItems, router]);
+  }, [filteredItems, router, removeHandler, deletedId]);
 
   return (
     <motion.div
@@ -273,24 +306,25 @@ const Region = () => {
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
             {/* Loader Overlay */}
             <AnimatePresence>
-              {isLoading && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10"
-                >
+              {isLoading ||
+                (deleteLoading && (
                   <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 1,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                    className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
-                  />
-                </motion.div>
-              )}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10"
+                  >
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                      className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
+                    />
+                  </motion.div>
+                ))}
             </AnimatePresence>
 
             <Shadcn_table
@@ -329,7 +363,7 @@ const Region = () => {
             action={DeleteHandler}
             type="danger"
             setDeletedId={setDeletedId}
-            isLoading={false}
+            isLoading={deleteLoading}
           />
         )}
       </AnimatePresence>

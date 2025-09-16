@@ -20,7 +20,7 @@ export interface RegionCountryData {
   includes_tax?: boolean;
   country_id:CountryStateCityType;
   countries:CountryStateCityType[];
-  region_id:RegionFrom;
+  region_id:string;
 }
 
 export interface GetAllRegionsResponse {

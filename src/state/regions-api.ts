@@ -16,13 +16,16 @@ export const regionsApi = createApi({
   }),
   tagTypes: ["regionsApi"],
   endpoints: (build) => ({
-    getAllRegionseData: build.query<GetAllRegionsResponse,  {
+    getAllRegionseData: build.query<
+      GetAllRegionsResponse,
+      {
         type?: string;
         rowsPerPage?: number;
         page?: number;
-        keywords?:string;
-      } | void>({
-       query: (filters) => {
+        keywords?: string;
+      } | void
+    >({
+      query: (filters) => {
         const params: Record<string, string | number | boolean> = {};
         // Add filters to the query parameters if they are present
         if (filters) {
@@ -32,7 +35,7 @@ export const regionsApi = createApi({
           if (filters.page) {
             params.page = filters.page; // Convert number to string
           }
-           if (filters.keywords) {
+          if (filters.keywords) {
             params.keywords = filters.keywords; // Convert number to string
           }
         }
@@ -57,6 +60,17 @@ export const regionsApi = createApi({
       },
       invalidatesTags: [{ type: "regionsApi", id: "LIST" }],
     }),
+    deleteRegion: build.mutation<void, { id: string }>({
+      query: ({ id }) => ({
+        url: `/delete-region/${id}`,
+        method: "DELETE", // Use DELETE instead of PUT
+      }),
+      invalidatesTags: [{ type: "regionsApi", id: "LIST" }],
+    }),
   }),
 });
-export const { useGetAllRegionseDataQuery, useAddRegionMutation } = regionsApi;
+export const {
+  useGetAllRegionseDataQuery,
+  useDeleteRegionMutation,
+  useAddRegionMutation,
+} = regionsApi;

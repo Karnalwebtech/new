@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEditStoreMutation, useGetStoreDataQuery } from "@/state/store-api";
+import { useGetStoreDataQuery } from "@/state/store-api";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import { Label } from "@/components/ui/label";
@@ -37,8 +37,8 @@ const CreateRegion = () => {
   useHandleNotifications({
     error,
     isSuccess,
-    successMessage: "Store updated successfully!",
-    // redirectPath: "/settings/store",
+    successMessage: "Store created successfully!",
+    redirectPath: "/settings/regions",
   });
   const {
     control,
@@ -72,11 +72,11 @@ const CreateRegion = () => {
     [addRegion, selected]
   );
 
-  useEffect(() => {
-    if (result) {
-      setValue("name", result.name);
-    }
-  }, [result, setValue]);
+  // useEffect(() => {
+  //   if (result) {
+  //     setValue("name", result.name);
+  //   }
+  // }, [result, setValue]);
   const handleRemove = useCallback(
     (id: string) => {
       dispatch(
