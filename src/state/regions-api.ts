@@ -1,6 +1,6 @@
 import { apiUrl, apiKey } from "@/config";
 import { getToken } from "@/lib/set-localstorage";
-import { GetAllRegionsResponse, RegionFrom } from "@/types/regions-type";
+import { GetAllRegionsResponse, GetRegionDetailsResponse, RegionFrom } from "@/types/regions-type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const regionsApi = createApi({
@@ -60,6 +60,18 @@ export const regionsApi = createApi({
       },
       invalidatesTags: [{ type: "regionsApi", id: "LIST" }],
     }),
+      updateRegion: build.mutation<void, RegionFrom>({
+      query: (data) => {
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(data));
+        return {
+          url: `/update-region/${data?.id}`,
+          method: "put",
+          body: formData,
+        };
+      },
+      invalidatesTags: [{ type: "regionsApi", id: "LIST" }],
+    }),
     deleteRegion: build.mutation<void, { id: string }>({
       query: ({ id }) => ({
         url: `/delete-region/${id}`,
@@ -67,7 +79,7 @@ export const regionsApi = createApi({
       }),
       invalidatesTags: [{ type: "regionsApi", id: "LIST" }],
     }),
-    getRegionDetails: build.query<void, { id: string }>({
+    getRegionDetails: build.query<GetRegionDetailsResponse, { id: string }>({
       query: ({id}) => {
         return {
           url: `/regions/${id}`,
@@ -83,5 +95,6 @@ export const {
   useGetRegionDetailsQuery,
   useDeleteRegionMutation,
   useAddRegionMutation,
+  useUpdateRegionMutation,
   
 } = regionsApi;

@@ -1,4 +1,6 @@
 import { CountryStateCityType } from "./country-state-city-type";
+import { CurrencyItem } from "./currency-type";
+import { StoreCurrenciesType } from "./store-currincies-type";
 
 export interface RegionFrom {
   _id?: string;
@@ -15,12 +17,16 @@ export interface RegionCountryData {
   _id?: string;
   id?: string;
   name?: string;
-  currency_id?: string;
   automatic_taxes?: boolean;
   includes_tax?: boolean;
-  country_id:CountryStateCityType;
+  // currency_id?: string;
+  storeCurrency:StoreCurrenciesType;
+  currnecy:CurrencyItem;
   countries:CountryStateCityType[];
-  region_id:string;
+}
+export interface GetRegionDetailsResponse {
+  success: boolean;
+  result: RegionCountryData;
 }
 
 export interface GetAllRegionsResponse {

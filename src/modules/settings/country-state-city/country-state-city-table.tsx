@@ -20,11 +20,7 @@ import {
 } from "@/components/ui/select";
 import { controls } from "@/lib/variants";
 import { useDebounced } from "@/hooks/useDebounced";
-import {
-  bulkToggleCodes,
-  toggleCode,
-  toggleTax,
-} from "@/reducers/healper-slice";
+import { bulkToggleCodes, toggleCode } from "@/reducers/healper-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { useGetAllCountoriesQuery } from "@/state/counrtries-states-cities-api";
@@ -52,7 +48,7 @@ const Row = memo(
         </TableCell>
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item?.name! || ""} maxLength={25} />
+            <TruncateText text={item?.name || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell>
@@ -65,17 +61,13 @@ const Row = memo(
   }
 );
 Row.displayName = "Row";
-interface CountryStateCityTableProps {
-  isTaxPrice?: boolean;
-}
-const CountryStateCityTable = ({
-  isTaxPrice = true,
-}: CountryStateCityTableProps) => {
+
+const CountryStateCityTable = ({}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const [search, setSearch] = useState<string>("");
   const dispatch = useDispatch();
-  const { taxMap, selected } = useSelector((state: RootState) => state.helper);
+  const { selected } = useSelector((state: RootState) => state.helper);
 
   const { data, isLoading } = useGetAllCountoriesQuery({
     rowsPerPage: Number(rowsPerPage),
@@ -90,7 +82,7 @@ const CountryStateCityTable = ({
 
   const selectedOnPageCount = useMemo(() => {
     if (!selected) return 0;
-    return result.filter((c) => selected.includes(c?.name!)).length;
+    return result.filter((c) => selected.includes(c?.name)).length;
   }, [result, selected]);
 
   const headerCheckedState: boolean | "indeterminate" = useMemo(() => {
@@ -127,17 +119,17 @@ const CountryStateCityTable = ({
       <Row
         key={`${item._id}-${i}`}
         item={item}
-        isChecked={Array.isArray(selected) && selected.includes(item?.name!)}
-        onCheckChange={(next) => handleToggleCode(item?.name!, next)}
+        isChecked={Array.isArray(selected) && selected.includes(item?.name)}
+        onCheckChange={(next) => handleToggleCode(item?.name, next)}
       />
     ));
-  }, [filteredItems, isTaxPrice, taxMap, selected]);
+  }, [filteredItems, selected, handleToggleCode]);
 
   const toggleSelectAllOnPage = useCallback(
     (nextChecked: boolean) => {
       dispatch(
         bulkToggleCodes({
-          codes: result.map((c) => c?.name!),
+          codes: result.map((c) => c?.name),
           checked: nextChecked,
         })
       );

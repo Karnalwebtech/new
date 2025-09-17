@@ -87,7 +87,7 @@ const SelectFields = <T extends FieldValues>({
               </SelectTrigger>
               <SelectContent>
                 {drop_down_selector.map((option) => (
-                  <SelectItem key={option.key} value={option.value}>
+                  <SelectItem key={option.key} value={option.key}>
                     {capitalizeFirstLetter(option.value)}
                   </SelectItem>
                 ))}
