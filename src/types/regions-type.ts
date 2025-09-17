@@ -21,7 +21,7 @@ export interface RegionCountryData {
   includes_tax?: boolean;
   // currency_id?: string;
   storeCurrency:StoreCurrenciesType;
-  currnecy:CurrencyItem;
+  currency:CurrencyItem;
   countries:CountryStateCityType[];
 }
 export interface GetRegionDetailsResponse {

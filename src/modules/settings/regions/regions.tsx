@@ -105,9 +105,9 @@ const Row = memo(
               </DropdownMenuItem>
 
               <DropdownMenuItem
-                disabled={deletedId === item?.region_id}
+                disabled={deletedId === item?._id}
                 className="text-destructive cursor-pointer"
-                onClick={() => item?.region_id && removeHandler(item.region_id)}
+                onClick={() => item?._id && removeHandler(item._id)}
               >
                 <Trash2 className="h-4 w-4 mr-2" /> Delete
               </DropdownMenuItem>
@@ -152,7 +152,7 @@ const Region = () => {
   ]);
 
   const removeHandler = useCallback((id: string) => {
-    console.log("click");
+ 
     setIsOpen(true);
     setDeletedId(id);
   }, []);
