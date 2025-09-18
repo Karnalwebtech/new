@@ -19,64 +19,58 @@ import {
 } from "@/components/ui/select";
 import { containerVariants, controls } from "@/lib/variants";
 import {
-  useDeleteStoreCurrencyMutation,
-  useGetAllStoreCurrenciesQuery,
-} from "@/state/store-currency-api";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  CircleCheck,
-  CircleX,
-  MoreHorizontal,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { StoreCurrenciesType } from "@/types/store-currincies-type";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
-import { useUpdateTaxPriceStoreCurrencyMutation } from "../../../state/store-currency-api";
+import NavigateBtn from "@/components/buttons/navigate-btn";
+import {
+  useDeleteSalesChannelsMutation,
+  useGetAllSalesChannelsDataQuery,
+} from "@/state/sales-channels-api";
+import { SalesChannelsType } from "@/types/sales-channels-type";
 import StatusIndicator from "@/components/status-indicator";
+import { TimeAgo } from "@/lib/timeAgo";
 
 const Row = memo(
   ({
     item,
     removeHandler,
-    toggleTaxPricing,
+    router,
     deletedId,
   }: {
-    item: StoreCurrenciesType;
+    item: SalesChannelsType;
     removeHandler: (id: string) => void;
     deletedId: string | null;
-    toggleTaxPricing: (id: string) => void;
+    router: ReturnType<typeof useRouter>;
   }) => {
     return (
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item.currency_id?.code || ""} maxLength={25} />
+            <TruncateText text={item.name || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item.currency_id?.name || ""} maxLength={25} />
+            <TruncateText text={item.description || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell className="text-right pr-6 text-gray-700">
-          <StatusIndicator
-            enabled={item?.tax_inclusive}
-            trueLabel="True"
-            falseLabel="False"
-            align="end"
-            size={40}
-          />
+          <StatusIndicator enabled={item.is_disabled!} size={40} />
         </TableCell>
-
+        <TableCell>
+          <TimeAgo time={item.createdAt!} />
+        </TableCell>
+        <TableCell>
+          <TimeAgo time={item.updatedAt!} />
+        </TableCell>
         <TableCell className="text-right pr-6">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -86,21 +80,25 @@ const Row = memo(
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={() => item?._id && toggleTaxPricing(item._id)}
-                className="cursor-pointer p-[4px]"
+                className="cursor-pointer"
+                onClick={() =>
+                  router.push(`/settings/sales-channels/${item?.id}/edit`)
+                }
               >
-                {item?.tax_inclusive ? (
-                  <CircleX className="h-4 w-4" />
-                ) : (
-                  <CircleCheck className="h-4 w-4" />
-                )}{" "}
-                {item?.tax_inclusive ? "Disable" : "Enabble"} tax inclusive
-                pricing
+                <Pencil className="h-4 w-4 mr-2" /> Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={deletedId === item?.id}
+                className="cursor-pointer"
+                onClick={() =>
+                  router.push(`/settings/sales-channels/${item?.id}`)
+                }
+              >
+                <Eye className="h-4 w-4 mr-2" /> Preview
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={deletedId === item?._id}
                 className="text-destructive cursor-pointer"
-                onClick={() => item?._id && removeHandler(item._id)}
+                onClick={() => item?._id && removeHandler(item?._id)}
               >
                 <Trash2 className="h-4 w-4 mr-2" /> Delete
               </DropdownMenuItem>
@@ -113,55 +111,41 @@ const Row = memo(
 );
 Row.displayName = "Row";
 
-const StoreCurrencies = () => {
+const SalesChannels = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const [
-    deleteStoreCurrency,
+    deleteSalesChannels,
     { isLoading: delteLoading, error: deleteError, isSuccess: deleteSuccess },
-  ] = useDeleteStoreCurrencyMutation();
-  const [
-    updateTaxPriceStoreCurrency,
-    { isLoading: UpdateLoading, error: UpdateError, isSuccess: UpdateSuccess },
-  ] = useUpdateTaxPriceStoreCurrencyMutation();
-  const { data, isLoading, error } = useGetAllStoreCurrenciesQuery({
+  ] = useDeleteSalesChannelsMutation();
+  const { data, isLoading, error } = useGetAllSalesChannelsDataQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
   });
 
   useHandleNotifications({
-    error: error || deleteError || UpdateError,
-    isSuccess: deleteSuccess || UpdateSuccess,
-    successMessage: `Store currency ${
-      UpdateSuccess ? "update" : "delete"
-    } successfully!`,
+    error: error || deleteError,
+    isSuccess: deleteSuccess,
+    successMessage: `Sales Channels delete successfully!`,
   });
   const width = useWindowWidth();
   const result = useMemo(() => data?.result || [], [data?.result]);
 
   const { filteredItems, searchTerm, setSearchTerm } = useTableFilters(result, [
-    "id",
+    "name",
   ]);
 
   const DeleteHandler = useCallback(async () => {
-    console.log(deletedId);
-    if (deletedId) await deleteStoreCurrency({ id: deletedId });
-  }, [deleteStoreCurrency, deletedId]);
+    if (deletedId) await deleteSalesChannels({ id: deletedId });
+  }, [deleteSalesChannels, deletedId]);
 
   const removeHandler = useCallback((id: string) => {
     setIsOpen(true);
     setDeletedId(id);
   }, []);
-
-  const toggleTaxPricing = useCallback(
-    async (id: string) => {
-      if (id) await updateTaxPriceStoreCurrency({ id: id });
-    },
-    [updateTaxPriceStoreCurrency]
-  );
 
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
@@ -185,10 +169,10 @@ const StoreCurrencies = () => {
         item={item}
         removeHandler={removeHandler}
         deletedId={deletedId}
-        toggleTaxPricing={toggleTaxPricing}
+        router={router}
       />
     ));
-  }, [filteredItems, deletedId, removeHandler, toggleTaxPricing]);
+  }, [filteredItems, deletedId, removeHandler, router]);
 
   useEffect(() => {
     if (deleteSuccess) {
@@ -207,10 +191,10 @@ const StoreCurrencies = () => {
         <div className="flex px-4 items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold text-foreground mb-2">
-              Currencies
+              Sales Channels
             </h1>
             <p className="text-muted-foreground">
-              Manage and organize product currencies.
+              Manage the online and offline channels you sell products on.
             </p>
           </div>
           <motion.div
@@ -280,31 +264,10 @@ const StoreCurrencies = () => {
                 </SelectContent>
               </Select>
             </motion.div>
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Table actions"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => router.push("/settings/store/currencies")}
-                    className="cursor-pointer p-[4px]"
-                  >
-                    <Plus className="h-4 w-4" /> Add
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </motion.div>
+            <NavigateBtn
+              path={"/settings/sales-channels/create"}
+              title="Create"
+            />
           </motion.div>
         </div>
 
@@ -313,16 +276,23 @@ const StoreCurrencies = () => {
           className="min-h-[400px] px-2"
         >
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
-            {(isLoading || delteLoading || UpdateLoading) && (
+            {(isLoading || delteLoading) && (
               <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               </div>
             )}
 
             <Shadcn_table
-              table_header={["Code", "Name", "Tax inclusive pricing", "Action"]}
+              table_header={[
+                "Name",
+                "Description",
+                "Status",
+                "Created",
+                "Updated",
+                "Action",
+              ]}
               tabel_body={() => tableBody}
-              isLoading={isLoading || delteLoading || UpdateLoading}
+              isLoading={isLoading || delteLoading}
             />
           </div>
 
@@ -357,4 +327,4 @@ const StoreCurrencies = () => {
   );
 };
 
-export default memo(StoreCurrencies);
+export default memo(SalesChannels);
