@@ -55,6 +55,7 @@ import { countriesStatesCitiesApi } from "./state/counrtries-states-cities-api";
 import { regionsApi } from "./state/regions-api";
 import { salesChannelApi } from "./state/sales-channels-api";
 import { productTypesApi } from "./state/product-types-api";
+import { productTagApi } from "./state/product-tag-api";
 
 const createNoopStorage = () => ({
   getItem: () => Promise.resolve(null),
@@ -99,6 +100,7 @@ const persistConfig = {
     regionsApi.reducerPath,
     salesChannelApi.reducerPath,
     productTypesApi.reducerPath,
+    productTagApi.reducerPath,
 
     //superme
     cloudStorageApi.reducerPath,
@@ -139,6 +141,7 @@ const rootReducer = combineReducers({
   [regionsApi.reducerPath]: regionsApi.reducer,
   [salesChannelApi.reducerPath]: salesChannelApi.reducer,
   [productTypesApi.reducerPath]: productTypesApi.reducer,
+  [productTagApi.reducerPath]: productTagApi.reducer,
 
   //superme
   [cloudStorageApi.reducerPath]: cloudStorageApi.reducer,
@@ -186,6 +189,7 @@ const makeStore = () => {
         regionsApi.middleware,
         salesChannelApi.middleware,
         productTypesApi.middleware,
+        productTagApi.middleware,
 
         //superme
         cloudStorageApi.middleware,

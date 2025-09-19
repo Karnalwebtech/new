@@ -107,3 +107,23 @@ export interface GetResponseProductTypesDetails {
   success: true;
   result: ProductTypes;
 }
+
+export interface ProductTagType {
+  name: string;
+  _id?: string;
+  id?: string;
+  description: string;
+  is_disabled?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface GetResponseProductTag {
+  success: true;
+  result: ProductTagType[];
+  dataCounter: number;
+}
+export interface GetResponseProductTagDetails {
+  success: true;
+  result: ProductTagType;
+}
