@@ -2,9 +2,10 @@ import React from "react";
 
 interface TimerProps {
   time: string | number | Date; // Specify correct types
+  className?:string;
 }
 
-export const TimeAgo: React.FC<TimerProps> = ({ time }) => {
+export const TimeAgo: React.FC<TimerProps> = ({ time,className="text-gray-700" }) => {
   const getTimeDifference = (timestamp: string | number | Date): string => {
     const now = new Date();
     const date = new Date(timestamp);
@@ -31,5 +32,5 @@ export const TimeAgo: React.FC<TimerProps> = ({ time }) => {
     }
   };
 
-  return <span>{getTimeDifference(time)}</span>;
+  return <span className={className}>{getTimeDifference(time)}</span>;
 };

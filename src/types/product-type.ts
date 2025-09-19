@@ -87,3 +87,23 @@ export interface GetSingleResponseProductCollection {
   result: ProductCollectionsFormData;
   success: boolean;
 }
+
+export interface ProductTypes {
+  name: string;
+  _id?: string;
+  id?: string;
+  description: string;
+  is_disabled?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface GetResponseProductTypes {
+  success: true;
+  result: ProductTypes[];
+  dataCounter: number;
+}
+export interface GetResponseProductTypesDetails {
+  success: true;
+  result: ProductTypes;
+}
