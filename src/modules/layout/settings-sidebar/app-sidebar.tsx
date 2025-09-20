@@ -13,6 +13,7 @@ import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { projectList } from "./project-list";
 import { NavProjects } from "./nav-projects";
+import { developerList } from "./developer-list";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
@@ -31,6 +32,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {/* <NavMain items={data.navMain} /> */}
         <NavProjects projects={projectList} />
+        <NavProjects projects={developerList} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
