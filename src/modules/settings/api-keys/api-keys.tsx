@@ -151,9 +151,7 @@ Row.displayName = "Row";
 interface API_KeysProps {
   type: string;
 }
-const API_Keys = ({
-  type = "publishable",
-}: API_KeysProps) => {
+const API_Keys = ({ type = "publishable" }: API_KeysProps) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
@@ -255,12 +253,6 @@ const API_Keys = ({
           className="min-h-[400px] px-2"
         >
           <div className="overflow-hidden relative">
-            {(isLoading || delteLoading || updateLoading) && (
-              <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              </div>
-            )}
-
             <Shadcn_table
               table_header={[
                 "Name",
@@ -294,7 +286,7 @@ const API_Keys = ({
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             title="Are you sure?"
-            description="This action cannot be undone. This will permanently delete."
+            description="You are about to delete the product tag. This action cannot be undone."
             action={DeleteHandler}
             type="danger"
             setDeletedId={setDeletedId}

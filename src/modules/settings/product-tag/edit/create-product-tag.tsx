@@ -103,10 +103,8 @@ const CreateProductTag = ({ ItemId }: CreateProductTagProps) => {
               <Details
                 control={control}
                 errors={errors}
-                title={`${ItemId ? "Update" : "Create"} Product Type`}
-                description={`${
-                  ItemId ? "Update" : "Create"
-                } a new product type to categorize your products.`}
+                title={`${ItemId ? "Update" : "Create"} Product tags`}
+                description={``}
               />
             </div>
           )}

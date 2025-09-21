@@ -1,6 +1,6 @@
 import { siteName } from "@/config";
 import { buildMetadata } from "@/lib/metadata";
-import RegionalSettings from "@/modules/settings/regions/regional-settings";
+import ProductTagDetails from "@/modules/settings/product-tag/product-tag-details";
 import React from "react";
 export const metadata = buildMetadata({
   title: "Update region",
@@ -12,7 +12,7 @@ const Page = async ({ params }: { params: Promise<{ edit: string }> }) => {
   const { edit } = await params; // 👈 await here
   return (
     <>
-      <RegionalSettings ItemId={edit} />
+      <ProductTagDetails ItemId={edit} />
     </>
   );
 };
