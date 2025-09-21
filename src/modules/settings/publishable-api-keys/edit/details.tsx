@@ -3,13 +3,11 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
 import InputField from "@/components/fields/input-field";
-import TextTextareaField from "@/components/fields/textarea-field";
-import SwitchField from "@/components/fields/switch-field";
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
   errors: FieldErrors<T>;
   title: string;
-  description: string;
+  description?: string;
 }
 const Details = <T extends FieldValues>({
   control,
@@ -45,44 +43,6 @@ const Details = <T extends FieldValues>({
                   inputStyle={
                     "placeholder-gray-200 bg-transparent border-zinc-300"
                   }
-                />
-              </div>
-            </div>
-            <div className="space-y-2 mb-4">
-              <Label
-                htmlFor="description"
-                className="text-sm font-medium text-gray-700"
-              >
-                Description
-              </Label>
-              <TextTextareaField
-                control={control}
-                errors={errors}
-                name={"description" as Path<T>}
-                placeholder="description"
-                inputStyle={
-                  "placeholder-gray-200 bg-transparent border-zinc-300"
-                }
-              />
-            </div>
-            <div className="flex items-center justify-between gap-4 mt-4">
-              <div className="flex flex-col">
-                <Label
-                  htmlFor="enabled"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Enabled
-                </Label>
-                <p className="text-sm font-medium text-gray-700">
-                  Specify whether the sales channel is enabled.
-                </p>
-              </div>
-
-              <div className="flex justify-end">
-                <SwitchField
-                  control={control}
-                  errors={errors}
-                  name={"enabled" as Path<T>}
                 />
               </div>
             </div>

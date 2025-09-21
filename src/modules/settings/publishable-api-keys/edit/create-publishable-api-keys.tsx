@@ -12,43 +12,40 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import { salesChannelsSchema } from "@/zod-shema/sales-channels-schema";
+import { apiKeySchema } from "@/zod-shema/publishable-aPI-key";
 import {
-  useAddSalesChannelsMutation,
-  useGetSalesChannelsDetailsQuery,
-  useUpdateSalesChannelsMutation,
-} from "@/state/sales-channels-api";
+  useAddApiKeyMutation,
+  useGetApiKeyDetailsQuery,
+  useUpdateApiKeyMutation,
+} from "@/state/api-key-api";
 
-type FormData = z.infer<typeof salesChannelsSchema>;
-interface CreateSalesChannelsProps {
+type FormData = z.infer<typeof apiKeySchema>;
+interface Create_publishable_api_keysProps {
   ItemId?: string;
 }
-const CreateSalesChannels = ({ ItemId }: CreateSalesChannelsProps) => {
+const Create_publishable_api_keys = ({
+  ItemId,
+}: Create_publishable_api_keysProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const [step, setStep] = React.useState<number>(0);
-  const [addSalesChannels, { isLoading, error, isSuccess }] =
-    useAddSalesChannelsMutation();
+  const [addApiKey, { isLoading, error, isSuccess }] = useAddApiKeyMutation();
   const [
-    updateSalesChannels,
+    updateApiKey,
     { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
-  ] = useUpdateSalesChannelsMutation();
+  ] = useUpdateApiKeyMutation();
 
   const {
     data,
     isLoading: dataLoader,
     error: dataLoadError,
-  } = useGetSalesChannelsDetailsQuery(
-    { id: ItemId as string },
-    { skip: !ItemId }
-  );
+  } = useGetApiKeyDetailsQuery({ id: ItemId as string }, { skip: !ItemId });
   useHandleNotifications({
     error: error || updateError || dataLoadError,
     isSuccess: isSuccess || updateSuccess,
     successMessage: updateSuccess
-      ? "Sales channels updated successfully!"
-      : "Sales channels created successfully!",
-    redirectPath: "/settings/sales-channels",
+      ? "Api Key updated successfully!"
+      : "Api Key created successfully!",
   });
   const {
     control,
@@ -58,7 +55,7 @@ const CreateSalesChannels = ({ ItemId }: CreateSalesChannelsProps) => {
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {},
-    resolver: zodResolver(salesChannelsSchema),
+    resolver: zodResolver(apiKeySchema),
   });
   const result = data?.result;
   const values = watch();
@@ -73,29 +70,28 @@ const CreateSalesChannels = ({ ItemId }: CreateSalesChannelsProps) => {
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (ItemId) {
-        await updateSalesChannels({ ...data, id: ItemId });
+        const res = await updateApiKey({ ...data, id: ItemId }).unwrap();
+        if (res && res?.result?.id) {
+          router.push(`/settings/publishable-api-keys/${res?.result?.id}`);
+        }
         return;
       }
-      await addSalesChannels(data);
+      const res = await addApiKey(data).unwrap();
+      if (res?.result?.id) {
+        router.push(`/settings/publishable-api-keys/${res?.result?.id}`);
+      }
     },
-    [addSalesChannels, updateSalesChannels, ItemId]
+    [addApiKey, updateApiKey, ItemId, router]
   );
 
   useEffect(() => {
     if (result) {
       setValue("name", result?.name);
-      setValue("description", result?.description);
-      setValue("enabled", result.is_disabled!);
     }
   }, [result, setValue, dispatch]);
 
   return (
-    <DialogPopUp
-      title="Add Currencies"
-      description="Add Currencies for your store"
-      isOpen={true}
-      handleClose={() => {}}
-    >
+    <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
@@ -112,8 +108,10 @@ const CreateSalesChannels = ({ ItemId }: CreateSalesChannelsProps) => {
               <Details
                 control={control}
                 errors={errors}
-                title={`${ItemId ? "Update" : "Create"} Sales Channel`}
-                description="Create a new sales channel to sell your products on."
+                title={`${ItemId ? "Update" : "Create"} Publishable API Key`}
+                description={`${
+                  ItemId ? "Update" : "Create a new"
+                } publishable API key to limit the scope of requests to specific sales channels.`}
               />
             </div>
           )}
@@ -133,4 +131,4 @@ const CreateSalesChannels = ({ ItemId }: CreateSalesChannelsProps) => {
   );
 };
 
-export default CreateSalesChannels;
+export default Create_publishable_api_keys;

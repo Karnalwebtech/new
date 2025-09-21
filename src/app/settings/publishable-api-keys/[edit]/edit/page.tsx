@@ -1,8 +1,7 @@
 import { siteName } from "@/config";
 import { buildMetadata } from "@/lib/metadata";
 import { Header } from "@/modules/layout/header/header";
-import CreateRegion from "@/modules/settings/regions/edit/create-region";
-import CreateSalesChannels from "@/modules/settings/sales-channels/edit/create-sales-channels";
+import Create_publishable_api_keys from "@/modules/settings/publishable-api-keys/edit/create-publishable-api-keys";
 import React from "react";
 export const metadata = buildMetadata({
   title: "Update region",
@@ -17,11 +16,14 @@ const Page = async ({ params }: { params: Promise<{ edit: string }> }) => {
       <Header
         breadcrumbData={[
           { label: "Settings", path: "/settings" },
-          { label: "Sales Channels", path: "/settings/sales-channels" },
-          { label: "Edit", path: "/settings/sales-channels/edit" },
+          {
+            label: "Publishable API Key",
+            path: "/settings/publishable-api-keys",
+          },
+          { label: "Edit", path: "/settings/publishable-api-keys/create" },
         ]}
       />
-      <CreateSalesChannels ItemId={edit} />
+      <Create_publishable_api_keys ItemId={edit} />
     </>
   );
 };

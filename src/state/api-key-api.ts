@@ -1,9 +1,9 @@
 import { apiUrl, apiKey } from "@/config";
 import { getToken } from "@/lib/set-localstorage";
+import { ApiKeyType, GetResponseApiKey, GetResponseApiKeyDetails } from "@/types/api-key-type";
 import {
   GetResponseProductTag,
   GetResponseProductTagDetails,
-  ProductTagType,
 } from "@/types/product-type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
@@ -20,8 +20,8 @@ export const apiKeyApi = createApi({
   }),
   tagTypes: ["apiKeyApi"],
   endpoints: (build) => ({
-    getAllProductTagData: build.query<
-      GetResponseProductTag,
+    getAllApiKeys: build.query<
+      GetResponseApiKey,
       {
         type?: string;
         rowsPerPage?: number;
@@ -45,51 +45,53 @@ export const apiKeyApi = createApi({
         }
 
         return {
-          url: "/product-tags",
+          url: "/api-keys",
           params, // Use the dynamically constructed params
           method: "GET",
         };
       },
       providesTags: [{ type: "apiKeyApi", id: "LIST" }],
     }),
-    addApiKey: build.mutation<void, ProductTagType>({
+    addApiKey: build.mutation<GetResponseApiKeyDetails, ApiKeyType>({
       query: (data) => {
         const formData = new FormData();
         formData.append("data", JSON.stringify(data));
         return {
-          url: "/product-tag-edit",
+          url: "/create-api-key",
           method: "post",
           body: formData,
         };
       },
       invalidatesTags: [{ type: "apiKeyApi", id: "LIST" }],
     }),
-    updateProductTag: build.mutation<void, ProductTagType>({
+    updateApiKey: build.mutation<GetResponseApiKeyDetails, ApiKeyType>({
       query: (data) => {
         const formData = new FormData();
         formData.append("data", JSON.stringify(data));
+        const url = data?.revoked? `/api-key/${data?.id}?revoked=true`: `/api-key/${data?.id}`
         return {
-          url: `/product-tag-edit/${data?.id}`,
+          url:url,
           method: "put",
           body: formData,
         };
       },
       invalidatesTags: [{ type: "apiKeyApi", id: "LIST" }],
     }),
-    deleteProductTag: build.mutation<void, { id: string }>({
+    deleteApiKey: build.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `/product-tag-delete/${id}`,
+        url: `/api-key/${id}`,
         method: "DELETE", // Use DELETE instead of PUT
       }),
       invalidatesTags: [{ type: "apiKeyApi", id: "LIST" }],
     }),
-    getProductTagDetails: build.query<
-      GetResponseProductTagDetails,
+    
+    getApiKeyDetails: build.query<
+      GetResponseApiKeyDetails,
       { id: string }
     >({
       query: ({ id }) => {
         return {
-          url: `/product-tag/${id}`,
+          url: `/api-key/${id}`,
           method: "GET",
         };
       },
@@ -99,8 +101,8 @@ export const apiKeyApi = createApi({
 });
 export const {
   useAddApiKeyMutation,
-  useGetAllProductTagDataQuery,
-  useDeleteProductTagMutation,
-  useGetProductTagDetailsQuery,
-  useUpdateProductTagMutation,
+  useGetAllApiKeysQuery,
+  useDeleteApiKeyMutation,
+  useGetApiKeyDetailsQuery,
+  useUpdateApiKeyMutation,
 } = apiKeyApi;

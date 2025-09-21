@@ -40,10 +40,10 @@ const Shadcn_table = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="rounded-lg border bg-card overflow-hidden shadow-sm">
+      <div className="overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-muted/50 transition-colors duration-200">
+            <TableRow className="hover:bg-muted/50 bg-gray-100 transition-colors duration-200">
               {table_header.map((header, index) =>
                 header === "checkbox" && isCheckbox ? (
                   <TableHead key="checkbox">

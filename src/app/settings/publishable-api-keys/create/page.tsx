@@ -1,5 +1,5 @@
 import { Header } from "@/modules/layout/header/header";
-import CreateSalesChannels from "@/modules/settings/sales-channels/edit/create-sales-channels";
+import Create_publishable_api_keys from "@/modules/settings/publishable-api-keys/edit/create-publishable-api-keys";
 import React from "react";
 
 const Page = () => {
@@ -12,7 +12,7 @@ const Page = () => {
           { label: "Create", path: "/settings/sales-channels/create" },
         ]}
       />
-      <CreateSalesChannels />
+      <Create_publishable_api_keys />
     </>
   );
 };

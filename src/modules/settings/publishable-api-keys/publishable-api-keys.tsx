@@ -7,71 +7,80 @@ import Shadcn_table from "@/components/table/table";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import { TruncateText } from "@/components/truncate-text";
 import ShadcnPagination from "@/components/pagination";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { containerVariants, controls } from "@/lib/variants";
+import { containerVariants } from "@/lib/variants";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  CircleX,
+  Copy,
+  Eye,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
-import NavigateBtn from "@/components/buttons/navigate-btn";
-import {
-  useDeleteSalesChannelsMutation,
-  useGetAllSalesChannelsDataQuery,
-} from "@/state/sales-channels-api";
-import { SalesChannelsType } from "@/types/sales-channels-type";
 import StatusIndicator from "@/components/status-indicator";
 import { TimeAgo } from "@/lib/timeAgo";
 import PageHeander2 from "@/modules/layout/header/page-heander2";
+import {
+  useDeleteApiKeyMutation,
+  useGetAllApiKeysQuery,
+  useUpdateApiKeyMutation,
+} from "@/state/api-key-api";
+import { ApiKeyType } from "@/types/api-key-type";
+import { copyToClipboard } from "@/services/helpers";
+import { toast } from "sonner";
+import { TableEmptyState } from "@/components/table/table-empty-state";
 
 const Row = memo(
   ({
     item,
     removeHandler,
     router,
-    deletedId,
+    revokeHandler,
   }: {
-    item: SalesChannelsType;
+    item: ApiKeyType;
     removeHandler: (id: string) => void;
-    deletedId: string | null;
+    revokeHandler: (item: ApiKeyType) => void;
     router: ReturnType<typeof useRouter>;
   }) => {
     return (
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
-        <TableCell>
+        <TableCell className="p-0">
           <span className="text-muted-foreground">
             <TruncateText text={item.name || ""} maxLength={25} />
           </span>
         </TableCell>
-        <TableCell>
+        <TableCell className="p-0">
           <span className="text-muted-foreground">
-            <TruncateText text={item.description || ""} maxLength={25} />
+            <TruncateText text={item.redactedToken || ""} maxLength={25} />
+          </span>
+        </TableCell>
+        <TableCell className="p-0">
+          <span className="text-muted-foreground">
+            <TruncateText text={item.type || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell className="text-right pr-6 text-gray-700">
-          <StatusIndicator enabled={item.is_disabled!} size={40} />
+          <StatusIndicator
+            trueLabel="Active"
+            falseLabel="Revoked"
+            enabled={!item.revoked_at}
+            size={40}
+          />
         </TableCell>
-        <TableCell>
+
+        <TableCell className="p-0">
           <TimeAgo time={item.createdAt!} />
         </TableCell>
-        <TableCell>
-          <TimeAgo time={item.updatedAt!} />
-        </TableCell>
+
         <TableCell className="text-right pr-6">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -83,23 +92,49 @@ const Row = memo(
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/settings/sales-channels/${item?.id}/edit`)
+                  router.push(`/settings/publishable-api-keys/${item?.id}/edit`)
                 }
               >
                 <Pencil className="h-4 w-4 mr-2" /> Edit
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
+                onClick={async () => {
+                  if (!item.token) {
+                    toast.error("No API key found to copy");
+                    return;
+                  }
+
+                  try {
+                    await copyToClipboard(item.token); // wait for the clipboard write
+                    toast.success("API key copied to clipboard!");
+                  } catch (err) {
+                    toast.error("Failed to copy API key");
+                    console.error("Clipboard copy failed:", err);
+                  }
+                }}
+              >
+                <Copy className="h-4 w-4 mr-2" /> Copy Api Key
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/settings/sales-channels/${item?.id}`)
+                  router.push(`/settings/publishable-api-keys/${item?.id}`)
                 }
               >
                 <Eye className="h-4 w-4 mr-2" /> Preview
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={deletedId === item?._id}
+                disabled={!!item.revoked_at}
+                className="cursor-pointer"
+                onClick={() => item?._id && revokeHandler(item)}
+              >
+                <CircleX className="h-4 w-4 mr-2" /> Revoke Api Key
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={!item.revoked_at}
                 className="text-destructive cursor-pointer"
-                onClick={() => item?._id && removeHandler(item?._id)}
+                onClick={() => item?.id && removeHandler(item?.id)}
               >
                 <Trash2 className="h-4 w-4 mr-2" /> Delete
               </DropdownMenuItem>
@@ -119,18 +154,25 @@ const Publishable_API_Keys = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const [
-    deleteSalesChannels,
+    deleteApiKey,
     { isLoading: delteLoading, error: deleteError, isSuccess: deleteSuccess },
-  ] = useDeleteSalesChannelsMutation();
-  const { data, isLoading, error } = useGetAllSalesChannelsDataQuery({
+  ] = useDeleteApiKeyMutation();
+  const [
+    updateApiKey,
+    { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
+  ] = useUpdateApiKeyMutation();
+
+  const { data, isLoading, error } = useGetAllApiKeysQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
   });
 
   useHandleNotifications({
-    error: error || deleteError,
-    isSuccess: deleteSuccess,
-    successMessage: `Sales Channels delete successfully!`,
+    error: error || deleteError || updateError,
+    isSuccess: deleteSuccess || updateSuccess,
+    successMessage: deleteSuccess
+      ? `Api key delete successfully!`
+      : `Api key revoked successfully!`,
   });
   const width = useWindowWidth();
   const result = useMemo(() => data?.result || [], [data?.result]);
@@ -140,28 +182,23 @@ const Publishable_API_Keys = () => {
   ]);
 
   const DeleteHandler = useCallback(async () => {
-    if (deletedId) await deleteSalesChannels({ id: deletedId });
-  }, [deleteSalesChannels, deletedId]);
+    if (deletedId) await deleteApiKey({ id: deletedId });
+  }, [deleteApiKey, deletedId]);
 
   const removeHandler = useCallback((id: string) => {
     setIsOpen(true);
     setDeletedId(id);
   }, []);
+  const revokeHandler = useCallback(
+    async (data: ApiKeyType) => {
+      await updateApiKey({ ...data, revoked: true });
+    },
+    [updateApiKey]
+  );
 
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
-      return (
-        <TableRow>
-          <TableCell colSpan={4} className="text-center py-8">
-            <div className="text-muted-foreground text-lg mb-2">
-              No currencies found
-            </div>
-            <div className="text-sm text-muted-foreground/70">
-              Try adjusting your search criteria
-            </div>
-          </TableCell>
-        </TableRow>
-      );
+      return <TableEmptyState colSpan={6} />;
     }
 
     return filteredItems.map((item, i) => (
@@ -169,11 +206,11 @@ const Publishable_API_Keys = () => {
         key={i}
         item={item}
         removeHandler={removeHandler}
-        deletedId={deletedId}
         router={router}
+        revokeHandler={revokeHandler}
       />
     ));
-  }, [filteredItems, deletedId, removeHandler, router]);
+  }, [filteredItems, removeHandler, router, revokeHandler]);
 
   useEffect(() => {
     if (deleteSuccess) {
@@ -183,26 +220,30 @@ const Publishable_API_Keys = () => {
   }, [deleteSuccess]);
   return (
     <motion.div
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-background border rounded-xl bg-white my-2"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto py-2">
         <PageHeander2
+          headerTitle="Publishable API Keys"
+          headerDescription="Manage API keys used in the storefront to limit the scope of requests to specific sales channels."
           rowsPerPage={rowsPerPage}
           setRowsPerPage={setRowsPerPage}
           setCurrentPage={setCurrentPage}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          subHeader={true}
+          navLink={"/settings/publishable-api-keys/create"}
         />
 
         <div
           style={{ width: width < 749 ? `${width}px` : "100%" }}
           className="min-h-[400px] px-2"
         >
-          <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
-            {(isLoading || delteLoading) && (
+          <div className="overflow-hidden relative">
+            {(isLoading || delteLoading || updateLoading) && (
               <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               </div>
@@ -211,14 +252,14 @@ const Publishable_API_Keys = () => {
             <Shadcn_table
               table_header={[
                 "Name",
-                "Description",
+                "Token",
+                "Type",
                 "Status",
                 "Created",
-                "Updated",
                 "Action",
               ]}
               tabel_body={() => tableBody}
-              isLoading={isLoading || delteLoading}
+              isLoading={isLoading || delteLoading || updateLoading}
             />
           </div>
 

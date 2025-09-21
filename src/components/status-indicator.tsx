@@ -43,7 +43,7 @@ export default function StatusIndicator({
   return (
     <div className={`flex items-center ${justify} ${className}`}>
       <Dot aria-hidden size={size} className={color} />
-      {showLabel && <span className="text-sm text-gray-700">{label}</span>}
+      {showLabel && <span className="text-sm text-gray-600">{label}</span>}
     </div>
   );
 }

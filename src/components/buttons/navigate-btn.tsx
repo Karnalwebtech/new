@@ -14,7 +14,7 @@ interface NavigateBtnProps {
 const NavigateBtn = ({
   path,
   Icon,
-  title,
+  title="Create",
   disabled = false,
   variant="default",
   style = "rounded-2xl shadow-md hover:scale-105 transition-transform",

@@ -5,7 +5,7 @@ interface TimerProps {
   className?:string;
 }
 
-export const TimeAgo: React.FC<TimerProps> = ({ time,className="text-gray-700" }) => {
+export const TimeAgo: React.FC<TimerProps> = ({ time,className="text-gray-600 text-sm" }) => {
   const getTimeDifference = (timestamp: string | number | Date): string => {
     const now = new Date();
     const date = new Date(timestamp);

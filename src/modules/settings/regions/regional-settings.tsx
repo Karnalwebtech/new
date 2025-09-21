@@ -41,7 +41,7 @@ const RegionalSettings = ({ ItemId }: RegionalSettingsProps) => {
 
   return (
     <div className="min-h-screen">
-        <h1>Pending</h1>
+      <h1>Pending</h1>
       {/* Header with breadcrumb */}
       <Header
         breadcrumbData={[
