@@ -10,14 +10,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { clearSelected } from "@/reducers/healper-slice";
 import { toast } from "sonner";
-import PublishableApiSalesChanelsTable from "./publishable-api-sales-chanels-table";
+import ApiSalesChanelsTable from "./api-sales-chanels-table";
 import { useAddPublishableApiKeyMutation } from "@/state/publishable-api-key-api";
-interface PublishableApiSalesChanelsProps {
+interface ApiSalesChanelsProps {
   pageId?: string;
+  type?: string;
 }
-const PublishableApiSalesChanels = ({
+const ApiSalesChanels = ({
   pageId,
-}: PublishableApiSalesChanelsProps) => {
+  type = "publishable",
+}: ApiSalesChanelsProps) => {
   const [step, setStep] = useState<number>(0);
   const dispatch = useDispatch();
   const { selected } = useSelector((state: RootState) => state.helper);
@@ -27,8 +29,8 @@ const PublishableApiSalesChanels = ({
   useHandleNotifications({
     error,
     isSuccess,
-    successMessage: "Publishable api key added successfully!",
-    redirectPath: `/settings/publishable-api-keys/${pageId}`,
+    successMessage: "api key added successfully!",
+    redirectPath: `/settings/${type}-api-keys/${pageId}`,
   });
   const onSubmit = useCallback(async () => {}, []);
 
@@ -38,7 +40,7 @@ const PublishableApiSalesChanels = ({
     }
   }, [dispatch, isSuccess]);
 
-  const formHandler = useCallback(async() => {
+  const formHandler = useCallback(async () => {
     if (selected.length === 0) {
       toast.warning("Please select one");
       return;
@@ -48,16 +50,8 @@ const PublishableApiSalesChanels = ({
   }, [selected, pageId, addPublishableApiKey]);
 
   return (
-    <DialogPopUp
-      title="Add Currencies"
-      description="Add Currencies for your store"
-      isOpen={true}
-      handleClose={() => {}}
-    >
+    <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
-        {/* {dataFetchLoading ? (
-          <FormSkeleton />
-        ) : ( */}
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
             tabs={[]}
@@ -66,7 +60,7 @@ const PublishableApiSalesChanels = ({
             canAccessStep={[true]}
             onCancel={() => router.back()}
           />
-          <PublishableApiSalesChanelsTable pageId={pageId}/>
+          <ApiSalesChanelsTable type={type} pageId={pageId} />
           <NormalPageFooter
             isLoading={isLoading}
             onCancel={() => router.back()}
@@ -78,4 +72,4 @@ const PublishableApiSalesChanels = ({
   );
 };
 
-export default memo(PublishableApiSalesChanels);
+export default memo(ApiSalesChanels);

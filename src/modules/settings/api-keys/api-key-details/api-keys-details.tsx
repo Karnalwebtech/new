@@ -25,15 +25,16 @@ import { containerVariants } from "@/lib/variants";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { ApiKeyType } from "@/types/api-key-type";
-import PublishableApiKeySalesChannelsList from "./publishable-api-key-sales-channels-list";
 import { Badge } from "@/components/ui/badge";
-import { copyToClipboard } from "@/services/helpers";
+import { capitalizeFirstLetter, copyToClipboard } from "@/services/helpers";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { clearSelected } from "@/reducers/healper-slice";
+import ApiKeySalesChannelsList from "./api-key-sales-channels-list";
 
-interface PublishableApiKeysDetailsProps {
+interface ApiKeysDetailsProps {
   ItemId?: string;
+  type?: string;
 }
 
 const rowMotion = {
@@ -42,9 +43,10 @@ const rowMotion = {
   transition: (idx: number) => ({ delay: 0.1 * idx, duration: 0.3 }),
 };
 
-const PublishableApiKeysDetails = ({
+const ApiKeysDetails = ({
   ItemId,
-}: PublishableApiKeysDetailsProps) => {
+  type = "publishable",
+}: ApiKeysDetailsProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -72,7 +74,7 @@ const PublishableApiKeysDetails = ({
     successMessage: deleteSuccess
       ? `Api key delete successfully!`
       : `Api key revoked successfully!`,
-    redirectPath: deletedId ? "/settings/publishable-api-keys" : "",
+    redirectPath: deletedId ? `/settings/${type}-api-keys` : "",
   });
 
   const result = data?.result;
@@ -119,10 +121,10 @@ const PublishableApiKeysDetails = ({
       <Header
         breadcrumbData={[
           { label: "Settings", path: "/settings" },
-          { label: "Api key", path: "/settings/publishable-api-keys" },
+          { label: "Api key", path: `/settings/${type}-api-keys` },
           {
             label: result?.name || "",
-            path: `/settings/publishable-api-keys/${result?.id}`,
+            path: `/settings/${type}-api-keys/${result?.id}`,
           },
         ]}
       />
@@ -137,7 +139,9 @@ const PublishableApiKeysDetails = ({
         <div className="bg-background border rounded-xl bg-white my-2">
           <div className="p-4">
             <div className="flex items-center justify-between gap-2">
-              <h1 className="text-xl">{result?.name}</h1>
+              <h1 className="text-xl">
+                {capitalizeFirstLetter(result?.name || "")}
+              </h1>
 
               <div className="flex items-center justify-between gap-2">
                 <StatusIndicator
@@ -161,7 +165,7 @@ const PublishableApiKeysDetails = ({
                     <DropdownMenuItem
                       onClick={() =>
                         router.push(
-                          `/settings/publishable-api-keys/${result?.id}/edit`
+                          `/settings/${type}-api-keys/${result?.id}/edit`
                         )
                       }
                       className="cursor-pointer p-1"
@@ -233,11 +237,13 @@ const PublishableApiKeysDetails = ({
             </div>
           </div>
         </div>
-        <PublishableApiKeySalesChannelsList
-          pageId={result?.id}
-          id={result?._id}
-        />
-        {/* <PublishableApiSalesChanelsLists pageId={result.id!} id={result._id!}/> */}
+        {type === "publishable" && (
+          <ApiKeySalesChannelsList
+            type={type}
+            pageId={result?.id}
+            id={result?._id}
+          />
+        )}
         <AnimatePresence>
           {isOpen && (
             <AlertDialogComponenet
@@ -257,4 +263,4 @@ const PublishableApiKeysDetails = ({
   );
 };
 
-export default memo(PublishableApiKeysDetails);
+export default memo(ApiKeysDetails);

@@ -17,13 +17,13 @@ const Page = async ({ params }: { params: Promise<{ edit: string }> }) => {
         breadcrumbData={[
           { label: "Settings", path: "/settings" },
           {
-            label: "Publishable API Key",
-            path: "/settings/publishable-api-keys",
+            label: "Secret API Key",
+            path: "/settings/secret-api-keys",
           },
-          { label: "Edit", path: "/settings/publishable-api-keys/create" },
+          { label: "Edit", path: "/settings/secret-api-keys/create" },
         ]}
       />
-      <Create_api_keys type={"publishable"} ItemId={edit} />
+      <Create_api_keys type={"secret"} ItemId={edit} />
     </>
   );
 };

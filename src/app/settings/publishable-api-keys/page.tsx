@@ -1,5 +1,5 @@
 import { Header } from "@/modules/layout/header/header";
-import Publishable_API_Keys from "@/modules/settings/publishable-api-keys/publishable-api-keys";
+import API_Keys from "@/modules/settings/api-keys/api-keys";
 import React from "react";
 
 const Page = () => {
@@ -11,7 +11,7 @@ const Page = () => {
           { label: "Publishable API Keys", path: "/settings/publishable-api-keys" },
         ]}
       />
-      <Publishable_API_Keys />
+      <API_Keys type="publishable" />
     </>
   );
 };

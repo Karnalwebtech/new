@@ -1,6 +1,6 @@
 import { siteName } from "@/config";
 import { buildMetadata } from "@/lib/metadata";
-import ApiSalesChanels from "@/modules/settings/api-keys/sales-channels/api-sales-chanels";
+import ApiKeysDetails from "@/modules/settings/api-keys/api-key-details/api-keys-details";
 import React from "react";
 
 export const metadata = buildMetadata({
@@ -10,10 +10,10 @@ export const metadata = buildMetadata({
 });
 
 const Page = async ({ params }: { params: Promise<{ edit: string }> }) => {
-  const { edit } = await params;
+  const { edit } = await params; // 👈 await here
   return (
     <>
-      <ApiSalesChanels type="publishable" pageId={edit} />
+      <ApiKeysDetails type="secret" ItemId={edit} />
     </>
   );
 };

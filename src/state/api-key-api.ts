@@ -1,10 +1,6 @@
 import { apiUrl, apiKey } from "@/config";
 import { getToken } from "@/lib/set-localstorage";
 import { ApiKeyType, GetResponseApiKey, GetResponseApiKeyDetails } from "@/types/api-key-type";
-import {
-  GetResponseProductTag,
-  GetResponseProductTagDetails,
-} from "@/types/product-type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const apiKeyApi = createApi({
@@ -38,6 +34,9 @@ export const apiKeyApi = createApi({
           }
           if (filters.page) {
             params.page = filters.page; // Convert number to string
+          }
+           if (filters.type) {
+            params.type = filters.type; // Convert number to string
           }
           if (filters.keywords) {
             params.keywords = filters.keywords; // Convert number to string

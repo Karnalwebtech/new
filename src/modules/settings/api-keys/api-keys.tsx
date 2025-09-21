@@ -35,7 +35,7 @@ import {
   useUpdateApiKeyMutation,
 } from "@/state/api-key-api";
 import { ApiKeyType } from "@/types/api-key-type";
-import { copyToClipboard } from "@/services/helpers";
+import { capitalizeFirstLetter, copyToClipboard } from "@/services/helpers";
 import { toast } from "sonner";
 import { TableEmptyState } from "@/components/table/table-empty-state";
 
@@ -45,11 +45,13 @@ const Row = memo(
     removeHandler,
     router,
     revokeHandler,
+    type,
   }: {
     item: ApiKeyType;
     removeHandler: (id: string) => void;
     revokeHandler: (item: ApiKeyType) => void;
     router: ReturnType<typeof useRouter>;
+    type: string;
   }) => {
     return (
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
@@ -92,7 +94,7 @@ const Row = memo(
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/settings/publishable-api-keys/${item?.id}/edit`)
+                  router.push(`/settings/${type}-api-keys/${item?.id}/edit`)
                 }
               >
                 <Pencil className="h-4 w-4 mr-2" /> Edit
@@ -119,7 +121,7 @@ const Row = memo(
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/settings/publishable-api-keys/${item?.id}`)
+                  router.push(`/settings/${type}-api-keys/${item?.id}`)
                 }
               >
                 <Eye className="h-4 w-4 mr-2" /> Preview
@@ -146,8 +148,12 @@ const Row = memo(
   }
 );
 Row.displayName = "Row";
-
-const Publishable_API_Keys = () => {
+interface API_KeysProps {
+  type: string;
+}
+const API_Keys = ({
+  type = "publishable",
+}: API_KeysProps) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
@@ -165,6 +171,7 @@ const Publishable_API_Keys = () => {
   const { data, isLoading, error } = useGetAllApiKeysQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
+    type,
   });
 
   useHandleNotifications({
@@ -208,9 +215,10 @@ const Publishable_API_Keys = () => {
         removeHandler={removeHandler}
         router={router}
         revokeHandler={revokeHandler}
+        type={type}
       />
     ));
-  }, [filteredItems, removeHandler, router, revokeHandler]);
+  }, [filteredItems, removeHandler, router, type, revokeHandler]);
 
   useEffect(() => {
     if (deleteSuccess) {
@@ -227,15 +235,19 @@ const Publishable_API_Keys = () => {
     >
       <div className="container mx-auto py-2">
         <PageHeander2
-          headerTitle="Publishable API Keys"
-          headerDescription="Manage API keys used in the storefront to limit the scope of requests to specific sales channels."
+          headerTitle={`${capitalizeFirstLetter(type)} API Keys`}
+          headerDescription={
+            type === "secret"
+              ? "Manage API keys used to authenticate admin users in admin applications."
+              : "Manage API keys used in the storefront to limit the scope of requests to specific sales channels."
+          }
           rowsPerPage={rowsPerPage}
           setRowsPerPage={setRowsPerPage}
           setCurrentPage={setCurrentPage}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           subHeader={true}
-          navLink={"/settings/publishable-api-keys/create"}
+          navLink={`/settings/${type}-api-keys/create`}
         />
 
         <div
@@ -282,7 +294,7 @@ const Publishable_API_Keys = () => {
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             title="Are you sure?"
-            description="This action cannot be undone. This will permanently delete the category."
+            description="This action cannot be undone. This will permanently delete."
             action={DeleteHandler}
             type="danger"
             setDeletedId={setDeletedId}
@@ -294,4 +306,4 @@ const Publishable_API_Keys = () => {
   );
 };
 
-export default memo(Publishable_API_Keys);
+export default memo(API_Keys);

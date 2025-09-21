@@ -20,12 +20,14 @@ import {
 } from "@/state/api-key-api";
 
 type FormData = z.infer<typeof apiKeySchema>;
-interface Create_publishable_api_keysProps {
+interface Create_api_keysProps {
   ItemId?: string;
+  type?: string;
 }
-const Create_publishable_api_keys = ({
+const Create_api_keys = ({
   ItemId,
-}: Create_publishable_api_keysProps) => {
+  type = "publishable",
+}: Create_api_keysProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const [step, setStep] = React.useState<number>(0);
@@ -70,18 +72,18 @@ const Create_publishable_api_keys = ({
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (ItemId) {
-        const res = await updateApiKey({ ...data, id: ItemId }).unwrap();
+        const res = await updateApiKey({ ...data, id: ItemId, type }).unwrap();
         if (res && res?.result?.id) {
-          router.push(`/settings/publishable-api-keys/${res?.result?.id}`);
+          router.push(`/settings/${type}-api-keys/${res?.result?.id}`);
         }
         return;
       }
-      const res = await addApiKey(data).unwrap();
+      const res = await addApiKey({ ...data, type }).unwrap();
       if (res?.result?.id) {
-        router.push(`/settings/publishable-api-keys/${res?.result?.id}`);
+        router.push(`/settings/${type}-api-keys/${res?.result?.id}`);
       }
     },
-    [addApiKey, updateApiKey, ItemId, router]
+    [addApiKey, updateApiKey, ItemId, type, router]
   );
 
   useEffect(() => {
@@ -108,10 +110,12 @@ const Create_publishable_api_keys = ({
               <Details
                 control={control}
                 errors={errors}
-                title={`${ItemId ? "Update" : "Create"} Publishable API Key`}
-                description={`${
-                  ItemId ? "Update" : "Create a new"
-                } publishable API key to limit the scope of requests to specific sales channels.`}
+                title={`${ItemId ? "Update" : "Create"} ${type} API Key`}
+                description={`${ItemId ? "Update" : "Create a new"} ${
+                  type === "secret"
+                    ? "secret API key to access the Medusa API as an authenticated admin user."
+                    : "publishable API key to limit the scope of requests to specific sales channels."
+                }`}
               />
             </div>
           )}
@@ -131,4 +135,4 @@ const Create_publishable_api_keys = ({
   );
 };
 
-export default Create_publishable_api_keys;
+export default Create_api_keys;

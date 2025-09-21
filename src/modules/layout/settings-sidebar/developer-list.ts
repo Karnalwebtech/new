@@ -6,6 +6,12 @@ const Settings = [
     icon: KeyRound,
     type: "dashboard",
   },
+  {
+    name: "Secret Api Keys",
+    url: "/settings/secret-api-keys",
+    icon: KeyRound,
+    type: "dashboard",
+  },
 ];
 
 export const developerList = [...Settings];

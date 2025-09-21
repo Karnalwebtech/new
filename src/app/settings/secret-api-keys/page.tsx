@@ -1,5 +1,5 @@
 import { Header } from "@/modules/layout/header/header";
-import Create_api_keys from "@/modules/settings/api-keys/edit/create-api-keys";
+import API_Keys from "@/modules/settings/api-keys/api-keys";
 import React from "react";
 
 const Page = () => {
@@ -8,11 +8,10 @@ const Page = () => {
       <Header
         breadcrumbData={[
           { label: "Settings", path: "/settings" },
-          { label: "Sales Channels", path: "/settings/sales-channels" },
-          { label: "Create", path: "/settings/sales-channels/create" },
+          { label: "Secret Api Keys", path: "/settings/secret-api-keys" },
         ]}
       />
-      <Create_api_keys />
+      <API_Keys type="secret" />
     </>
   );
 };

@@ -8,11 +8,11 @@ const Page = () => {
       <Header
         breadcrumbData={[
           { label: "Settings", path: "/settings" },
-          { label: "Sales Channels", path: "/settings/sales-channels" },
-          { label: "Create", path: "/settings/sales-channels/create" },
+          { label: "Secret Api Keys", path: "/settings/secret-api-keys" },
+          { label: "Create", path: "/settings/secret-api-keys/create" },
         ]}
       />
-      <Create_api_keys />
+      <Create_api_keys type="secret"/>
     </>
   );
 };
