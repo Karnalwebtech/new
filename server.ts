@@ -8,7 +8,7 @@ const port = parseInt(process.env.PORT || '3000', 10);
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
 const ALLOWED_HOSTS = [
-  "http://localhost:9000", "https://api.karnalwebtech.com"
+  "http://localhost:9000", "https://api.karnalwebtech.com","https://new-back-3iqc.onrender.com","https://new-back-3iqc.onrender.com/"
 ];
 
 // Initialize Next.js
