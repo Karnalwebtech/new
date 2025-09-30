@@ -187,7 +187,7 @@ const ProductType = () => {
         <div className="flex px-4 items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold text-foreground mb-2">
-              Product Tags
+              Product Types
             </h1>
           </div>
           <motion.div
