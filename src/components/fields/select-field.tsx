@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { capitalizeFirstLetter } from "@/services/helpers";
+import { ParaSkeleton } from "../skeletons/para-skeleton";
 
 type DropdownOption = { key: string; value: string };
 
@@ -27,6 +28,7 @@ interface SelectFieldProps<T extends FieldValues> {
   drop_down_selector: DropdownOption[];
   class_style?: string;
   defaultValue?: PathValue<T, Path<T>>;
+  is_loading?: boolean;
 }
 
 const SelectFields = <T extends FieldValues>({
@@ -38,6 +40,7 @@ const SelectFields = <T extends FieldValues>({
   drop_down_selector,
   class_style,
   defaultValue,
+  is_loading = false,
 }: SelectFieldProps<T>) => {
   let errorMessage: string | undefined;
 
@@ -56,9 +59,7 @@ const SelectFields = <T extends FieldValues>({
 
   return (
     <div className="w-full mt-[3px]">
-      {label && (
-        <label className="block text-sm font-medium">{label}</label>
-      )}
+      {label && <label className="block text-sm font-medium">{label}</label>}
       <Controller
         control={control}
         name={name}
@@ -86,11 +87,19 @@ const SelectFields = <T extends FieldValues>({
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
               <SelectContent>
-                {drop_down_selector.map((option) => (
-                  <SelectItem key={option.key} value={option.key}>
-                    {capitalizeFirstLetter(option.value)}
-                  </SelectItem>
-                ))}
+                {is_loading
+                  ? Array.from({ length: 5 }).map((_, i) => (
+                      <ParaSkeleton key={i} style={"h-4 w-full my-[4px]"} />
+                    ))
+                  : drop_down_selector.map((option) => (
+                      <SelectItem
+                        key={option.key}
+                        value={option.key}
+                        className="cursor-pointer hover:bg-gray-100"
+                      >
+                        {capitalizeFirstLetter(option.value)}
+                      </SelectItem>
+                    ))}
               </SelectContent>
             </Select>
           );

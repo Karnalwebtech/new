@@ -1,37 +1,96 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
-import SelectFields from "@/components/fields/select-field";
 import InputField from "@/components/fields/input-field";
-import { useGetAllStoreCurrenciesQuery } from "@/state/store-currency-api";
-import SwitchField from "@/components/fields/switch-field";
+import HoverTooltip from "@/components/tooltip/hover-tooltip";
+import { Info } from "lucide-react";
+import SelectFields from "@/components/fields/select-field";
+import { useGetAllCountoriesQuery } from "@/state/counrtries-states-cities-api";
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
   errors: FieldErrors<T>;
+  title: string;
+  description: string;
 }
 const Details = <T extends FieldValues>({
   control,
   errors,
+  title,
+  description,
 }: DetailsProps<T>) => {
-  const { data, isLoading, error } = useGetAllStoreCurrenciesQuery({
-    rowsPerPage: 300,
+  const { data, isLoading } = useGetAllCountoriesQuery({
+    rowsPerPage: 500,
     page: 1,
   });
+  const result = useMemo(
+    () =>
+      data?.result?.map(({ _id, name }) => ({ key: _id!, value: name! })) || [],
+    [data?.result]
+  );
+
   return (
     <>
       {/* Form Content */}
       <div className="p-8 pb-0 max-w-[800px] m-auto">
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-90">Create Region</h2>
-          <p>Manage tax rates and providers for a set of countries.</p>
+          <h2 className="text-lg font-semibold text-gray-90">{title}</h2>
+          <p className="text-sm text-gray-600">{description}</p>
         </div>
 
         <div className="space-y-8">
           {/* Title, Subtitle, Handle Row */}
           <div className="">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2 mb-4">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="country"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Country
+                </Label>
+                <SelectFields
+                  is_loading={isLoading}
+                  control={control}
+                  errors={errors}
+                  name={"country" as Path<T>}
+                  placeholder="Select country" // Default placeholder
+                  drop_down_selector={result}
+                  class_style={"text-gray-500"}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="tax_provider"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Tax provider
+                </Label>
+                <SelectFields
+                  is_loading={isLoading}
+                  control={control}
+                  errors={errors}
+                  name={"tax_provider" as Path<T>}
+                  placeholder="Select tax provider" // Default placeholder
+                  drop_down_selector={[{ key: "default", value: "system" }]}
+                  class_style={"text-gray-500"}
+                />
+              </div>
+            </div>
+            <div className="py-8">
+              <p className="text-sm flex items-center gap-[4px]">
+                <b>Default tax rate</b>
+                <span className="text-sm text-gray-600">(Optional)</span>
+                <HoverTooltip
+                  is_icon
+                  Icon={Info}
+                  description="The default tax rate for this region. An example is the standard VAT rate for a country or region."
+                  className="bg-gray-300 rounded-full text-base cursor-pointer opacity-50"
+                />
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
                 <Label
                   htmlFor="name"
                   className="text-sm font-medium text-gray-700"
@@ -42,76 +101,47 @@ const Details = <T extends FieldValues>({
                   control={control}
                   errors={errors}
                   name={"name" as Path<T>}
-                  placeholder="Name"
+                  placeholder="Tax name"
                   inputStyle={
                     "placeholder-gray-200 bg-transparent border-zinc-300"
                   }
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <Label
-                  htmlFor="currency"
+                  htmlFor="tax_rate"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Currency
+                  Tax rate
                 </Label>
-                <SelectFields
+                <InputField
                   control={control}
                   errors={errors}
-                  name={"currency" as Path<T>}
-                  placeholder="Select currency" // Default placeholder
-                  drop_down_selector={
-                    data?.result?.length
-                      ? data.result.map((item) => ({
-                          key: item?._id,
-                          value: item?.currency_id?.name,
-                        }))
-                      : []
+                  name={"tax_rate" as Path<T>}
+                  placeholder="18"
+                  inputStyle={
+                    "placeholder-gray-200 bg-transparent border-zinc-300"
                   }
-                  class_style={"text-gray-500"}
                 />
-              </div>
-            </div>
-            <div className="flex items-center justify-between gap-4 mt-4">
-              <div className="flex flex-col">
+                <span className="text-gray-400 absolute top-[30px] right-[10px]">
+                  %
+                </span>
+              </div>{" "}
+              <div className="space-y-2 relative">
                 <Label
-                  htmlFor="currency"
+                  htmlFor="tax_code"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Automatic Taxes
+                  Tax code
                 </Label>
-                <p className="text-sm font-medium text-gray-700">
-                  When enabled, taxes will only be calculated at checkout based
-                  on the shipping address.
-                </p>
-              </div>
-
-              <div className="flex justify-end">
-                <SwitchField
+                <InputField
                   control={control}
                   errors={errors}
-                  name={"automatic_taxes" as Path<T>}
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-between gap-4 mt-6">
-              <div className="flex flex-col">
-                <Label
-                  htmlFor="currency"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Tax inclusive pricing
-                </Label>
-                <p className="text-sm font-medium text-gray-700">
-                  When enabled, prices in the region will be tax inclusive.
-                </p>
-              </div>
-
-              <div className="flex justify-end">
-                <SwitchField
-                  control={control}
-                  errors={errors}
-                  name={"tax_inclusive_pricing" as Path<T>}
+                  name={"tax_code" as Path<T>}
+                  placeholder="Tax code"
+                  inputStyle={
+                    "placeholder-gray-200 bg-transparent border-zinc-300"
+                  }
                 />
               </div>
             </div>

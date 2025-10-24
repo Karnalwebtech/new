@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
+import PageHeander2 from "@/modules/layout/header/page-heander2";
 
 const Row = memo(
   ({
@@ -90,16 +91,14 @@ const Row = memo(
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/settings/regions/${item?.id}/edit`)
+                  router.push(`/settings/tax-regions/${item?.id}/edit`)
                 }
               >
                 <Pencil className="h-4 w-4 mr-2" /> Edit
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() =>
-                  router.push(`/settings/regions/${item?.id}`)
-                }
+                onClick={() => router.push(`/settings/tax-regions/${item?.id}`)}
               >
                 <Eye className="h-4 w-4 mr-2" /> Preview
               </DropdownMenuItem>
@@ -138,7 +137,7 @@ const TaxRegion = () => {
   useHandleNotifications({
     error: deteError || error,
     isSuccess: deleteSuccess,
-    successMessage: deleteSuccess ? "Regoin deleted successfully!" : "",
+    successMessage: deleteSuccess ? "Tax-regions deleted successfully!" : "",
   });
 
   const width = useWindowWidth();
@@ -152,7 +151,6 @@ const TaxRegion = () => {
   ]);
 
   const removeHandler = useCallback((id: string) => {
- 
     setIsOpen(true);
     setDeletedId(id);
   }, []);
@@ -202,100 +200,17 @@ const TaxRegion = () => {
       animate="visible"
     >
       <div className="container mx-auto py-8">
-        <motion.div
-          className="flex px-4 items-center justify-between mb-8"
-          variants={itemVariants}
-        >
-          <motion.div>
-            <motion.h1 className="text-2xl font-semibold text-foreground mb-2">
-              Tax Regions
-            </motion.h1>
-            <motion.p className="text-muted-foreground">
-              Manage what you charge your customers when they shop from different countries and regions.
-            </motion.p>
-          </motion.div>
-
-          <NavigateBtn path={"/settings/regions/create"} title={"Create"} />
-        </motion.div>
-
-        <div className="flex px-4 items-center justify-between mb-8">
-          <div>
-            {/* <h1 className="text-2xl font-semibold text-foreground mb-2">
-              Currencies
-            </h1>
-            <p className="text-muted-foreground">
-              Manage and organize product currencies.
-            </p> */}
-          </div>
-          <motion.div
-            className="flex flex-wrap items-center gap-3"
-            initial="hidden"
-            animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.06 } } }}
-          >
-            {/* Search */}
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="max-w-lg  flex-1"
-            >
-              <Input
-                type="text"
-                value={searchTerm}
-                placeholder="Search currencies..."
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="transition-all focus-visible:shadow-[0_0_0_2px_rgba(59,130,246,.25)]"
-              />
-            </motion.div>
-
-            {/* Per page Select */}
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <Select
-                value={rowsPerPage}
-                onValueChange={(val) => {
-                  setRowsPerPage(val); // val is a string
-                  setCurrentPage(1); // optional: reset page
-                }}
-              >
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Per page" />
-                </SelectTrigger>
-
-                {/* Animate dropdown content on mount/unmount */}
-                <SelectContent>
-                  <AnimatePresence>
-                    <motion.div
-                      key="select-content"
-                      initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                      transition={{ duration: 0.16 }}
-                    >
-                      <SelectGroup>
-                        <SelectLabel>Per page</SelectLabel>
-                        {["10", "20", "50", "100"].map((val) => (
-                          <motion.div
-                            key={val}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 4 }}
-                          >
-                            <SelectItem value={val}>{val} / page</SelectItem>
-                          </motion.div>
-                        ))}
-                      </SelectGroup>
-                    </motion.div>
-                  </AnimatePresence>
-                </SelectContent>
-              </Select>
-            </motion.div>
-          </motion.div>
-        </div>
+        <PageHeander2
+          headerTitle={"Tax Regions"}
+          headerDescription="Manage what you charge your customers when they shop from different countries and regions."
+          rowsPerPage={rowsPerPage}
+          setRowsPerPage={setRowsPerPage}
+          setCurrentPage={setCurrentPage}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          subHeader={true}
+          navLink={`/settings/tax-regions/create`}
+        />
 
         <div
           style={{ width: width < 749 ? `${width}px` : "100%" }}
