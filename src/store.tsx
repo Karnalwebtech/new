@@ -58,6 +58,7 @@ import { productTypesApi } from "./state/product-types-api";
 import { productTagApi } from "./state/product-tag-api";
 import { apiKeyApi } from "./state/api-key-api";
 import { publishableApiKeyApi } from "./state/publishable-api-key-api";
+import { returnReasonApi } from "./state/return-reason-api";
 
 const createNoopStorage = () => ({
   getItem: () => Promise.resolve(null),
@@ -105,6 +106,7 @@ const persistConfig = {
     productTagApi.reducerPath,
     apiKeyApi.reducerPath,
     publishableApiKeyApi.reducerPath,
+    returnReasonApi.reducerPath,
 
     //superme
     cloudStorageApi.reducerPath,
@@ -148,6 +150,7 @@ const rootReducer = combineReducers({
   [productTagApi.reducerPath]: productTagApi.reducer,
   [apiKeyApi.reducerPath]: apiKeyApi.reducer,
   [publishableApiKeyApi.reducerPath]: publishableApiKeyApi.reducer,
+  [returnReasonApi.reducerPath]: returnReasonApi.reducer,
 
   //superme
   [cloudStorageApi.reducerPath]: cloudStorageApi.reducer,
@@ -198,6 +201,7 @@ const makeStore = () => {
         productTagApi.middleware,
         apiKeyApi.middleware,
         publishableApiKeyApi.middleware,
+        returnReasonApi.middleware,
 
         //superme
         cloudStorageApi.middleware,

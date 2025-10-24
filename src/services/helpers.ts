@@ -6,6 +6,14 @@ export const slugify = (text: string) =>
     .replace(/[\s_-]+/g, "-") // collapse whitespace and dashes
     .replace(/^-+|-+$/g, ""); // trim - from start and end
 
+export const slugifyUnderscore = (text: string) =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "") // remove special characters
+    .replace(/[\s_-]+/g, "_") // collapse spaces, underscores, or dashes into a single underscore
+    .replace(/^_+|_+$/g, ""); // trim underscores from start and end
+
 // export const formatFileSize = (megabytes: number): string => {
 //   const units = ['MB', 'GB', 'TB', 'PB']; // Adjusted for MB input
 //   let index = 0;
@@ -23,7 +31,7 @@ export const capitalizeFirstLetter = (str: string) => {
 };
 
 export const calculatePercentage = (used: number, total: number): number => {
-  const usedNum = Math.floor(used);  // Corrected: Removed second argument
+  const usedNum = Math.floor(used); // Corrected: Removed second argument
   const totalNum = Math.floor(total);
 
   if (totalNum === 0) return 0; // Prevent division by zero
@@ -36,11 +44,11 @@ export const extractNumber = (size: string, traget: string): number => {
 
 export const convertToGB = (size: string): number => {
   const units: Record<string, number> = {
-    "Bytes": 1 / (1024 ** 3),  // Convert Bytes to GB
-    "KB": 1 / (1024 ** 2),     // Convert KB to GB
-    "MB": 1 / 1024,            // Convert MB to GB
-    "GB": 1,                   // GB remains the same
-    "TB": 1024,                // Convert TB to GB
+    Bytes: 1 / 1024 ** 3, // Convert Bytes to GB
+    KB: 1 / 1024 ** 2, // Convert KB to GB
+    MB: 1 / 1024, // Convert MB to GB
+    GB: 1, // GB remains the same
+    TB: 1024, // Convert TB to GB
   };
 
   // Extract numeric value and unit (e.g., "12.97 GB" → ["12.97", "GB"])
@@ -63,9 +71,13 @@ export const formatFileSize = (bytes: number): string => {
   return `${size} ${units[i]}`;
 };
 
-export const formatDate = (dateString: string, month: "numeric" | "2-digit" | "long" | "short" = "short", includeTime: boolean = false): string => {
+export const formatDate = (
+  dateString: string,
+  month: "numeric" | "2-digit" | "long" | "short" = "short",
+  includeTime: boolean = false
+): string => {
   try {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     if (isNaN(date.getTime())) throw new Error("Invalid date");
     // Base date options
     const options: Intl.DateTimeFormatOptions = {
@@ -87,16 +99,16 @@ export const formatDate = (dateString: string, month: "numeric" | "2-digit" | "l
   } catch {
     return "Invalid Date";
   }
-}
+};
 export const getsampleFileExtension = (mimetype: string) => {
-  return mimetype.split("/")[1]?.toUpperCase() || "UNKNOWN"
-}
+  return mimetype.split("/")[1]?.toUpperCase() || "UNKNOWN";
+};
 // Format sampleFile size to KB/MB
 export const formatsampleFileSize = (bytes: number) => {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
-}
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+};
 
 export const copyToClipboard = async (text: string): Promise<boolean> => {
   try {
@@ -107,13 +119,19 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
     return false; // Copy failed
   }
 };
-export default function idToUrl(data: { public_id: string, mimetype: string }): string {
+export default function idToUrl(data: {
+  public_id: string;
+  mimetype: string;
+}): string {
   return data.mimetype.startsWith("image/")
     ? `https://lh3.googleusercontent.com/d/${data.public_id}=s400`
     : `https://drive.google.com/file/d/${data.public_id}/preview`;
 }
-export const idToImageTag = (data: { public_id: string; mimetype: string;altText: string }) => {
-
+export const idToImageTag = (data: {
+  public_id: string;
+  mimetype: string;
+  altText: string;
+}) => {
   const encodedUrl = encodeURIComponent(idToUrl(data));
   return `<img
       alt="${data?.altText}"
@@ -134,19 +152,25 @@ export const idToImageTag = (data: { public_id: string; mimetype: string;altText
   `;
 };
 
-export const idToDownloadUrl = (data: { public_id: string, mimetype: string }): string => {
+export const idToDownloadUrl = (data: {
+  public_id: string;
+  mimetype: string;
+}): string => {
   return data.mimetype.startsWith("image/")
     ? `https://lh3.googleusercontent.com/d/${data.public_id}=s0`
     : `https://drive.google.com/uc?export=download&id=${data.public_id}`;
-}
+};
 export const formatNumber = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'decimal',
+  return new Intl.NumberFormat("en-US", {
+    style: "decimal",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   }).format(value);
 };
-export function calculatePercentageChange(current: number, previous: number): number {
+export function calculatePercentageChange(
+  current: number,
+  previous: number
+): number {
   if (previous === 0) return current > 0 ? 100 : 0;
   return ((current - previous) / previous) * 100;
 }
@@ -155,10 +179,7 @@ export const stringToColor = (str: string): string => {
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const c = (hash & 0x00ffffff)
-    .toString(16)
-    .toUpperCase()
-    .padStart(6, "0");
+  const c = (hash & 0x00ffffff).toString(16).toUpperCase().padStart(6, "0");
   return `#${c}`;
 };
 
@@ -172,20 +193,22 @@ export const platformColors = {
   site: "bg-[#6B7280] text-white",
 };
 export function formatOperationsPerDay(operations: number): string {
-  if (operations >= 1_000_000_000) return `${(operations / 1_000_000_000).toFixed(1)}B/day`;
-  if (operations >= 1_000_000) return `${(operations / 1_000_000).toFixed(1)}M/day`;
+  if (operations >= 1_000_000_000)
+    return `${(operations / 1_000_000_000).toFixed(1)}B/day`;
+  if (operations >= 1_000_000)
+    return `${(operations / 1_000_000).toFixed(1)}M/day`;
   if (operations >= 1_000) return `${(operations / 1_000).toFixed(1)}K/day`;
   return `${operations}/day`;
 }
 function parseTTL(ttl: string): number | null {
-  if (ttl === 'No expiry') return null;
+  if (ttl === "No expiry") return null;
   return parseInt(ttl.replace(/s$/, ""), 10);
 }
 
 export function formatTTL(secondsStr: string): string {
   const seconds = parseTTL(secondsStr);
 
-  if (seconds === null) return 'No expiry';
+  if (seconds === null) return "No expiry";
 
   const days = Math.floor(seconds / (3600 * 24));
   const hours = Math.floor((seconds % (3600 * 24)) / 3600);
@@ -198,5 +221,5 @@ export function formatTTL(secondsStr: string): string {
   if (minutes) result.push(`${minutes}m`);
   if (secs) result.push(`${secs}s`);
 
-  return result.join(' ') || '0s';
+  return result.join(" ") || "0s";
 }

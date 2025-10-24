@@ -26,7 +26,7 @@ const Settings = [
   },
   {
     name: "Return Regions",
-    url: "/settings/return-regions",
+    url: "/settings/return-reasons",
     icon: UsersRound,
     type: "dashboard",
   },
