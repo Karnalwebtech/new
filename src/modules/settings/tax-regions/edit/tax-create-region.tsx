@@ -12,14 +12,15 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import { ReturnReasonSchema } from "@/zod-shema/return-reason-schema";
 import {
   useAddReturnReasonMutation,
   useGetReturnReasonDetailsQuery,
   useUpdateReturnReasonMutation,
 } from "@/state/return-reason-api";
+import { TaxRegionSchema } from "@/zod-shema/tax-region-schema";
+import { useAddTaxRegionMutation, useGetTaxRegionDetailsQuery } from "@/state/tax-region-api";
 
-type FormData = z.infer<typeof ReturnReasonSchema>;
+type FormData = z.infer<typeof TaxRegionSchema>;
 interface CreateTaxRegionProps {
   ItemId?: string;
 }
@@ -27,8 +28,8 @@ const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const [step, setStep] = React.useState<number>(0);
-  const [addReturnReason, { isLoading, error, isSuccess }] =
-    useAddReturnReasonMutation();
+  const [addTaxRegion, { isLoading, error, isSuccess }] =
+    useAddTaxRegionMutation();
   const [
     updateReturnReason,
     { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
@@ -38,7 +39,7 @@ const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
     data,
     isLoading: dataLoader,
     error: dataLoadError,
-  } = useGetReturnReasonDetailsQuery(
+  } = useGetTaxRegionDetailsQuery(
     { id: ItemId as string },
     { skip: !ItemId }
   );
@@ -48,7 +49,7 @@ const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
     successMessage: updateSuccess
       ? "Sales channels updated successfully!"
       : "Add Return Reason!",
-    redirectPath: "/settings/return-reasons",
+    // redirectPath: "/settings/return-reasons",
   });
   const {
     control,
@@ -57,53 +58,61 @@ const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
     setValue,
     formState: { errors },
   } = useForm<FormData>({
-    defaultValues: {},
-    resolver: zodResolver(ReturnReasonSchema),
+    defaultValues: {
+      tax_provider:"system"
+    },
+    resolver: zodResolver(TaxRegionSchema),
   });
   const result = data?.result;
   const values = watch();
   const canAccessStep = useMemo(() => {
     return [
       true,
-      !!values.value?.trim(),
-      values.value?.trim().length > 0 && values.value?.trim().length <= 60,
+      !!values.country?.trim(),
+      values.country?.trim().length > 0 && values.country?.trim().length <= 60,
     ];
   }, [values]);
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      if (ItemId) {
-        await updateReturnReason({ ...data, id: ItemId });
-        return;
-      }
-      await addReturnReason(data);
+      console.log(data)
+      // if (ItemId) {
+      //   await updateReturnReason({ ...data, id: ItemId });
+      //   return;
+      // }
+      await addTaxRegion(data);
     },
-    [addReturnReason, updateReturnReason, ItemId]
+    [
+      addTaxRegion, 
+      // updateReturnReason, ItemId
+      ]
   );
 
-  useEffect(() => {
-    if (result) {
-      setValue("value", result?.value);
-      setValue("description", result?.description);
-      setValue("label", result.label!);
-    }
-  }, [result, setValue, dispatch]);
-  const value = watch("value", "");
-  useEffect(() => {
-    if (value) {
-      // ✅ Replace spaces live but don't break typing
-      const formatted = value.replace(/\s+/g, "_");
+  // useEffect(() => {
+  //   if (result) {
+  //     setValue("country", result?.country);
+  //     setValue("tax_provider", result?.tax_provider);
+  //     setValue("name", result.name!);
+  //     setValue("tax_rate", result.tax_rate!);
+  //     setValue("tax_code", result.tax_code!);
+  //   }
+  // }, [result, setValue, dispatch]);
+  // const value = watch("value", "");
+  // useEffect(() => {
+  //   if (value) {
+  //     // ✅ Replace spaces live but don't break typing
+  //     const formatted = value.replace(/\s+/g, "_");
 
-      // only update if changed (prevents infinite re-renders)
-      if (formatted !== value) {
-        setValue("value", formatted);
-      }
-    }
-  }, [value, setValue]);
+  //     // only update if changed (prevents infinite re-renders)
+  //     if (formatted !== value) {
+  //       setValue("value", formatted);
+  //     }
+  //   }
+  // }, [value, setValue]);
   return (
     <DialogPopUp
-      title="Add Currencies"
-      description="Add Currencies for your store"
+      title=""
+      description=""
       isOpen={true}
       handleClose={() => {}}
     >

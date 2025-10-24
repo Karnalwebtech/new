@@ -7,23 +7,10 @@ import Shadcn_table from "@/components/table/table";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import { TruncateText } from "@/components/truncate-text";
 import ShadcnPagination from "@/components/pagination";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { containerVariants, controls, itemVariants } from "@/lib/variants";
-import NavigateBtn from "@/components/buttons/navigate-btn";
+import { containerVariants } from "@/lib/variants";
 import {
   useDeleteRegionMutation,
-  useGetAllRegionseDataQuery,
 } from "../../../state/regions-api";
-import { RegionCountryData } from "@/types/regions-type";
 import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
@@ -36,6 +23,10 @@ import { useRouter } from "next/navigation";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import PageHeander2 from "@/modules/layout/header/page-heander2";
+import { useGetAllTaxRegionDataQuery } from "@/state/tax-region-api";
+import ReactCountryFlag from "react-country-flag";
+import { TaxRegionType } from "@/types/tax-region-type";
+
 
 const Row = memo(
   ({
@@ -45,35 +36,23 @@ const Row = memo(
     deletedId,
   }: {
     router: ReturnType<typeof useRouter>;
-    item: RegionCountryData;
+    item: TaxRegionType;
     removeHandler: (id: string) => void;
     deletedId: string;
   }) => {
     return (
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
-        <TableCell>
-          <span className="text-muted-foreground">
-            <TruncateText text={item?.name || ""} maxLength={25} />
+        <TableCell className="flex gap-2 item-center">
+          <span>
+           <ReactCountryFlag
+            countryCode={item?.country_code?.isoCode || ""}
+            svg
+            style={{ width: "1.25rem", height: "1.25rem" }}
+            title={item?.country_code?.isoCode}
+          />
           </span>
-        </TableCell>
-        <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText
-              text={
-                item?.countries?.length <= 3
-                  ? item.countries.map((c) => c?.name).join(", ")
-                  : `${item.countries
-                      .slice(0, 3)
-                      .map((c) => c?.name)
-                      .join(", ")}... more`
-              }
-              maxLength={25}
-            />
-          </span>
-        </TableCell>
-        <TableCell className="text-right pr-6">
-          <span className="text-muted-foreground">
-            <TruncateText text={"test"} maxLength={25} />
+            <TruncateText text={item?.country_code?.name || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell className="text-end">
@@ -129,7 +108,7 @@ const TaxRegion = () => {
     deleteRegion,
     { isLoading: deleteLoading, isSuccess: deleteSuccess, error: deteError },
   ] = useDeleteRegionMutation();
-  const { data, isLoading, error } = useGetAllRegionseDataQuery({
+  const { data, isLoading, error } = useGetAllTaxRegionDataQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
   });
@@ -144,10 +123,7 @@ const TaxRegion = () => {
   const result = useMemo(() => data?.result || [], [data?.result]);
   const { filteredItems, searchTerm, setSearchTerm } = useTableFilters(result, [
     "name",
-    "country_id.name",
-    "region_id.name",
-    "country.name",
-    "region.name",
+    "country_code.name",
   ]);
 
   const removeHandler = useCallback((id: string) => {
@@ -242,9 +218,7 @@ const TaxRegion = () => {
 
             <Shadcn_table
               table_header={[
-                "Name",
-                "Countries",
-                "Payment Providers",
+                "Region",
                 "Action",
               ]}
               tabel_body={() => tableBody}
@@ -272,7 +246,7 @@ const TaxRegion = () => {
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             title="Are you sure?"
-            description="This action cannot be undone. This will permanently delete the category."
+            description="This action cannot be undone. This will permanently delete the tax region."
             action={DeleteHandler}
             type="danger"
             setDeletedId={setDeletedId}

@@ -14,6 +14,16 @@ export const slugifyUnderscore = (text: string) =>
     .replace(/[\s_-]+/g, "_") // collapse spaces, underscores, or dashes into a single underscore
     .replace(/^_+|_+$/g, ""); // trim underscores from start and end
 
+  
+export function getFlagEmoji(countryCode: string): string {
+  if (!countryCode) return "🏳️";
+  return countryCode
+    .toUpperCase()
+    .replace(/./g, char =>
+      String.fromCodePoint(127397 + char.charCodeAt(0))
+    );
+}
+
 // export const formatFileSize = (megabytes: number): string => {
 //   const units = ['MB', 'GB', 'TB', 'PB']; // Adjusted for MB input
 //   let index = 0;

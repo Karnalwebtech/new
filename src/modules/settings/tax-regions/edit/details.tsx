@@ -72,7 +72,7 @@ const Details = <T extends FieldValues>({
                   errors={errors}
                   name={"tax_provider" as Path<T>}
                   placeholder="Select tax provider" // Default placeholder
-                  drop_down_selector={[{ key: "default", value: "system" }]}
+                  drop_down_selector={[{ key: "system", value: "system" }]}
                   class_style={"text-gray-500"}
                 />
               </div>
