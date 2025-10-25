@@ -12,13 +12,8 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import {
-  useAddReturnReasonMutation,
-  useGetReturnReasonDetailsQuery,
-  useUpdateReturnReasonMutation,
-} from "@/state/return-reason-api";
 import { TaxRegionSchema } from "@/zod-shema/tax-region-schema";
-import { useAddTaxRegionMutation, useGetTaxRegionDetailsQuery } from "@/state/tax-region-api";
+import { useAddTaxRegionMutation, useGetTaxRegionDetailsQuery, useUpdateTaxRegionMutation } from "@/state/tax-region-api";
 
 type FormData = z.infer<typeof TaxRegionSchema>;
 interface CreateTaxRegionProps {
@@ -31,9 +26,9 @@ const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
   const [addTaxRegion, { isLoading, error, isSuccess }] =
     useAddTaxRegionMutation();
   const [
-    updateReturnReason,
+    updateTaxRegion,
     { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
-  ] = useUpdateReturnReasonMutation();
+  ] = useUpdateTaxRegionMutation();
 
   const {
     data,
@@ -76,39 +71,27 @@ const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
   const onSubmit = useCallback(
     async (data: FormData) => {
       console.log(data)
-      // if (ItemId) {
-      //   await updateReturnReason({ ...data, id: ItemId });
-      //   return;
-      // }
+      if (ItemId) {
+        await updateTaxRegion({ ...data, id: ItemId });
+        return;
+      }
       await addTaxRegion(data);
     },
     [
       addTaxRegion, 
-      // updateReturnReason, ItemId
+      updateTaxRegion, ItemId
       ]
   );
 
-  // useEffect(() => {
-  //   if (result) {
-  //     setValue("country", result?.country);
-  //     setValue("tax_provider", result?.tax_provider);
-  //     setValue("name", result.name!);
-  //     setValue("tax_rate", result.tax_rate!);
-  //     setValue("tax_code", result.tax_code!);
-  //   }
-  // }, [result, setValue, dispatch]);
-  // const value = watch("value", "");
-  // useEffect(() => {
-  //   if (value) {
-  //     // ✅ Replace spaces live but don't break typing
-  //     const formatted = value.replace(/\s+/g, "_");
-
-  //     // only update if changed (prevents infinite re-renders)
-  //     if (formatted !== value) {
-  //       setValue("value", formatted);
-  //     }
-  //   }
-  // }, [value, setValue]);
+  useEffect(() => {
+    if (result) {
+      setValue("country", result?.country_code?._id || "");
+      setValue("tax_provider", result?.tax_provider || "");
+      setValue("name", result?.default_rate?.name || "");
+      setValue("tax_rate", result?.default_rate?.rate || "0");
+      setValue("tax_code", result?.default_rate?.code || "");
+    }
+  }, [result, setValue, dispatch]);
   return (
     <DialogPopUp
       title=""

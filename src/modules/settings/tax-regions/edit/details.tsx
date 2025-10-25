@@ -103,7 +103,7 @@ const Details = <T extends FieldValues>({
                   name={"name" as Path<T>}
                   placeholder="Tax name"
                   inputStyle={
-                    "placeholder-gray-200 bg-transparent border-zinc-300"
+                    "placeholder-gray-200 bg-transparent border-zinc-300 text-gray-500"
                   }
                 />
               </div>
@@ -120,7 +120,7 @@ const Details = <T extends FieldValues>({
                   name={"tax_rate" as Path<T>}
                   placeholder="18"
                   inputStyle={
-                    "placeholder-gray-200 bg-transparent border-zinc-300"
+                    "placeholder-gray-200 bg-transparent border-zinc-300 text-gray-500"
                   }
                 />
                 <span className="text-gray-400 absolute top-[30px] right-[10px]">
@@ -140,7 +140,7 @@ const Details = <T extends FieldValues>({
                   name={"tax_code" as Path<T>}
                   placeholder="Tax code"
                   inputStyle={
-                    "placeholder-gray-200 bg-transparent border-zinc-300"
+                    "placeholder-gray-200 bg-transparent border-zinc-300 text-gray-500"
                   }
                 />
               </div>

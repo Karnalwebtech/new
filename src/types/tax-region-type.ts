@@ -6,9 +6,12 @@ export interface TaxRegionType {
     _id?:string;
     id?:string;
     tax_provider?:string;
+    default_rate?:TaxRegionType;
     name?: string | undefined;
     tax_rate?: string | undefined;
-    tax_code?: string | undefined;
+    rate?: string | undefined;
+    tax_code?: string;
+    code?: string | undefined;
     createdAt?:Date;
     updatedAt?:Date;
 }

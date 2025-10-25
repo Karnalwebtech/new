@@ -61,18 +61,18 @@ export const taxRegionApi = createApi({
       },
       invalidatesTags: [{ type: "taxregion", id: "LIST" }],
     }),
-    //   updateReturnReason: build.mutation<void, ReturnReasonType>({
-    //   query: (data) => {
-    //     const formData = new FormData();
-    //     formData.append("data", JSON.stringify(data));
-    //     return {
-    //       url: `/return-reason-edit/${data?.id}`,
-    //       method: "put",
-    //       body: formData,
-    //     };
-    //   },
-    //   invalidatesTags: [{ type: "taxregion", id: "LIST" }],
-    // }),
+      updateTaxRegion: build.mutation<void, TaxRegionType>({
+      query: (data) => {
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(data));
+        return {
+          url: `/tax-region-edit/${data?.id}`,
+          method: "put",
+          body: formData,
+        };
+      },
+      invalidatesTags: [{ type: "taxregion", id: "LIST" }],
+    }),
     // deleteReturnReason: build.mutation<void, { id: string }>({
     //   query: ({ id }) => ({
     //     url: `/return-reason-delete/${id}`,
@@ -83,7 +83,7 @@ export const taxRegionApi = createApi({
     getTaxRegionDetails: build.query<GetResponseTaxRegionDetails, { id: string }>({
       query: ({id}) => {
         return {
-          url: `/tax-region/${id}`,
+          url: `/tax-regions/${id}`,
           method: "GET",
         };
       },
@@ -95,5 +95,5 @@ export const { useAddTaxRegionMutation,
   useGetAllTaxRegionDataQuery,
   // useDeleteReturnReasonMutation,
   useGetTaxRegionDetailsQuery,
-  // useUpdateReturnReasonMutation
+  useUpdateTaxRegionMutation
  } = taxRegionApi;
