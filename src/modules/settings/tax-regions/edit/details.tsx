@@ -6,33 +6,63 @@ import InputField from "@/components/fields/input-field";
 import HoverTooltip from "@/components/tooltip/hover-tooltip";
 import { Info } from "lucide-react";
 import SelectFields from "@/components/fields/select-field";
-import { useGetAllCountoriesQuery } from "@/state/counrtries-states-cities-api";
+import {
+  useGetAllCountoriesQuery,
+  useGetCountorieByStatesQuery,
+} from "@/state/counrtries-states-cities-api";
+import SwitchField from "@/components/fields/switch-field";
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
   errors: FieldErrors<T>;
   title: string;
   description: string;
+  ItemId?: string;
+  Provinces?: string;
 }
 const Details = <T extends FieldValues>({
   control,
   errors,
   title,
   description,
+  ItemId,
+  Provinces,
 }: DetailsProps<T>) => {
   const { data, isLoading } = useGetAllCountoriesQuery({
     rowsPerPage: 500,
     page: 1,
   });
+  const { data: statesData, isLoading: stateLoading } =
+    useGetCountorieByStatesQuery(
+      {
+        rowsPerPage: 500,
+        page: 1,
+        countryCode: Provinces,
+      },
+      { skip: !Provinces }
+    );
+
   const result = useMemo(
     () =>
-      data?.result?.map(({ _id, name }) => ({ key: _id!, value: name! })) || [],
+      data?.result?.map(({ _id, name, isoCode }) => ({
+        key: _id!,
+        value: name!,
+        isoCode,
+      })) || [],
     [data?.result]
+  );
+  const statesResult = useMemo(
+    () =>
+      statesData?.result?.map(({ _id, name }) => ({
+        key: _id!,
+        value: name!,
+      })) || [],
+    [statesData?.result]
   );
 
   return (
     <>
       {/* Form Content */}
-      <div className="p-8 pb-0 max-w-[800px] m-auto">
+      <div className="p-8 pb-0 max-w-[800px] m-auto pb-24">
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-90">{title}</h2>
           <p className="text-sm text-gray-600">{description}</p>
@@ -42,40 +72,65 @@ const Details = <T extends FieldValues>({
           {/* Title, Subtitle, Handle Row */}
           <div className="">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label
-                  htmlFor="country"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Country
-                </Label>
-                <SelectFields
-                  is_loading={isLoading}
-                  control={control}
-                  errors={errors}
-                  name={"country" as Path<T>}
-                  placeholder="Select country" // Default placeholder
-                  drop_down_selector={result}
-                  class_style={"text-gray-500"}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="tax_provider"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Tax provider
-                </Label>
-                <SelectFields
-                  is_loading={isLoading}
-                  control={control}
-                  errors={errors}
-                  name={"tax_provider" as Path<T>}
-                  placeholder="Select tax provider" // Default placeholder
-                  drop_down_selector={[{ key: "system", value: "system" }]}
-                  class_style={"text-gray-500"}
-                />
-              </div>
+              {Provinces ? (
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="state"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    State
+                  </Label>
+                  <SelectFields
+                    is_loading={stateLoading}
+                    control={control}
+                    errors={errors}
+                    name={"state" as Path<T>}
+                    placeholder="Select state" // Default placeholder
+                    drop_down_selector={statesResult}
+                    class_style={"text-gray-500"}
+                    is_disabled={ItemId ? true : false}
+                  />
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="country"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Country
+                    </Label>
+                    <SelectFields
+                      is_loading={isLoading}
+                      control={control}
+                      errors={errors}
+                      name={"country" as Path<T>}
+                      placeholder="Select country" // Default placeholder
+                      drop_down_selector={result}
+                      class_style={"text-gray-500"}
+                      is_disabled={ItemId ? true : false}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="tax_provider"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Tax provider
+                    </Label>
+                    <SelectFields
+                      is_loading={isLoading}
+                      control={control}
+                      errors={errors}
+                      name={"tax_provider" as Path<T>}
+                      placeholder="Select tax provider" // Default placeholder
+                      drop_down_selector={[{ key: "system", value: "system" }]}
+                      class_style={"text-gray-500"}
+                      is_disabled={ItemId ? true : false}
+                    />
+                  </div>
+                </>
+              )}
             </div>
             <div className="py-8">
               <p className="text-sm flex items-center gap-[4px]">
@@ -126,7 +181,7 @@ const Details = <T extends FieldValues>({
                 <span className="text-gray-400 absolute top-[30px] right-[10px]">
                   %
                 </span>
-              </div>{" "}
+              </div>
               <div className="space-y-2 relative">
                 <Label
                   htmlFor="tax_code"
@@ -145,6 +200,29 @@ const Details = <T extends FieldValues>({
                 />
               </div>
             </div>
+            {Provinces && (
+              <div className="flex items-center gap-4 my-8 border border-gray-200 p-4 rounded-lg">
+                <div className="flex">
+                  <SwitchField
+                    control={control}
+                    errors={errors}
+                    name={"is_combinable" as Path<T>}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <Label
+                    htmlFor="combinable"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Combinable
+                  </Label>
+                  <p className="text-sm font-medium text-gray-700">
+                    Whether this tax rate can be combined with the default rate
+                    from the tax region.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

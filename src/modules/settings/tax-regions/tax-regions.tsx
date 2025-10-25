@@ -8,9 +8,6 @@ import useWindowWidth from "@/hooks/useWindowWidth";
 import { TruncateText } from "@/components/truncate-text";
 import ShadcnPagination from "@/components/pagination";
 import { containerVariants } from "@/lib/variants";
-import {
-  useDeleteRegionMutation,
-} from "../../../state/regions-api";
 import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,10 +20,12 @@ import { useRouter } from "next/navigation";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import PageHeander2 from "@/modules/layout/header/page-heander2";
-import { useGetAllTaxRegionDataQuery } from "@/state/tax-region-api";
+import {
+  useDeleteTaxRegionMutation,
+  useGetAllTaxRegionDataQuery,
+} from "@/state/tax-region-api";
 import ReactCountryFlag from "react-country-flag";
 import { TaxRegionType } from "@/types/tax-region-type";
-
 
 const Row = memo(
   ({
@@ -44,15 +43,18 @@ const Row = memo(
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
         <TableCell className="flex gap-2 item-center">
           <span>
-           <ReactCountryFlag
-            countryCode={item?.country_code?.isoCode || ""}
-            svg
-            style={{ width: "1.25rem", height: "1.25rem" }}
-            title={item?.country_code?.isoCode}
-          />
+            <ReactCountryFlag
+              countryCode={item?.country_code?.isoCode || ""}
+              svg
+              style={{ width: "1.25rem", height: "1.25rem" }}
+              title={item?.country_code?.isoCode}
+            />
           </span>
           <span className="text-muted-foreground">
-            <TruncateText text={item?.country_code?.name || ""} maxLength={25} />
+            <TruncateText
+              text={item?.country_code?.name || ""}
+              maxLength={25}
+            />
           </span>
         </TableCell>
         <TableCell className="text-end">
@@ -83,9 +85,9 @@ const Row = memo(
               </DropdownMenuItem>
 
               <DropdownMenuItem
-                disabled={deletedId === item?._id}
+                disabled={deletedId === item?.id}
                 className="text-destructive cursor-pointer"
-                onClick={() => item?._id && removeHandler(item._id)}
+                onClick={() => item?._id && removeHandler(item.id!)}
               >
                 <Trash2 className="h-4 w-4 mr-2" /> Delete
               </DropdownMenuItem>
@@ -97,20 +99,24 @@ const Row = memo(
   }
 );
 Row.displayName = "Row";
-
-const TaxRegion = () => {
+interface TaxRegionProps {
+  provinces?: string;
+  isoCode?: string;
+}
+const TaxRegion = ({ provinces, isoCode }: TaxRegionProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const [
-    deleteRegion,
+    deleteTaxRegion,
     { isLoading: deleteLoading, isSuccess: deleteSuccess, error: deteError },
-  ] = useDeleteRegionMutation();
+  ] = useDeleteTaxRegionMutation();
   const { data, isLoading, error } = useGetAllTaxRegionDataQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
+    province_code: "null",
   });
 
   useHandleNotifications({
@@ -132,8 +138,8 @@ const TaxRegion = () => {
   }, []);
 
   const DeleteHandler = useCallback(async () => {
-    if (deletedId) await deleteRegion({ id: deletedId });
-  }, [deleteRegion, deletedId]);
+    if (deletedId) await deleteTaxRegion({ id: deletedId });
+  }, [deleteTaxRegion, deletedId]);
 
   useEffect(() => {
     if (deleteSuccess) {
@@ -147,7 +153,7 @@ const TaxRegion = () => {
         <TableRow>
           <TableCell colSpan={4} className="text-center py-8">
             <div className="text-muted-foreground text-lg mb-2">
-              No currencies found
+              No Tax region found
             </div>
             <div className="text-sm text-muted-foreground/70">
               Try adjusting your search criteria
@@ -185,7 +191,11 @@ const TaxRegion = () => {
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           subHeader={true}
-          navLink={`/settings/tax-regions/create`}
+          navLink={
+            provinces
+              ? `/settings/tax-regions/${provinces}/${isoCode}/create`
+              : `/settings/tax-regions/create`
+          }
         />
 
         <div
@@ -217,10 +227,7 @@ const TaxRegion = () => {
             </AnimatePresence>
 
             <Shadcn_table
-              table_header={[
-                "Region",
-                "Action",
-              ]}
+              table_header={["Region", "Action"]}
               tabel_body={() => tableBody}
               isLoading={isLoading}
               textend="Payment Providers"

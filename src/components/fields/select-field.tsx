@@ -16,8 +16,9 @@ import {
 } from "@/components/ui/select";
 import { capitalizeFirstLetter } from "@/services/helpers";
 import { ParaSkeleton } from "../skeletons/para-skeleton";
+import ReactCountryFlag from "react-country-flag";
 
-type DropdownOption = { key: string; value: string };
+type DropdownOption = { key: string; value: string; isoCode?: string };
 
 interface SelectFieldProps<T extends FieldValues> {
   control: Control<T>;
@@ -29,6 +30,7 @@ interface SelectFieldProps<T extends FieldValues> {
   class_style?: string;
   defaultValue?: PathValue<T, Path<T>>;
   is_loading?: boolean;
+  is_disabled?: boolean;
 }
 
 const SelectFields = <T extends FieldValues>({
@@ -41,6 +43,7 @@ const SelectFields = <T extends FieldValues>({
   class_style,
   defaultValue,
   is_loading = false,
+  is_disabled = false,
 }: SelectFieldProps<T>) => {
   let errorMessage: string | undefined;
 
@@ -82,6 +85,7 @@ const SelectFields = <T extends FieldValues>({
                 // Always trigger onBlur to mark the field as touched
                 field.onBlur();
               }}
+              disabled={is_disabled}
             >
               <SelectTrigger className={`w-full ${class_style || ""}`}>
                 <SelectValue placeholder={placeholder} />
@@ -95,9 +99,20 @@ const SelectFields = <T extends FieldValues>({
                       <SelectItem
                         key={option.key}
                         value={option.key}
-                        className="cursor-pointer hover:bg-gray-100"
+                        className="cursor-pointer hover:bg-gray-100 flex gap-6 items-center"
                       >
-                        {capitalizeFirstLetter(option.value)}
+                        {option?.isoCode && (
+                          <span className="pr-2">
+                            <ReactCountryFlag
+                              countryCode={option?.isoCode || ""}
+                              svg
+                              style={{ width: "15px", height: "15px" }}
+                              title={option?.isoCode}
+                            />
+                          </span>
+                        )}
+
+                        <span>{capitalizeFirstLetter(option.value)}</span>
                       </SelectItem>
                     ))}
               </SelectContent>

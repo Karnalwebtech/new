@@ -70,6 +70,40 @@ export const countriesStatesCitiesApi = createApi({
       },
       // providesTags: [{ type: "Country-state-city", id: "LIST" }],
     }),
+     getCountorieByStates: builder.query<
+      GETCountryStateCityResponse,
+      {
+        rowsPerPage?: number;
+        page?: number;
+        keywords?: string;
+        countryCode?: string;
+      } | void
+    >({
+      query: (filters) => {
+        const params: Record<string, string | number | boolean> = {};
+        if (filters) {
+          if (filters.rowsPerPage) {
+            params.rowsPerPage = filters.rowsPerPage; // Convert number to string
+          }
+          if (filters.page) {
+            params.page = filters.page; // Convert number to string
+          }
+          if (filters.keywords) {
+            params.keyword = filters.keywords; // Convert number to string
+          }
+           if (filters.countryCode) {
+            params.countryCode = filters.countryCode; // Convert number to string
+          }
+        }
+
+        return {
+          url: "/countrie-states",
+          params, // Use the dynamically constructed params
+          method: "GET",
+        };
+      },
+      // providesTags: [{ type: "Country-state-city", id: "LIST" }],
+    }),
     // deleteCountry-state-city: builder.mutation<void, { id: string }>({
     //   query: ({ id }) => ({
     //     url: `remove-store-currency/${id}`,
@@ -90,6 +124,7 @@ export const countriesStatesCitiesApi = createApi({
 export const {
   // useAddCurrencyMutation,
   useGetAllCountoriesQuery,
+  useGetCountorieByStatesQuery,
   // useDeleteCountry-state-cityMutation,
   // useUpdateTaxPriceCountry-state-cityMutation,
 } = countriesStatesCitiesApi;

@@ -13,13 +13,19 @@ import Details from "./details";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
 import { TaxRegionSchema } from "@/zod-shema/tax-region-schema";
-import { useAddTaxRegionMutation, useGetTaxRegionDetailsQuery, useUpdateTaxRegionMutation } from "@/state/tax-region-api";
+import {
+  useAddTaxRegionMutation,
+  useGetTaxRegionDetailsQuery,
+  useUpdateTaxRegionMutation,
+} from "@/state/tax-region-api";
 
 type FormData = z.infer<typeof TaxRegionSchema>;
 interface CreateTaxRegionProps {
   ItemId?: string;
+  Provinces?: string;
+  parentId?:string;
 }
-const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
+const CreateTaxRegion = ({ ItemId, Provinces,parentId }: CreateTaxRegionProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const [step, setStep] = React.useState<number>(0);
@@ -34,17 +40,14 @@ const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
     data,
     isLoading: dataLoader,
     error: dataLoadError,
-  } = useGetTaxRegionDetailsQuery(
-    { id: ItemId as string },
-    { skip: !ItemId }
-  );
+  } = useGetTaxRegionDetailsQuery({ id: ItemId as string }, { skip: !ItemId });
   useHandleNotifications({
     error: error || updateError || dataLoadError,
     isSuccess: isSuccess || updateSuccess,
     successMessage: updateSuccess
-      ? "Sales channels updated successfully!"
-      : "Add Return Reason!",
-    // redirectPath: "/settings/return-reasons",
+      ? "Tax region updated successfully!"
+      : "Tax region Add successfully!",
+    // redirectPath: "/settings/tax-regions",
   });
   const {
     control,
@@ -54,7 +57,7 @@ const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      tax_provider:"system"
+      tax_provider: "system",
     },
     resolver: zodResolver(TaxRegionSchema),
   });
@@ -64,41 +67,41 @@ const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
     return [
       true,
       !!values.country?.trim(),
-      values.country?.trim().length > 0 && values.country?.trim().length <= 60,
+      // values.country?.trim().length > 0 && values.country?.trim().length <= 60,
     ];
   }, [values]);
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      console.log(data)
-      if (ItemId) {
-        await updateTaxRegion({ ...data, id: ItemId });
+      const updatedData = {
+        ...data,
+        country_id:parentId,
+      }
+      // console.log(updatedData)
+      // if (ItemId) {
+      //   await updateTaxRegion({ ...data, id: ItemId });
+      //   return;
+      // }
+      if(Provinces){
+        await addTaxRegion(updatedData);
         return;
       }
       await addTaxRegion(data);
     },
-    [
-      addTaxRegion, 
-      updateTaxRegion, ItemId
-      ]
+    [addTaxRegion, updateTaxRegion, ItemId,Provinces,parentId]
   );
 
   useEffect(() => {
     if (result) {
       setValue("country", result?.country_code?._id || "");
-      setValue("tax_provider", result?.tax_provider || "");
+      setValue("tax_provider", result?.tax_provider_details?.name || "");
       setValue("name", result?.default_rate?.name || "");
-      setValue("tax_rate", result?.default_rate?.rate || "0");
+      setValue("tax_rate", String(result?.default_rate?.rate) || "0");
       setValue("tax_code", result?.default_rate?.code || "");
     }
   }, [result, setValue, dispatch]);
   return (
-    <DialogPopUp
-      title=""
-      description=""
-      isOpen={true}
-      handleClose={() => {}}
-    >
+    <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
@@ -115,10 +118,12 @@ const CreateTaxRegion = ({ ItemId }: CreateTaxRegionProps) => {
               <Details
                 control={control}
                 errors={errors}
+                ItemId={ItemId}
                 title={`${ItemId ? "Update" : "Add"} Tax Region`}
                 description={`${
                   ItemId ? "Update" : "Add a new"
                 } to define tax rates for a specific country.`}
+                Provinces={Provinces}
               />
             </div>
           )}

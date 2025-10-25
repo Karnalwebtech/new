@@ -1,6 +1,5 @@
 import { apiUrl, apiKey } from "@/config";
 import { getToken } from "@/lib/set-localstorage";
-import { GetResponseReturnReason, GetResponseReturnReasonDetails, ReturnReasonType } from "@/types/return-reason-type";
 import { GetResponseTaxRegion, GetResponseTaxRegionDetails, TaxRegionType } from "@/types/tax-region-type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
@@ -24,6 +23,7 @@ export const taxRegionApi = createApi({
         rowsPerPage?: number;
         page?: number;
         keywords?: string;
+        province_code?:string;
       } | void
     >({
       query: (filters) => {
@@ -38,6 +38,9 @@ export const taxRegionApi = createApi({
           }
           if (filters.keywords) {
             params.keywords = filters.keywords; // Convert number to string
+          }
+            if (filters.province_code) {
+            params.province_code = filters.province_code; // Convert number to string
           }
         }
 
@@ -73,13 +76,13 @@ export const taxRegionApi = createApi({
       },
       invalidatesTags: [{ type: "taxregion", id: "LIST" }],
     }),
-    // deleteReturnReason: build.mutation<void, { id: string }>({
-    //   query: ({ id }) => ({
-    //     url: `/return-reason-delete/${id}`,
-    //     method: "DELETE", // Use DELETE instead of PUT
-    //   }),
-    //   invalidatesTags: [{ type: "taxregion", id: "LIST" }],
-    // }),
+    deleteTaxRegion: build.mutation<void, { id: string }>({
+      query: ({ id }) => ({
+        url: `/delete-tax-region/${id}`,
+        method: "DELETE", // Use DELETE instead of PUT
+      }),
+      invalidatesTags: [{ type: "taxregion", id: "LIST" }],
+    }),
     getTaxRegionDetails: build.query<GetResponseTaxRegionDetails, { id: string }>({
       query: ({id}) => {
         return {
@@ -93,7 +96,7 @@ export const taxRegionApi = createApi({
 });
 export const { useAddTaxRegionMutation,
   useGetAllTaxRegionDataQuery,
-  // useDeleteReturnReasonMutation,
+  useDeleteTaxRegionMutation,
   useGetTaxRegionDetailsQuery,
   useUpdateTaxRegionMutation
  } = taxRegionApi;
