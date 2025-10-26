@@ -1,7 +1,7 @@
 "use client";
 import NavigateBtn from "@/components/buttons/navigate-btn";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BaggageClaim, ChevronRight } from "lucide-react";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { BaggageClaim, ChevronRight, Truck } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -31,17 +31,17 @@ const Locations = () => {
           <CardTitle>Shipping Configuration</CardTitle>
           <div className="mt-4">
             <Link href={"/settings/locations/shipping-profiles"}>
-              <div className="grid grid-cols-12 gap-2 place-items-center hover:bg-gray-50 bg-white p-2 border rounded-md">
-                <div className="bg-gray-50 ml-4 p-2 col-span-1 block rounded-md border">
+              <div className="grid grid-cols-12 gap-2 place-items-start hover:bg-gray-50 bg-white p-2 border rounded-md">
+                <div className="bg-gray-50 p-2 col-span-1 block rounded-md border">
                   <BaggageClaim size={16} />
                 </div>
-                <div className="col-span-10">
+                <div className="col-span-10 pl-4">
                   <p className="text-sm font-semibold">Shipping Profiles</p>
                   <p className="text-xs text-gray-700">
                     Group products by shipping requirements
                   </p>
                 </div>
-                <div className="col-span-1">
+                <div className="col-span-1 pt-3">
                   <ChevronRight size={14} />
                 </div>
               </div>
@@ -49,17 +49,17 @@ const Locations = () => {
           </div>
            <div className="mt-2">
             <Link href={"/settings/locations/shipping-option-types"}>
-              <div className="grid grid-cols-12 gap-2 place-items-center hover:bg-gray-50 bg-white p-2 border rounded-md">
-                <div className="bg-gray-50 ml-4 p-2 col-span-1 block rounded-md border">
-                  <BaggageClaim size={16} />
+              <div className="grid grid-cols-12 gap-2 place-items-start hover:bg-gray-50 bg-white p-2 border rounded-md">
+                <div className="bg-gray-50 p-2 col-span-1 block rounded-md border">
+                  <Truck size={16} />
                 </div>
-                <div className="col-span-10">
-                  <p className="text-sm font-semibold">Shipping Profiles</p>
+                <div className="col-span-10 pl-4">
+                  <p className="text-sm font-semibold">Shipping Option Types</p>
                   <p className="text-xs text-gray-700">
-                    Group products by shipping requirements
+                    Group shipping options by types
                   </p>
                 </div>
-                <div className="col-span-1">
+                <div className="col-span-1 pt-3">
                   <ChevronRight size={14} />
                 </div>
               </div>
