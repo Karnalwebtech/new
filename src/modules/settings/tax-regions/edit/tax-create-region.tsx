@@ -47,7 +47,7 @@ const CreateTaxRegion = ({ ItemId, Provinces,parentId }: CreateTaxRegionProps) =
     successMessage: updateSuccess
       ? "Tax region updated successfully!"
       : "Tax region Add successfully!",
-    // redirectPath: "/settings/tax-regions",
+    redirectPath: parentId?`/settings/tax-regions/${parentId}`:"/settings/tax-regions",
   });
   const {
     control,
@@ -75,29 +75,33 @@ const CreateTaxRegion = ({ ItemId, Provinces,parentId }: CreateTaxRegionProps) =
     async (data: FormData) => {
       const updatedData = {
         ...data,
-        country_id:parentId,
+        country_id:parentId!,
+        provinces:Provinces!,
+        id: ItemId!
       }
       // console.log(updatedData)
-      // if (ItemId) {
-      //   await updateTaxRegion({ ...data, id: ItemId });
-      //   return;
-      // }
-      if(Provinces){
-        await addTaxRegion(updatedData);
+      if (ItemId) {
+        await updateTaxRegion(updatedData);
         return;
       }
-      await addTaxRegion(data);
+      // if(Provinces){
+      //   return;
+      // }
+        await addTaxRegion(updatedData);
+      // await addTaxRegion(data);
     },
     [addTaxRegion, updateTaxRegion, ItemId,Provinces,parentId]
   );
 
   useEffect(() => {
     if (result) {
-      setValue("country", result?.country_code?._id || "");
+      setValue("country", result?.country_id?._id);
+      setValue("state", result?.province_id?._id || "");
       setValue("tax_provider", result?.tax_provider_details?.name || "");
       setValue("name", result?.default_rate?.name || "");
       setValue("tax_rate", String(result?.default_rate?.rate) || "0");
       setValue("tax_code", result?.default_rate?.code || "");
+      setValue("is_combinable", result?.default_rate?.is_combinable || false);
     }
   }, [result, setValue, dispatch]);
   return (

@@ -5,7 +5,9 @@ interface TaxProviderDetailsType{
 }
 export interface TaxRegionType {
     country?:string;
-    country_code?:CountryStateCityType;
+    country_id?:CountryStateCityType | undefined;
+    province_id?:CountryStateCityType | undefined;
+    country_code?:string;
     _id?:string;
     id?:string;
     tax_provider?:string;
@@ -16,6 +18,7 @@ export interface TaxRegionType {
     rate?: string | undefined;
     tax_code?: string;
     code?: string | undefined;
+    is_combinable?:boolean;
     createdAt?:Date;
     updatedAt?:Date;
 }

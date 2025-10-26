@@ -1,11 +1,12 @@
 "use client";
 
 import { memo, useCallback, useEffect, useState } from "react";
-import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { MapPinned, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/modules/layout/header/header";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { ProductsSkeleton } from "@/components/skeletons/single-page-skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   useDeleteTaxRegionMutation,
   useGetTaxRegionDetailsQuery,
@@ -25,8 +26,14 @@ import { AlertDialogComponenet } from "@/components/alert-dialog";
 import TaxRegions from "./tax-regions";
 interface TaxRegionDetailsProps {
   ItemId: string;
+  region?: string;
+  provinces_last?: boolean;
 }
-const TaxRegionDetails = ({ ItemId }: TaxRegionDetailsProps) => {
+const TaxRegionDetails = ({
+  ItemId,
+  region,
+  provinces_last = true,
+}: TaxRegionDetailsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
   const router = useRouter();
@@ -71,15 +78,35 @@ const TaxRegionDetails = ({ ItemId }: TaxRegionDetailsProps) => {
   return (
     <div className="min-h-screen">
       {/* Header with breadcrumb */}
+
       <Header
-        breadcrumbData={[
-          { label: "Settings", path: "/settings" },
-          { label: "Tax regions", path: "/settings/tax-regions" },
-          {
-            label: result?.country_code?.name || "Preview",
-            path: "/settings/regions/preview",
-          },
-        ]}
+        breadcrumbData={
+          result?.province_id?._id
+            ? [
+                { label: "Settings", path: "/settings" },
+                { label: "Tax regions", path: "/settings/tax-regions" },
+                {
+                  label: result?.country_id?.name || "",
+                  path: `/settings/tax-regions/${region}`,
+                },
+                {
+                  label: result?.province_id?.countryCode || "",
+                  path: `/settings/tax-regions/${region}/${result?.province_id?.countryCode}`,
+                },
+                {
+                  label: result?.province_id?.name || "",
+                  path: `/settings/tax-regions/${region}/${ItemId}`,
+                },
+              ]
+            : [
+                { label: "Settings", path: "/settings" },
+                { label: "Tax regions", path: "/settings/tax-regions" },
+                {
+                  label: result?.country_id?.name || "Preview",
+                  path: `/settings/tax-regions/${ItemId}`,
+                },
+              ]
+        }
       />
       {dataLoader ? (
         <ProductsSkeleton />
@@ -89,51 +116,94 @@ const TaxRegionDetails = ({ ItemId }: TaxRegionDetailsProps) => {
           <div className="pr-[2px]">
             <header className="border-b group border-border bg-card mx-auto max-w-7xl shadow-sm border bg-gray-50 border-gray-200 rounded-md">
               <div className="px-6 py-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 item-center ">
-                    <ReactCountryFlag
-                      countryCode={result?.country_code?.isoCode || ""}
-                      svg
-                      style={{ width: "1.7rem", height: "1.7rem" }}
-                      title={result?.country_code?.isoCode}
-                    />
-                    <h1 className="text-xl font-bold text-foreground">
-                      {capitalizeFirstLetter(result?.country_code?.name || "")}
-                    </h1>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      className="animate-in fade-in"
-                    >
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() =>
-                          router.push(
-                            `/settings/tax-regions/${result?.id}/edit`
-                          )
+                <div className="grid grid-cols-12 gap-4 items-center w-full">
+                  {/* Province info + status */}
+                  <div className="col-span-12 md:col-span-10 flex flex-wrap items-center justify-between gap-4">
+                    {/* Province name + flag/icon */}
+                    <div className="flex items-center gap-3 item-center ">
+                      {result?.province_id?._id ? (
+                        <MapPinned size={25} />
+                      ) : (
+                        <ReactCountryFlag
+                          countryCode={result?.country_id?.isoCode || ""}
+                          svg
+                          style={{ width: "1.7rem", height: "1.7rem" }}
+                          title={result?.country_id?.isoCode}
+                        />
+                      )}
+
+                      <h1 className="text-xl font-bold text-foreground">
+                        {capitalizeFirstLetter(
+                          result?.province_id?._id
+                            ? result?.province_id?.name || ""
+                            : result?.country_id?.name || ""
+                        )}
+                      </h1>
+                    </div>
+
+                    {/* Badge */}
+                    {result?.province_id?._id && (
+                      <Badge
+                        variant={
+                          result?.default_rate?.is_combinable
+                            ? "secondary"
+                            : "destructive"
                         }
+                        className={`${
+                          result?.default_rate?.is_combinable
+                            ? "bg-green-500 text-white dark:bg-green-600"
+                            : "bg-red-500 text-white dark:bg-red-600"
+                        }`}
                       >
-                        <Pencil className="h-4 w-4 mr-2" /> Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        disabled={deletedId === result?.id}
-                        className="text-destructive cursor-pointer"
-                        onClick={() => result?.id && removeHandler(result.id!)}
+                        {result?.default_rate?.is_combinable
+                          ? "Combinable"
+                          : "No default rate"}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Dropdown menu */}
+                  <div className="col-span-12 md:col-span-2 flex justify-end">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent
+                        align="end"
+                        className="animate-in fade-in"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() =>
+                            router.push(
+                              provinces_last
+                              ?
+                              `/settings/tax-regions/${result?.id}/edit`:
+                               `/settings/tax-regions/${region}/${result?.province_id?.countryCode}/${result?.id}/edit`
+                            )
+                          }
+                        >
+                          <Pencil className="h-4 w-4 mr-2" /> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={deletedId === result?.id}
+                          className="text-destructive cursor-pointer"
+                          onClick={() =>
+                            result?.id && removeHandler(result.id!)
+                          }
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center justify-between border-t-[1px] px-6 py-2">
@@ -159,7 +229,12 @@ const TaxRegionDetails = ({ ItemId }: TaxRegionDetailsProps) => {
 
           {/* Main Content */}
           <div className="mx-auto max-w-7xl px-6 py-8">
-            <TaxRegions provinces={ItemId} isoCode={result?.country_code?.isoCode}/>
+            {provinces_last && (
+              <TaxRegions
+                provinces={ItemId}
+                isoCode={result?.country_id?.isoCode}
+              />
+            )}
 
             {/* Overrides Section */}
             <div className="mb-8">

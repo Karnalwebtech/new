@@ -8,7 +8,7 @@ import useWindowWidth from "@/hooks/useWindowWidth";
 import { TruncateText } from "@/components/truncate-text";
 import ShadcnPagination from "@/components/pagination";
 import { containerVariants } from "@/lib/variants";
-import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Eye, MapPinned, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,7 @@ import {
 } from "@/state/tax-region-api";
 import ReactCountryFlag from "react-country-flag";
 import { TaxRegionType } from "@/types/tax-region-type";
+import NoRecordsCard from "@/components/cards/no-records-card";
 
 const Row = memo(
   ({
@@ -33,26 +34,36 @@ const Row = memo(
     router,
     removeHandler,
     deletedId,
+    provinces,
   }: {
     router: ReturnType<typeof useRouter>;
     item: TaxRegionType;
     removeHandler: (id: string) => void;
     deletedId: string;
+    provinces?:string;
   }) => {
     return (
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
         <TableCell className="flex gap-2 item-center">
-          <span>
-            <ReactCountryFlag
-              countryCode={item?.country_code?.isoCode || ""}
-              svg
-              style={{ width: "1.25rem", height: "1.25rem" }}
-              title={item?.country_code?.isoCode}
-            />
+          <span className="border border-gray-300 p-[4px] bg-gray-100 rounded-lg">
+            {item.province_id ? (
+              <MapPinned size={18} />
+            ) : (
+              <ReactCountryFlag
+                countryCode={item?.country_id?.isoCode || ""}
+                svg
+                style={{ width: "1.25rem", height: "1.25rem" }}
+                title={item?.country_id?.isoCode}
+              />
+            )}
           </span>
           <span className="text-muted-foreground">
             <TruncateText
-              text={item?.country_code?.name || ""}
+              text={
+                item.province_id
+                  ? item?.province_id?.name || ""
+                  : item?.country_id?.name || ""
+              }
               maxLength={25}
             />
           </span>
@@ -72,14 +83,24 @@ const Row = memo(
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/settings/tax-regions/${item?.id}/edit`)
+                  router.push(
+                    item.province_id
+                      ? `/settings/tax-regions/${provinces}/${item.province_id?.countryCode}/${item?.id}/edit`
+                      : `/settings/tax-regions/${item?.id}/edit`
+                  )
                 }
               >
                 <Pencil className="h-4 w-4 mr-2" /> Edit
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => router.push(`/settings/tax-regions/${item?.id}`)}
+                onClick={() =>
+                  router.push(
+                    item.province_id
+                      ? `/settings/tax-regions/${provinces}/${item.province_id?.countryCode}/${item?.id}`
+                      : `/settings/tax-regions/${item?.id}`
+                  )
+                }
               >
                 <Eye className="h-4 w-4 mr-2" /> Preview
               </DropdownMenuItem>
@@ -103,7 +124,7 @@ interface TaxRegionProps {
   provinces?: string;
   isoCode?: string;
 }
-const TaxRegion = ({ provinces, isoCode }: TaxRegionProps) => {
+const TaxRegion = ({ provinces, isoCode = "null" }: TaxRegionProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -116,7 +137,7 @@ const TaxRegion = ({ provinces, isoCode }: TaxRegionProps) => {
   const { data, isLoading, error } = useGetAllTaxRegionDataQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
-    province_code: "null",
+    country_code: isoCode,
   });
 
   useHandleNotifications({
@@ -129,7 +150,7 @@ const TaxRegion = ({ provinces, isoCode }: TaxRegionProps) => {
   const result = useMemo(() => data?.result || [], [data?.result]);
   const { filteredItems, searchTerm, setSearchTerm } = useTableFilters(result, [
     "name",
-    "country_code.name",
+    "country_id.name",
   ]);
 
   const removeHandler = useCallback((id: string) => {
@@ -152,12 +173,7 @@ const TaxRegion = ({ provinces, isoCode }: TaxRegionProps) => {
       return (
         <TableRow>
           <TableCell colSpan={4} className="text-center py-8">
-            <div className="text-muted-foreground text-lg mb-2">
-              No Tax region found
-            </div>
-            <div className="text-sm text-muted-foreground/70">
-              Try adjusting your search criteria
-            </div>
+           <NoRecordsCard/>
           </TableCell>
         </TableRow>
       );
@@ -170,9 +186,10 @@ const TaxRegion = ({ provinces, isoCode }: TaxRegionProps) => {
         router={router}
         removeHandler={removeHandler}
         deletedId={deletedId!}
+        provinces={provinces}
       />
     ));
-  }, [filteredItems, router, removeHandler, deletedId]);
+  }, [filteredItems, router, removeHandler, deletedId,provinces]);
 
   return (
     <motion.div
@@ -183,8 +200,8 @@ const TaxRegion = ({ provinces, isoCode }: TaxRegionProps) => {
     >
       <div className="container mx-auto py-8">
         <PageHeander2
-          headerTitle={"Tax Regions"}
-          headerDescription="Manage what you charge your customers when they shop from different countries and regions."
+          headerTitle={provinces?"States":"Tax Regions"}
+          headerDescription={provinces?"":"Manage what you charge your customers when they shop from different countries and regions."}
           rowsPerPage={rowsPerPage}
           setRowsPerPage={setRowsPerPage}
           setCurrentPage={setCurrentPage}

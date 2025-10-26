@@ -4,6 +4,7 @@ export interface CountryStateCityType {
   currency?: string;
   isoCode?:string;
   id?: string;
+  countryCode?:string;
   flag?: string;
   latitude?: string;
   longitude?: string;

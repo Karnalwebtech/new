@@ -23,7 +23,7 @@ export const taxRegionApi = createApi({
         rowsPerPage?: number;
         page?: number;
         keywords?: string;
-        province_code?:string;
+        country_code?:string;
       } | void
     >({
       query: (filters) => {
@@ -39,8 +39,8 @@ export const taxRegionApi = createApi({
           if (filters.keywords) {
             params.keywords = filters.keywords; // Convert number to string
           }
-            if (filters.province_code) {
-            params.province_code = filters.province_code; // Convert number to string
+            if (filters.country_code) {
+            params.country_code = filters.country_code; // Convert number to string
           }
         }
 
