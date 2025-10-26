@@ -60,6 +60,8 @@ import { apiKeyApi } from "./state/api-key-api";
 import { publishableApiKeyApi } from "./state/publishable-api-key-api";
 import { returnReasonApi } from "./state/return-reason-api";
 import { taxRegionApi } from "./state/tax-region-api";
+import { shippingProfileApi } from "./state/shipping-profile-api";
+import { shippingOptionTypeApi } from "./state/shipping-option-type-api";
 
 const createNoopStorage = () => ({
   getItem: () => Promise.resolve(null),
@@ -109,6 +111,9 @@ const persistConfig = {
     publishableApiKeyApi.reducerPath,
     returnReasonApi.reducerPath,
     taxRegionApi.reducerPath,
+    shippingProfileApi.reducerPath,
+    shippingOptionTypeApi.reducerPath,
+
     //superme
     cloudStorageApi.reducerPath,
   ],
@@ -153,6 +158,8 @@ const rootReducer = combineReducers({
   [publishableApiKeyApi.reducerPath]: publishableApiKeyApi.reducer,
   [returnReasonApi.reducerPath]: returnReasonApi.reducer,
   [taxRegionApi.reducerPath]: taxRegionApi.reducer,
+  [shippingProfileApi.reducerPath]: shippingProfileApi.reducer,
+  [shippingOptionTypeApi.reducerPath]: shippingOptionTypeApi.reducer,
 
   //superme
   [cloudStorageApi.reducerPath]: cloudStorageApi.reducer,
@@ -205,6 +212,8 @@ const makeStore = () => {
         publishableApiKeyApi.middleware,
         returnReasonApi.middleware,
         taxRegionApi.middleware,
+        shippingProfileApi.middleware,
+        shippingOptionTypeApi.middleware,
 
         //superme
         cloudStorageApi.middleware,

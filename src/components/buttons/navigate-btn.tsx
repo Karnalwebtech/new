@@ -44,7 +44,7 @@ const NavigateBtn = ({
           onClick={handleNavigation}
         >
           {Icon && <Icon className="mr-2 h-4 w-4" />}
-          <span className="hidden md:block"> {title}</span>
+          <span className=""> {title}</span>
         </Button>
       </motion.div>
     </motion.div>
