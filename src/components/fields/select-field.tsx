@@ -17,9 +17,19 @@ import {
 import { capitalizeFirstLetter } from "@/services/helpers";
 import { ParaSkeleton } from "../skeletons/para-skeleton";
 import ReactCountryFlag from "react-country-flag";
+import { useMemo } from "react";
 
-type DropdownOption = { key: string; value: string; isoCode?: string };
-
+type DropdownOption = {
+  key: string;
+  value: string;
+  isoCode?: string;
+  stateCode?: string;
+};
+export type CSCCode = {
+  countryCode?: string; // ISO2
+  stateCode?: string; // ISO / short code
+  cityName?: string;
+};
 interface SelectFieldProps<T extends FieldValues> {
   control: Control<T>;
   errors: FieldErrors<T>;
@@ -31,6 +41,7 @@ interface SelectFieldProps<T extends FieldValues> {
   defaultValue?: PathValue<T, Path<T>>;
   is_loading?: boolean;
   is_disabled?: boolean;
+  setCscCode?: (patch: Partial<CSCCode>) => void;
 }
 
 const SelectFields = <T extends FieldValues>({
@@ -44,7 +55,14 @@ const SelectFields = <T extends FieldValues>({
   defaultValue,
   is_loading = false,
   is_disabled = false,
+  setCscCode,
 }: SelectFieldProps<T>) => {
+  const optionMap = useMemo(() => {
+    const m = new Map<string, DropdownOption>();
+    for (const o of drop_down_selector) m.set(o.key, o);
+    return m;
+  }, [drop_down_selector]);
+
   let errorMessage: string | undefined;
 
   // Check for nested errors
@@ -77,6 +95,17 @@ const SelectFields = <T extends FieldValues>({
             <Select
               value={value}
               onValueChange={(newValue) => {
+                // 🔹 Store the isoCode (if available) or the selected key
+                const selected = optionMap.get(newValue);
+                if (selected) {
+                  // Push ISO to shared CSC state if available
+                  if (selected.isoCode) console.log(name);
+                  if (name === "country") {
+                    setCscCode?.({ countryCode: selected.isoCode });
+                  } else if (name === "state") {
+                    setCscCode?.({ stateCode: selected.stateCode });
+                  }
+                }
                 // Prevent empty string resets by not calling onChange when value is empty
                 // unless the current value is already defined (intentional clearing)
                 if (newValue !== "" || field.value) {
@@ -101,7 +130,7 @@ const SelectFields = <T extends FieldValues>({
                         value={option.key}
                         className="cursor-pointer hover:bg-gray-100 flex gap-6 items-center"
                       >
-                        {option?.isoCode && (
+                        {option?.isoCode && name === "country" && (
                           <span className="pr-2">
                             <ReactCountryFlag
                               countryCode={option?.isoCode || ""}

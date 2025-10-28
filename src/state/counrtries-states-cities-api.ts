@@ -21,7 +21,7 @@ export const countriesStatesCitiesApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Country-state-city"],
+  tagTypes: ["Country","State","City"],
   endpoints: (builder) => ({
     // addCurrency: builder.mutation<void, AddCurrencyPayload>({
     //   query: (data) => {
@@ -68,7 +68,7 @@ export const countriesStatesCitiesApi = createApi({
           method: "GET",
         };
       },
-      // providesTags: [{ type: "Country-state-city", id: "LIST" }],
+      providesTags: [{ type: "Country", id: "LIST" }],
     }),
      getCountorieByStates: builder.query<
       GETCountryStateCityResponse,
@@ -102,7 +102,41 @@ export const countriesStatesCitiesApi = createApi({
           method: "GET",
         };
       },
-      // providesTags: [{ type: "Country-state-city", id: "LIST" }],
+      providesTags: [{ type: "State", id: "LIST" }],
+    }),
+      getStateByCities: builder.query<
+      GETCountryStateCityResponse,
+      {
+        rowsPerPage?: number;
+        page?: number;
+        keywords?: string;
+        stateCode?: string;
+      } | void
+    >({
+      query: (filters) => {
+        const params: Record<string, string | number | boolean> = {};
+        if (filters) {
+          if (filters.rowsPerPage) {
+            params.rowsPerPage = filters.rowsPerPage; // Convert number to string
+          }
+          if (filters.page) {
+            params.page = filters.page; // Convert number to string
+          }
+          if (filters.keywords) {
+            params.keyword = filters.keywords; // Convert number to string
+          }
+           if (filters.stateCode) {
+            params.stateCode = filters.stateCode; // Convert number to string
+          }
+        }
+
+        return {
+          url: "/countrie-state-cities",
+          params, // Use the dynamically constructed params
+          method: "GET",
+        };
+      },
+      providesTags: [{ type: "City", id: "LIST" }],
     }),
     // deleteCountry-state-city: builder.mutation<void, { id: string }>({
     //   query: ({ id }) => ({
@@ -125,6 +159,7 @@ export const {
   // useAddCurrencyMutation,
   useGetAllCountoriesQuery,
   useGetCountorieByStatesQuery,
+  useGetStateByCitiesQuery,
   // useDeleteCountry-state-cityMutation,
   // useUpdateTaxPriceCountry-state-cityMutation,
 } = countriesStatesCitiesApi;
