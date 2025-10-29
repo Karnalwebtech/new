@@ -101,12 +101,7 @@ const CreateLocation = ({ ItemId }: CreateLocationProps) => {
     }
   }, [value, setValue]);
   return (
-    <DialogPopUp
-      title="Add Currencies"
-      description="Add Currencies for your store"
-      isOpen={true}
-      handleClose={() => {}}
-    >
+    <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
@@ -123,10 +118,10 @@ const CreateLocation = ({ ItemId }: CreateLocationProps) => {
               <Details
                 control={control}
                 errors={errors}
-                title={`${ItemId ? "Update" : "Add"} return reason`}
-                description={`${
-                  ItemId ? "Update" : "Add a new"
-                } return reason to sell your products on.`}
+                title={`${ItemId ? "Update" : "Add"} Stock Location`}
+                description={
+                  "A stock location is a physical site where products are stored and shipped from."
+                }
               />
             </div>
           )}
