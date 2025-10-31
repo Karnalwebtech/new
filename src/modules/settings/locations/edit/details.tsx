@@ -1,16 +1,19 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
+import { useWatch } from "react-hook-form";
 import InputField from "@/components/fields/input-field";
 import SelectFields from "@/components/fields/select-field";
 import { useCSCData } from "@/hooks/useCSCData";
+
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
   errors: FieldErrors<T>;
   title: string;
   description: string;
 }
+
 const Details = <T extends FieldValues>({
   control,
   errors,
@@ -19,6 +22,35 @@ const Details = <T extends FieldValues>({
 }: DetailsProps<T>) => {
   const { countries, states, cities, loading, cscCode, setCscCode } =
     useCSCData();
+
+  // Read currently selected IDs from RHF (works on both Add and Edit)
+  const countryId = useWatch({
+    control,
+    name: "country" as Path<T>,
+  }) as string | undefined;
+
+  const stateId = useWatch({
+    control,
+    name: "state" as Path<T>,
+  }) as string | undefined;
+
+  // 🔹 Hydrate cscCode.countryCode (ISO2) from current countryId
+  useEffect(() => {
+    if (!countryId || !countries?.length) return;
+    const hit = countries.find((c) => c.key === countryId);
+    if (hit?.isoCode) {
+      setCscCode((prev) => ({ ...prev, countryCode: hit.isoCode }));
+    }
+  }, [countryId, countries, setCscCode]);
+
+  // 🔹 Hydrate cscCode.stateCode (short code) from current stateId
+  useEffect(() => {
+    if (!stateId || !states?.length) return;
+    const hit = states.find((s) => s.key === stateId);
+    if (hit?.stateCode) {
+      setCscCode((prev) => ({ ...prev, stateCode: hit.stateCode }));
+    }
+  }, [stateId, states, setCscCode]);
 
   return (
     <>
@@ -30,10 +62,9 @@ const Details = <T extends FieldValues>({
         </div>
 
         <div className="space-y-8">
-          {/* Title, Subtitle, Handle Row */}
-          <div className="">
+          <div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className=" mb-4">
+              <div className="mb-4">
                 <Label
                   htmlFor="name"
                   className="text-sm font-medium text-gray-700"
@@ -45,14 +76,13 @@ const Details = <T extends FieldValues>({
                   errors={errors}
                   name={"name" as Path<T>}
                   placeholder=""
-                  inputStyle={
-                    "placeholder-gray-200 bg-transparent border-zinc-300"
-                  }
+                  inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
                 />
               </div>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-6">
-              <div className="">
+              <div>
                 <Label
                   htmlFor="address_1"
                   className="text-sm font-medium text-gray-700"
@@ -64,12 +94,11 @@ const Details = <T extends FieldValues>({
                   errors={errors}
                   name={"address_1" as Path<T>}
                   placeholder=""
-                  inputStyle={
-                    "placeholder-gray-200 bg-transparent border-zinc-300"
-                  }
+                  inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
                 />
               </div>
-              <div className="">
+
+              <div>
                 <Label
                   htmlFor="address_2"
                   className="text-sm font-medium text-gray-700"
@@ -82,12 +111,11 @@ const Details = <T extends FieldValues>({
                   errors={errors}
                   name={"address_2" as Path<T>}
                   placeholder=""
-                  inputStyle={
-                    "placeholder-gray-200 bg-transparent border-zinc-300"
-                  }
+                  inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
                 />
               </div>
-              <div className="">
+
+              <div>
                 <Label
                   htmlFor="postal_code"
                   className="text-sm font-medium text-gray-700"
@@ -100,12 +128,11 @@ const Details = <T extends FieldValues>({
                   errors={errors}
                   name={"postal_code" as Path<T>}
                   placeholder=""
-                  inputStyle={
-                    "placeholder-gray-200 bg-transparent border-zinc-300"
-                  }
+                  inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
                 />
               </div>
-              <div className="">
+
+              <div>
                 <Label
                   htmlFor="country"
                   className="text-sm font-medium text-gray-700"
@@ -119,17 +146,19 @@ const Details = <T extends FieldValues>({
                   placeholder="Select Country"
                   drop_down_selector={countries}
                   is_loading={loading.countries}
+                  // country is always enabled
+                  is_disabled={false}
                   setCscCode={setCscCode}
                 />
               </div>
-              <div className="">
+
+              <div>
                 <Label
                   htmlFor="state"
                   className="text-sm font-medium text-gray-700"
                 >
                   State
                 </Label>
-
                 <SelectFields
                   control={control}
                   errors={errors}
@@ -137,18 +166,19 @@ const Details = <T extends FieldValues>({
                   placeholder="Select State"
                   drop_down_selector={states}
                   is_loading={loading.states}
-                  is_disabled={!cscCode?.countryCode && !cscCode?.stateCode}
+                  // Enable if either ISO is known or a country is selected (edit case)
+                  is_disabled={!cscCode?.countryCode && !countryId}
                   setCscCode={setCscCode}
                 />
               </div>
-              <div className="">
+
+              <div>
                 <Label
                   htmlFor="city"
                   className="text-sm font-medium text-gray-700"
                 >
                   City
                 </Label>
-
                 <SelectFields
                   control={control}
                   errors={errors}
@@ -156,11 +186,13 @@ const Details = <T extends FieldValues>({
                   placeholder="Select City"
                   drop_down_selector={cities}
                   is_loading={loading.cities}
-                  is_disabled={!cscCode?.stateCode}
+                  // Enable if either stateCode is known or a state is selected (edit case)
+                  is_disabled={!cscCode?.stateCode && !stateId}
                   setCscCode={setCscCode}
                 />
               </div>
-              <div className="">
+
+              <div>
                 <Label
                   htmlFor="company"
                   className="text-sm font-medium text-gray-700"
@@ -173,12 +205,11 @@ const Details = <T extends FieldValues>({
                   errors={errors}
                   name={"company" as Path<T>}
                   placeholder=""
-                  inputStyle={
-                    "placeholder-gray-200 bg-transparent border-zinc-300"
-                  }
+                  inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
                 />
               </div>
-              <div className="">
+
+              <div>
                 <Label
                   htmlFor="phone"
                   className="text-sm font-medium text-gray-700"
@@ -191,9 +222,7 @@ const Details = <T extends FieldValues>({
                   errors={errors}
                   name={"phone" as Path<T>}
                   placeholder=""
-                  inputStyle={
-                    "placeholder-gray-200 bg-transparent border-zinc-300"
-                  }
+                  inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
                 />
               </div>
             </div>
