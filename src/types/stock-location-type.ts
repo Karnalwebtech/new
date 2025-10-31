@@ -12,18 +12,17 @@ export interface StockLocationType {
   country: string;
   state?: string;
   city?: string;
+  address_id?: StockLocationType;
   province_id?: string;
 }
 
-
-export interface GETResponseStockLocation {
+export interface GETResponseStockLocationDetails {
   success: boolean;
   result: StockLocationType;
 }
 
-
 export interface GetResponseStockLocation {
-   success:true;
-   result:StockLocationType[];
-   dataCounter:number;
+  success: true;
+  result: StockLocationType[];
+  dataCounter: number;
 }

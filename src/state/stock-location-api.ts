@@ -1,7 +1,10 @@
 import { apiUrl, apiKey } from "@/config";
 import { getToken } from "@/lib/set-localstorage";
-import { GetResponseStockLocation, StockLocationType } from "@/types/stock-location-type";
-import { GetResponseTaxRegion, GetResponseTaxRegionDetails, TaxRegionType } from "@/types/tax-region-type";
+import {
+  GetResponseStockLocation,
+  GETResponseStockLocationDetails,
+  StockLocationType,
+} from "@/types/stock-location-type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const stockLocationApi = createApi({
@@ -39,7 +42,6 @@ export const stockLocationApi = createApi({
           if (filters.keywords) {
             params.keywords = filters.keywords; // Convert number to string
           }
-        
         }
 
         return {
@@ -62,29 +64,32 @@ export const stockLocationApi = createApi({
       },
       invalidatesTags: [{ type: "stockLocation", id: "LIST" }],
     }),
-      updateTaxRegion: build.mutation<void, TaxRegionType>({
+    updateStockLocation: build.mutation<void, StockLocationType>({
       query: (data) => {
         const formData = new FormData();
         formData.append("data", JSON.stringify(data));
         return {
-          url: `/tax-region-edit/${data?.id}`,
+          url: `/stock-location-edit/${data?.id}`,
           method: "put",
           body: formData,
         };
       },
       invalidatesTags: [{ type: "stockLocation", id: "LIST" }],
     }),
-    deleteTaxRegion: build.mutation<void, { id: string }>({
+    deleteStockLocation: build.mutation<void, { id: string }>({
       query: ({ id }) => ({
-        url: `/delete-tax-region/${id}`,
+        url: `/remove-stock-location/${id}`,
         method: "DELETE", // Use DELETE instead of PUT
       }),
       invalidatesTags: [{ type: "stockLocation", id: "LIST" }],
     }),
-    getTaxRegionDetails: build.query<GetResponseTaxRegionDetails, { id: string }>({
-      query: ({id}) => {
+    getStockLocationDetails: build.query<
+      GETResponseStockLocationDetails,
+      { id: string }
+    >({
+      query: ({ id }) => {
         return {
-          url: `/tax-regions/${id}`,
+          url: `/stock-location/${id}`,
           method: "GET",
         };
       },
@@ -92,9 +97,10 @@ export const stockLocationApi = createApi({
     }),
   }),
 });
-export const { useAddStockLocationMutation,
+export const {
+  useAddStockLocationMutation,
   useGetAllStockLocationQuery,
-  useDeleteTaxRegionMutation,
-  useGetTaxRegionDetailsQuery,
-  useUpdateTaxRegionMutation
- } = stockLocationApi;
+  useDeleteStockLocationMutation,
+  useGetStockLocationDetailsQuery,
+  useUpdateStockLocationMutation,
+} = stockLocationApi;

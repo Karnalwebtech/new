@@ -12,12 +12,12 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import {
-  useGetReturnReasonDetailsQuery,
-  useUpdateReturnReasonMutation,
-} from "@/state/return-reason-api";
 import { stockLocationSchema } from "@/zod-shema/stock-location-schema";
-import { useAddStockLocationMutation } from "@/state/stock-location-api";
+import {
+  useAddStockLocationMutation,
+  useGetStockLocationDetailsQuery,
+  useUpdateStockLocationMutation,
+} from "@/state/stock-location-api";
 
 type FormData = z.infer<typeof stockLocationSchema>;
 interface CreateLocationProps {
@@ -30,15 +30,15 @@ const CreateLocation = ({ ItemId }: CreateLocationProps) => {
   const [addStockLocation, { isLoading, error, isSuccess }] =
     useAddStockLocationMutation();
   const [
-    updateReturnReason,
+    updateStockLocation,
     { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
-  ] = useUpdateReturnReasonMutation();
+  ] = useUpdateStockLocationMutation();
 
   const {
     data,
     isLoading: dataLoader,
     error: dataLoadError,
-  } = useGetReturnReasonDetailsQuery(
+  } = useGetStockLocationDetailsQuery(
     { id: ItemId as string },
     { skip: !ItemId }
   );
@@ -73,19 +73,25 @@ const CreateLocation = ({ ItemId }: CreateLocationProps) => {
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (ItemId) {
-        await updateReturnReason({ ...data, id: ItemId });
+        await updateStockLocation({ ...data, id: ItemId });
         return;
       }
       await addStockLocation(data);
     },
-    [addStockLocation, updateReturnReason, ItemId]
+    [addStockLocation, updateStockLocation, ItemId]
   );
 
   useEffect(() => {
     if (result) {
-      // setValue("value", result?.value);
-      // setValue("description", result?.description);
-      // setValue("label", result.label!);
+      setValue("name", result?.name);
+      setValue("phone", result?.address_id?.phone);
+      setValue("address_1", result?.address_id?.address_1);
+      setValue("address_2", result?.address_id?.address_2);
+      setValue("postal_code", result?.address_id?.postal_code);
+      setValue("company", result?.address_id?.company);
+      setValue("city", result?.address_id?.city_id);
+      setValue("country", result?.address_id?.country_id || "");
+      setValue("state", result?.address_id?.province_id || "");
     }
   }, [result, setValue, dispatch]);
   // const value = watch("value", "");
