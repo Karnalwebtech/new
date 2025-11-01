@@ -89,9 +89,9 @@ const CreateLocation = ({ ItemId }: CreateLocationProps) => {
       setValue("address_2", result?.address_id?.address_2);
       setValue("postal_code", result?.address_id?.postal_code);
       setValue("company", result?.address_id?.company);
-      setValue("city", result?.address_id?.city_id);
-      setValue("country", result?.address_id?.country_id || "");
-      setValue("state", result?.address_id?.province_id || "");
+      setValue("city", result?.address_id?.city_id?._id);
+      setValue("country", result?.address_id?.country_id?._id || "");
+      setValue("state", result?.address_id?.province_id?._id || "");
     }
   }, [result, setValue, dispatch]);
   // const value = watch("value", "");

@@ -22,7 +22,7 @@ const Page = async ({ params }: { params: Promise<{ edit: string }> }) => {
             { label: "Updte", path: "/settings/locations/create" },
           ]}
         />
-      <LocationDetails />
+      <LocationDetails ItemId={edit}/>
     </>
   );
 };
