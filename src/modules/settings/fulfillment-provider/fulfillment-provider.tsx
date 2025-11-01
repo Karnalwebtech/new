@@ -1,6 +1,6 @@
 "use client";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useTableFilters } from "@/hooks/useTableFilters";
 import Shadcn_table from "@/components/table/table";
@@ -8,24 +8,7 @@ import useWindowWidth from "@/hooks/useWindowWidth";
 import { TruncateText } from "@/components/truncate-text";
 import ShadcnPagination from "@/components/pagination";
 import { containerVariants } from "@/lib/variants";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
-import {
-  useDeleteSalesChannelsMutation,
-  useGetAllSalesChannelsDataQuery,
-} from "@/state/sales-channels-api";
-import { SalesChannelsType } from "@/types/sales-channels-type";
-import StatusIndicator from "@/components/status-indicator";
-import { TimeAgo } from "@/lib/timeAgo";
 import PageHeander2 from "@/modules/layout/header/page-heander2";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useDispatch, useSelector } from "react-redux";
@@ -35,21 +18,17 @@ import {
   clearSelected,
   toggleCode,
 } from "@/reducers/healper-slice";
+import { useGetAllFulFillmentProviderQuery } from "@/state/fullfillment-provider-api";
+import { FulFillmentProviderType } from "@/types/fulfillment-provider-type";
 
 const Row = memo(
   ({
     item,
-    removeHandler,
-    router,
-    deletedId,
     onCheckChange,
     isChild,
     isChecked,
   }: {
-    item: SalesChannelsType;
-    removeHandler: (id: string) => void;
-    deletedId: string | null;
-    router: ReturnType<typeof useRouter>;
+    item: FulFillmentProviderType;
     isChecked: boolean;
     onCheckChange: (next: boolean) => void;
     isChild: boolean;
@@ -71,86 +50,27 @@ const Row = memo(
             <TruncateText text={item.name || ""} maxLength={25} />
           </span>
         </TableCell>
-        <TableCell>
-          <span className="text-muted-foreground">
-            <TruncateText text={item.description || ""} maxLength={25} />
-          </span>
-        </TableCell>
-        <TableCell className="text-right pr-6 text-gray-700">
-          <StatusIndicator enabled={item.is_disabled!} size={40} />
-        </TableCell>
-        <TableCell>
-          <TimeAgo time={item.createdAt!} />
-        </TableCell>
-        <TableCell>
-          <TimeAgo time={item.updatedAt!} />
-        </TableCell>
-        {!isChild && (
-          <TableCell className="text-right pr-6">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Table actions">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(`/settings/sales-channels/${item?.id}/edit`)
-                  }
-                >
-                  <Pencil className="h-4 w-4 mr-2" /> Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(`/settings/sales-channels/${item?.id}`)
-                  }
-                >
-                  <Eye className="h-4 w-4 mr-2" /> Preview
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  disabled={deletedId === item?._id}
-                  className="text-destructive cursor-pointer"
-                  onClick={() => item?._id && removeHandler(item?._id)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </TableCell>
-        )}
       </TableRow>
     );
   }
 );
 Row.displayName = "Row";
-interface SalesChannelsProps {
+interface FulFillmentProviderProps {
   isChild?: boolean;
 }
-const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
-  const router = useRouter();
+const FulFillmentProvider = ({ isChild = false }: FulFillmentProviderProps) => {
   const dispatch = useDispatch();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [deletedId, setDeletedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const { selected } = useSelector((state: RootState) => state.helper);
 
-  const [
-    deleteSalesChannels,
-    { isLoading: delteLoading, error: deleteError, isSuccess: deleteSuccess },
-  ] = useDeleteSalesChannelsMutation();
-  const { data, isLoading, error } = useGetAllSalesChannelsDataQuery({
+  const { data, isLoading, error } = useGetAllFulFillmentProviderQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
   });
 
   useHandleNotifications({
-    error: error || deleteError,
-    isSuccess: deleteSuccess,
-    successMessage: `Sales Channels delete successfully!`,
+    error: error,
   });
   useEffect(() => {
     dispatch(clearSelected());
@@ -161,15 +81,6 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
   const { filteredItems, searchTerm, setSearchTerm } = useTableFilters(result, [
     "name",
   ]);
-
-  const DeleteHandler = useCallback(async () => {
-    if (deletedId) await deleteSalesChannels({ id: deletedId });
-  }, [deleteSalesChannels, deletedId]);
-
-  const removeHandler = useCallback((id: string) => {
-    setIsOpen(true);
-    setDeletedId(id);
-  }, []);
 
   const selectedOnPageCount = useMemo(() => {
     if (!selected) return 0;
@@ -210,23 +121,12 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
       <Row
         key={i}
         item={item}
-        removeHandler={removeHandler}
-        deletedId={deletedId}
-        router={router}
         isChecked={Array.isArray(selected) && selected.includes(item._id!)}
         onCheckChange={(next) => handleToggleCode(item._id!, next)}
         isChild={isChild}
       />
     ));
-  }, [
-    filteredItems,
-    deletedId,
-    removeHandler,
-    router,
-    selected,
-    handleToggleCode,
-    isChild,
-  ]);
+  }, [filteredItems, selected, handleToggleCode, isChild]);
 
   const toggleSelectAllOnPage = useCallback(
     (nextChecked: boolean) => {
@@ -240,12 +140,6 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
     [dispatch, result]
   );
 
-  useEffect(() => {
-    if (deleteSuccess) {
-      setIsOpen(false);
-      setDeletedId(null);
-    }
-  }, [deleteSuccess]);
   return (
     <motion.div
       className="min-h-screen bg-background"
@@ -276,37 +170,19 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
           className="min-h-[400px] px-2"
         >
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
-            {(isLoading || delteLoading) && (
+            {isLoading && (
               <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               </div>
             )}
 
             <Shadcn_table
-              table_header={
-                isChild
-                  ? [
-                      "checkbox",
-                      "Name",
-                      "Description",
-                      "Status",
-                      "Created",
-                      "Updated",
-                    ]
-                  : [
-                      "Name",
-                      "Description",
-                      "Status",
-                      "Created",
-                      "Updated",
-                      "Action",
-                    ]
-              }
+              table_header={isChild ? ["checkbox", "Name"] : ["Name"]}
               isAllSelected={headerCheckedState}
               isCheckbox={isChild}
               handleSelectAll={(e) => toggleSelectAllOnPage(e)}
               tabel_body={() => tableBody}
-              isLoading={isLoading || delteLoading}
+              isLoading={isLoading}
             />
           </div>
 
@@ -322,23 +198,8 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
           )}
         </div>
       </div>
-      {/* Delete Confirmation */}
-      <AnimatePresence>
-        {isOpen && (
-          <AlertDialogComponenet
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            title="Are you sure?"
-            description="This action cannot be undone. This will permanently delete the category."
-            action={DeleteHandler}
-            type="danger"
-            setDeletedId={setDeletedId}
-            isLoading={delteLoading}
-          />
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };
 
-export default memo(SalesChannels);
+export default memo(FulFillmentProvider);

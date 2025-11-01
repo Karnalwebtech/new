@@ -20,6 +20,8 @@ import { memo } from "react";
 import { StockLocationTypeDetails } from "@/types/stock-location-type";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Card } from "@/components/ui/card"
+
 interface StockLocationDetailsProps {
   item: StockLocationTypeDetails;
   removeHandler: (value: string) => void;
@@ -33,20 +35,15 @@ const StockLocationDetails = ({
   const router = useRouter();
   return (
     <motion.div
-      className="w-full my-4"
+      className="w-full"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* Main Card */}
-      <motion.div
-        className="bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden"
-        whileHover={{ boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)" }}
-        transition={{ duration: 0.3 }}
-      >
+      <Card>
         {/* Header Section */}
         <motion.div
-          className="p-6 border-b border-slate-200 dark:border-slate-700"
+          className="p-6"
           variants={itemVariants}
         >
           <div className="flex items-start justify-between gap-4">
@@ -134,7 +131,7 @@ const StockLocationDetails = ({
             </div>
           </div>
         </motion.div>
-      </motion.div>
+      </Card>
     </motion.div>
   );
 };

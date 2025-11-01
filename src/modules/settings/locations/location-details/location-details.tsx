@@ -53,9 +53,9 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-12 gap-2">
         {/* Left Column - Main Content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="col-span-12 lg:col-span-8 space-y-6">
           <StockLocationDetails
             item={result!}
             removeHandler={removeHandler}
@@ -64,9 +64,9 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
         </div>
 
         {/* Right Column - Side Panels */}
-        <div className="space-y-6">
-          <SalesChannelsCard />
-          <FulfillmentCard />
+        <div className="space-y-6 col-span-12 lg:col-span-4">
+          <SalesChannelsCard result={result!} />
+          <FulfillmentCard result={result!} />
         </div>
       </div>
 

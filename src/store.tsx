@@ -63,6 +63,7 @@ import { taxRegionApi } from "./state/tax-region-api";
 import { shippingProfileApi } from "./state/shipping-profile-api";
 import { shippingOptionTypeApi } from "./state/shipping-option-type-api";
 import { stockLocationApi } from "./state/stock-location-api";
+import { fulfillmentProviderApi } from "./state/fullfillment-provider-api";
 
 const createNoopStorage = () => ({
   getItem: () => Promise.resolve(null),
@@ -115,6 +116,7 @@ const persistConfig = {
     shippingProfileApi.reducerPath,
     shippingOptionTypeApi.reducerPath,
     stockLocationApi.reducerPath,
+    fulfillmentProviderApi.reducerPath,
 
     //superme
     cloudStorageApi.reducerPath,
@@ -163,6 +165,7 @@ const rootReducer = combineReducers({
   [shippingProfileApi.reducerPath]: shippingProfileApi.reducer,
   [shippingOptionTypeApi.reducerPath]: shippingOptionTypeApi.reducer,
   [stockLocationApi.reducerPath]: stockLocationApi.reducer,
+  [fulfillmentProviderApi.reducerPath]: fulfillmentProviderApi.reducer,
 
   //superme
   [cloudStorageApi.reducerPath]: cloudStorageApi.reducer,
@@ -218,6 +221,7 @@ const makeStore = () => {
         shippingProfileApi.middleware,
         shippingOptionTypeApi.middleware,
         stockLocationApi.middleware,
+        fulfillmentProviderApi.middleware,
 
         //superme
         cloudStorageApi.middleware,
