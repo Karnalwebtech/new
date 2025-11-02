@@ -23,6 +23,7 @@ export const fulfillmentProviderApi = createApi({
         rowsPerPage?: number;
         page?: number;
         keywords?: string;
+           stock_location_id?: string;
       } | void
     >({
       query: (filters) => {

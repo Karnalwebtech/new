@@ -1,7 +1,7 @@
 import { siteName } from "@/config";
 import { buildMetadata } from "@/lib/metadata";
 import { Header } from "@/modules/layout/header/header";
-import FulfillmentProviderList from "@/modules/settings/locations/location-details/fulfillment-provider-list";
+import SaleChannelsList from "@/modules/settings/locations/location-details/sale-channels-list";
 import React from "react";
 export const metadata = buildMetadata({
   title: "Update region",
@@ -9,7 +9,8 @@ export const metadata = buildMetadata({
   siteName: siteName,
 });
 
-const Page = async ({ params }: { params: Promise<{ edit: string }> }) => {
+const Page = async ({ params }: { params: Promise<{ edit: string,sale_channel_id: string }> }) => {
+  const { edit,sale_channel_id   } = await params; // 👈 await here
   return (
     <>
       <Header
@@ -19,7 +20,7 @@ const Page = async ({ params }: { params: Promise<{ edit: string }> }) => {
           { label: "Updte", path: "/settings/locations/create" },
         ]}
       />
-      <FulfillmentProviderList />
+      <SaleChannelsList itemId={edit} stockid={sale_channel_id}/>
     </>
   );
 };

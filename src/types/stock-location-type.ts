@@ -45,3 +45,31 @@ export interface GetResponseStockLocation {
   result: StockLocationType[];
   dataCounter: number;
 }
+
+
+
+export interface StockLocationSaleChannelType {
+  _id?: string;
+  sales_channel_id?: string;
+}
+
+
+export interface GETResponseStockLocationSaleChannel {
+  success: boolean;
+  result: StockLocationSaleChannelType[];
+   dataCounter: number;
+}
+
+
+
+export interface LocationFulFillmentProviderType {
+  _id?: string;
+  fulfillment_provider_id?: string;
+}
+
+
+export interface GETResponseLocationFulFillmentProvider {
+  success: boolean;
+  result: LocationFulFillmentProviderType[];
+   dataCounter: number;
+}

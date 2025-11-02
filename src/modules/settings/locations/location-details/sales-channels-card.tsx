@@ -34,7 +34,7 @@ export default function SalesChannelsCard({ result }: SalesChannelsCardProps) {
             <DropdownMenuItem
               className="cursor-pointer"
               onClick={() =>
-                router.push(`/settings/locations/${result?.id}/sales-channels`)
+                router.push(`/settings/locations/${result?.id}/sales-channels/${result?._id}`)
               }
             >
               <Pencil className="h-4 w-4 mr-2" /> Edit
@@ -50,7 +50,7 @@ export default function SalesChannelsCard({ result }: SalesChannelsCardProps) {
         />
         <div className="mt-4">
           <NavigateBtn
-            path={`/settings/locations/${result?.id}/sales-channels`}
+            path={`/settings/locations/${result?.id}/sales-channels/${result?._id}`}
             title="Connect sales channels"
             variant="outline"
           />

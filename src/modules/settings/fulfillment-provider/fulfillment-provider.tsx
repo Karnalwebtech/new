@@ -1,5 +1,5 @@
 "use client";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -15,7 +15,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import {
   bulkToggleCodes,
-  clearSelected,
   toggleCode,
 } from "@/reducers/healper-slice";
 import { useGetAllFulFillmentProviderQuery } from "@/state/fullfillment-provider-api";
@@ -72,9 +71,6 @@ const FulFillmentProvider = ({ isChild = false }: FulFillmentProviderProps) => {
   useHandleNotifications({
     error: error,
   });
-  useEffect(() => {
-    dispatch(clearSelected());
-  }, [dispatch]);
   const width = useWindowWidth();
   const result = useMemo(() => data?.result || [], [data?.result]);
 

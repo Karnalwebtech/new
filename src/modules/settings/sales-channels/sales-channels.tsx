@@ -32,7 +32,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import {
   bulkToggleCodes,
-  clearSelected,
   toggleCode,
 } from "@/reducers/healper-slice";
 
@@ -152,9 +151,7 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
     isSuccess: deleteSuccess,
     successMessage: `Sales Channels delete successfully!`,
   });
-  useEffect(() => {
-    dispatch(clearSelected());
-  }, [dispatch]);
+ 
   const width = useWindowWidth();
   const result = useMemo(() => data?.result || [], [data?.result]);
 

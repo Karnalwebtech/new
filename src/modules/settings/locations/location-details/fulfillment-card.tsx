@@ -38,7 +38,7 @@ const FulfillmentCard = ({ result }: FulfillmentCardProps) => {
               className="cursor-pointer"
               onClick={() =>
                 router.push(
-                  `/settings/locations/${result?.id}/fulfillment-providers`
+                  `/settings/locations/${result?.id}/fulfillment-providers/${result?._id}`
                 )
               }
             >
@@ -55,7 +55,7 @@ const FulfillmentCard = ({ result }: FulfillmentCardProps) => {
         />
         <div className="mt-4">
           <NavigateBtn
-            path={`/settings/locations/${result?.id}/fulfillment-providers`}
+            path={`/settings/locations/${result?.id}/fulfillment-providers/${result?._id}`}
             title="Connect Providers"
             variant="outline"
           />
