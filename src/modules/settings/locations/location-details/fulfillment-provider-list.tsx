@@ -67,7 +67,7 @@ const FulfillmentProviderList = ({ itemId, stockid }: FulfillmentProviderListPro
     if (result) {
       dispatch(
         bulkToggleCodes({
-          codes: result.map((c) => c.fulfillment_provider_id!),
+          codes: result.map((c) => c.fulfillment_provider_id._id!),
           checked: true,
         })
       );

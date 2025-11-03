@@ -67,7 +67,7 @@ const SaleChannelsList = ({ itemId, stockid }: SaleChannelsListProps) => {
     if (result) {
       dispatch(
         bulkToggleCodes({
-          codes: result.map((c) => c.sales_channel_id!),
+          codes: result.map((c) => c.sales_channel_id._id!),
           checked: true,
         })
       );

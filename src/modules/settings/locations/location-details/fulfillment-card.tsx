@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import NoRecordsCard from "@/components/cards/no-records-card";
 import NavigateBtn from "@/components/buttons/navigate-btn";
 import { StockLocationTypeDetails } from "@/types/stock-location-type";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 import {
   DropdownMenu,
@@ -15,12 +15,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, Pencil } from "lucide-react";
+import { useGetAllLocationFulfillmentProviderQuery } from "@/state/stock-location-api";
 
 interface FulfillmentCardProps {
   result: StockLocationTypeDetails;
 }
 const FulfillmentCard = ({ result }: FulfillmentCardProps) => {
   const router = useRouter();
+  const {
+    data,
+    isLoading: fettchLocader,
+    error: fetchError,
+  } = useGetAllLocationFulfillmentProviderQuery({
+    rowsPerPage: 500,
+    page: 1,
+    stock_location_id: result?._id || "",
+  });
+  const fetchData = useMemo(() => data?.result || [], [data?.result]);
+
   return (
     <Card className="p-6">
       <div className="flex justify-between items-center mb-2">
@@ -47,7 +59,14 @@ const FulfillmentCard = ({ result }: FulfillmentCardProps) => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
+      {fetchData?.map((item) => (
+        <div key={item._id} className="border p-4 rounded-md mb-2">
+          <h3 className="font-medium">{item.fulfillment_provider_id?.name}</h3>
+          <p className="text-sm text-muted-foreground">
+            ID: {item.fulfillment_provider_id?._id}
+          </p>
+        </div>
+      ))}
       <div className="text-center py-8">
         <NoRecordsCard
           style={"p-0 border-0 shadow-none"}

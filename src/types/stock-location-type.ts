@@ -1,4 +1,5 @@
 import { CountryStateCityType } from "./country-state-city-type";
+import { SalesChannelsType } from "./sales-channels-type";
 
 export interface StockLocationType {
   name: string;
@@ -50,7 +51,7 @@ export interface GetResponseStockLocation {
 
 export interface StockLocationSaleChannelType {
   _id?: string;
-  sales_channel_id?: string;
+  sales_channel_id?: SalesChannelsType;
 }
 
 
@@ -64,7 +65,7 @@ export interface GETResponseStockLocationSaleChannel {
 
 export interface LocationFulFillmentProviderType {
   _id?: string;
-  fulfillment_provider_id?: string;
+  fulfillment_provider_id?: FulFillmentProviderType;
 }
 
 
