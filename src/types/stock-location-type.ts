@@ -1,4 +1,5 @@
 import { CountryStateCityType } from "./country-state-city-type";
+import { FulFillmentProviderType } from "./fulfillment-provider-type";
 import { SalesChannelsType } from "./sales-channels-type";
 
 export interface StockLocationType {
