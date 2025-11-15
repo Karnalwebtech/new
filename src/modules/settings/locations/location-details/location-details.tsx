@@ -10,6 +10,7 @@ import {
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { AnimatePresence } from "framer-motion";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
+import FulfillmentCardDetails from "./fulfillment-card-details";
 interface LocationDetailsProps {
   ItemId: string;
 }
@@ -61,6 +62,8 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
             removeHandler={removeHandler}
             deletedId={deletedId!}
           />
+          <FulfillmentCardDetails title="Pickup" />
+          <FulfillmentCardDetails title="Shipping" />
         </div>
 
         {/* Right Column - Side Panels */}
