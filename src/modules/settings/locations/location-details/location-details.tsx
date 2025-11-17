@@ -52,6 +52,11 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
     }
   }, [deleteSuccess]);
 
+
+  const addFulfillmentSet = useCallback((type:string,name:string,location_id:string)=>{
+    console.log(type,name,location_id)
+  },[])
+
   return (
     <>
       <div className="grid grid-cols-12 gap-2">
@@ -62,8 +67,8 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
             removeHandler={removeHandler}
             deletedId={deletedId!}
           />
-          <FulfillmentCardDetails title="Pickup" />
-          <FulfillmentCardDetails title="Shipping" />
+          <FulfillmentCardDetails title="Pickup" addEvent={()=>addFulfillmentSet("pickup",`${result?.name || ""}, pickup`,ItemId)}/>
+          <FulfillmentCardDetails title="Shipping" addEvent={()=>addFulfillmentSet("shipping",`${result?.name || ""}, shipping`,ItemId)}/>
         </div>
 
         {/* Right Column - Side Panels */}

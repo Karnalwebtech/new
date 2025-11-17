@@ -13,17 +13,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { memo } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface FulfillmentCardDetailsProps {
  title: string;
+ addEvent: ()=>void;
 }
 const FulfillmentCardDetails = ({
-title
+title,
+addEvent
 }: FulfillmentCardDetailsProps) => {
-  const router = useRouter();
+  // const router = useRouter();
   return (
     <motion.div
       className="w-full"
@@ -69,9 +71,9 @@ title
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      // onClick={() =>
-                      //   router.push(`/settings/locations/${item?.id}/edit`)
-                      // }
+                      onClick={() =>
+                        addEvent()
+                      }
                     >
                       <Plus className="h-4 w-4 mr-2" /> Enable
                     </DropdownMenuItem>
