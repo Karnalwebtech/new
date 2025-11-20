@@ -1,49 +1,47 @@
-// components/status-indicator.tsx
 "use client";
 
 import * as React from "react";
-import { Dot } from "lucide-react";
 
 type StatusIndicatorProps = {
-  /** True → Enabled, False → Disabled */
   enabled: boolean;
-  /** Optional custom labels */
   trueLabel?: string;
   falseLabel?: string;
-  /** Optional Tailwind color classes */
-  activeColorClass?: string;   // default: "text-green-400"
-  inactiveColorClass?: string; // default: "text-red-500"
-  /** Icon size in px */
-  size?: number;               // default: 14
-  /** Hide the text label if you only want the dot */
-  showLabel?: boolean;         // default: true
-  /** Extra classes on the wrapper */
+  activeColorClass?: string;
+  inactiveColorClass?: string;
+  size?: number;
+  showLabel?: boolean;
   className?: string;
-  /** Align the content */
-  align?: "start" | "center" | "end"; // default: "start"
+  align?: "start" | "center" | "end";
 };
 
 export default function StatusIndicator({
   enabled,
   trueLabel = "Enabled",
   falseLabel = "Disabled",
-  activeColorClass = "text-green-400",
-  inactiveColorClass = "text-red-500",
-  size = 14,
+  activeColorClass = "bg-green-400",
+  inactiveColorClass = "bg-red-500",
+  size = 10,
   showLabel = true,
   className = "",
   align = "start",
 }: StatusIndicatorProps) {
-  const color = enabled ? activeColorClass : inactiveColorClass;
+  const colorClass = enabled ? activeColorClass : inactiveColorClass;
   const label = enabled ? trueLabel : falseLabel;
 
   const justify =
     align === "end" ? "justify-end" : align === "center" ? "justify-center" : "justify-start";
 
   return (
-    <div className={`flex items-center ${justify} ${className}`}>
-      <Dot aria-hidden size={size} className={color} />
-      {showLabel && <span className="text-sm text-gray-600">{label}</span>}
+    <div className={`flex items-center gap-2 ${justify} ${className}`}>
+      <span
+        className={`rounded-full ${colorClass}`}
+        style={{
+          width: size,
+          height: size,
+          display: "inline-block",
+        }}
+      />
+      {showLabel && <span className="text-sm text-gray-700">{label}</span>}
     </div>
   );
 }

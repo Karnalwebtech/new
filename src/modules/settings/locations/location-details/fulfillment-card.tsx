@@ -62,7 +62,7 @@ const FulfillmentCard = ({ result }: FulfillmentCardProps) => {
       </div>
       {fettchLocader ? (
         <ParaSkeleton style="h-10 w-full" />
-      ) : fetchData ? (
+      ) : fetchData.length>0 ? (
         fetchData?.map((item) => (
           <div
             key={item._id}

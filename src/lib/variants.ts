@@ -40,7 +40,7 @@ export const buttonVariants: Variants = {
   },
 };
 
-export const statusVariants = {
+export const statusVariants:Variants  = {
   inactive: { backgroundColor: "#374151" },
   active: { backgroundColor: "#10b981" },
   draft: { backgroundColor: "#374151" },
@@ -50,3 +50,15 @@ export const controls = {
   hidden: { opacity: 0, y: 8 },
   show:   { opacity: 1, y: 0, transition: { duration: 0.25 } },
 };
+
+export const expandVariants:Variants = {
+    collapsed: { height: 0, opacity: 0 },
+    expanded: {
+      height: "auto",
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut",
+      },
+    },
+  };

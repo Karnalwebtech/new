@@ -18,6 +18,7 @@ import { ParaSkeleton } from "@/components/skeletons/para-skeleton";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 import RemainingCount from "@/components/remaining-count";
+import { useGetAllSalesChannelsDataQuery } from "@/state/sales-channels-api";
 interface SalesChannelsCardProps {
   result: StockLocationTypeDetails;
 }
@@ -32,7 +33,7 @@ export default function SalesChannelsCard({ result }: SalesChannelsCardProps) {
     page: 1,
     stock_location_id: result?._id || "",
   });
-  const { data: dataLength } = useGetAllStockLocationSaleChannelQuery({
+  const { data: dataLength } = useGetAllSalesChannelsDataQuery({
     rowsPerPage: 500,
     page: 1,
   });
@@ -66,7 +67,7 @@ export default function SalesChannelsCard({ result }: SalesChannelsCardProps) {
       </div>
       {fettchLocader ? (
         <ParaSkeleton style="h-10 w-full" />
-      ) : fetchData ? (
+      ) : fetchData.length>0 ? (
         <div>
           <div className="flex items-center space-x-4">
             <motion.div
