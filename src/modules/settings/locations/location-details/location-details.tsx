@@ -14,6 +14,7 @@ import FulfillmentCardDetails from "./fulfillment-card-details";
 import {
   useAddFulfillmentSetMutation,
   useGetAllFulFillmentSetQuery,
+  useRemoveFulFillmentSetMutation,
 } from "@/state/fullfillment-set-api";
 import DeliverySkeleton from "@/components/skeletons/delivery-skeleton";
 interface LocationDetailsProps {
@@ -31,7 +32,7 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
     deleteStockLocation,
     { isLoading: delteLoading, error: deleteError, isSuccess: deleteSuccess },
   ] = useDeleteStockLocationMutation();
-
+ 
   const [addFulfillmentSet, { error: addError, isSuccess: addSuccess }] =
     useAddFulfillmentSetMutation();
   const result = useMemo(() => data?.result, [data?.result]);
@@ -67,6 +68,7 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
   const DeleteHandler = useCallback(async () => {
     if (deletedId) await deleteStockLocation({ id: deletedId });
   }, [deleteStockLocation, deletedId]);
+
 
   const removeHandler = useCallback((id: string) => {
     setIsOpen(true);

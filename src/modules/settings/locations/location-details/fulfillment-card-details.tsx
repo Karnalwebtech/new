@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import StatusIndicator from "@/components/status-indicator";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,6 +25,9 @@ import {
   itemVariants,
 } from "@/lib/variants";
 import { LocationFulFillmentSetType } from "@/types/fulfillment-set-type";
+import { useRouter } from "next/navigation";
+import { useRemoveFulFillmentSetMutation } from "@/state/fullfillment-set-api";
+import { useHandleNotifications } from "@/hooks/use-notification-handler";
 
 interface FulfillmentCardDetailsProps {
   title: string;
@@ -36,10 +39,27 @@ const FulfillmentCardDetails = ({
   addEvent,
   existingData = [],
 }: FulfillmentCardDetailsProps) => {
+  const [
+    removeFulFillmentSet,
+    { isLoading: removeLoading, error: removeError, isSuccess: removeSuccess },
+  ] = useRemoveFulFillmentSetMutation();
   const [expandedPickup, setExpandedPickup] = useState(true);
   const [expandedReturn, setExpandedReturn] = useState(true);
   const isExpand = existingData?.length > 0 ? true : false;
   const test: boolean = false;
+  const router = useRouter();
+  useHandleNotifications({
+    error: removeError,
+    isSuccess: removeSuccess,
+    successMessage: "Removed successfully!",
+    // redirectPath: "/settings/locations",
+  });
+  const DeleteLocationfulfillmentHandler = useCallback(
+    async (deletedId: string) => {
+      if (deletedId) await removeFulFillmentSet({ id: deletedId });
+    },
+    [removeFulFillmentSet]
+  );
   return (
     <motion.div
       initial="hidden"
@@ -81,13 +101,21 @@ const FulfillmentCardDetails = ({
                   <>
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      onClick={() => addEvent()}
+                      onClick={() =>
+                        router.push(
+                          `/settings/locations/${existingData[0]?.stock_location_id?.id}/fulfillment-set/${existingData[0]?.fulfillment_set_id?.id}`
+                        )
+                      }
                     >
                       <Plus className="h-4 w-4 mr-2" /> Create service zone
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="cursor-pointer"
-                      onClick={() => addEvent()}
+                      onClick={() =>
+                        DeleteLocationfulfillmentHandler(
+                          existingData[0]?.fulfillment_set_id?.id || ""
+                        )
+                      }
                     >
                       <Trash2 className="h-4 w-4 mr-2" /> Disable
                     </DropdownMenuItem>

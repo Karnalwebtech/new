@@ -62,7 +62,17 @@ export const fulfillmentSetApi = createApi({
       },
       providesTags: [{ type: "fulfillment_set", id: "LIST" }],
     }),
+    removeFulFillmentSet: build.mutation<void, { id: string }>({
+      query: ({ id }) => ({
+        url: `/delete-fulfillment-set/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "fulfillment_set", id: "LIST" }],
+    }),
   }),
 });
-export const { useAddFulfillmentSetMutation, useGetAllFulFillmentSetQuery } =
-  fulfillmentSetApi;
+export const {
+  useAddFulfillmentSetMutation,
+  useGetAllFulFillmentSetQuery,
+  useRemoveFulFillmentSetMutation,
+} = fulfillmentSetApi;
