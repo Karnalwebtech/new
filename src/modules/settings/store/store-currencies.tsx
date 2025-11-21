@@ -73,7 +73,7 @@ const Row = memo(
             trueLabel="True"
             falseLabel="False"
             align="end"
-            size={40}
+            // size={40}
           />
         </TableCell>
 

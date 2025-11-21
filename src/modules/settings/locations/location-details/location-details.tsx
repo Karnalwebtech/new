@@ -11,11 +11,7 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { AnimatePresence } from "framer-motion";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import FulfillmentCardDetails from "./fulfillment-card-details";
-import {
-  useAddFulfillmentSetMutation,
-  useGetAllFulFillmentSetQuery,
-  useRemoveFulFillmentSetMutation,
-} from "@/state/fullfillment-set-api";
+import { useGetAllFulFillmentSetQuery } from "@/state/fullfillment-set-api";
 import DeliverySkeleton from "@/components/skeletons/delivery-skeleton";
 interface LocationDetailsProps {
   ItemId: string;
@@ -32,9 +28,7 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
     deleteStockLocation,
     { isLoading: delteLoading, error: deleteError, isSuccess: deleteSuccess },
   ] = useDeleteStockLocationMutation();
- 
-  const [addFulfillmentSet, { error: addError, isSuccess: addSuccess }] =
-    useAddFulfillmentSetMutation();
+
   const result = useMemo(() => data?.result, [data?.result]);
 
   const { data: fetchFulfillmentData } = useGetAllFulFillmentSetQuery({
@@ -43,11 +37,9 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
     stock_location_id: result?._id,
   });
   useHandleNotifications({
-    error: dataLoadError || deleteError || addError,
+    error: dataLoadError || deleteError,
     isSuccess: deleteSuccess,
-    successMessage: addSuccess
-      ? `Added successfully!`
-      : `Stock location delete successfully!`,
+    successMessage: `Stock location delete successfully!`,
     redirectPath: "/settings/locations",
   });
 
@@ -69,7 +61,6 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
     if (deletedId) await deleteStockLocation({ id: deletedId });
   }, [deleteStockLocation, deletedId]);
 
-
   const removeHandler = useCallback((id: string) => {
     setIsOpen(true);
     setDeletedId(id);
@@ -81,18 +72,6 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
       setDeletedId(null);
     }
   }, [deleteSuccess]);
-
-  const addFulfillmentSetHandler = useCallback(
-    async (type: string, name: string, location_id: string) => {
-      const payload = {
-        name,
-        type,
-        location_id,
-      };
-      await addFulfillmentSet(payload);
-    },
-    [addFulfillmentSet]
-  );
 
   return (
     <>
@@ -110,24 +89,14 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
               />
               <FulfillmentCardDetails
                 title="Pickup"
-                addEvent={() =>
-                  addFulfillmentSetHandler(
-                    "pickup",
-                    `${result?.name || ""} pickup`,
-                    ItemId
-                  )
-                }
+                fulfillment_name={result?.name || ""}
+                ItemId={ItemId}
                 existingData={pickupResult}
               />
               <FulfillmentCardDetails
                 title="Shipping"
-                addEvent={() =>
-                  addFulfillmentSetHandler(
-                    "shipping",
-                    `${result?.name || ""} shipping`,
-                    ItemId
-                  )
-                }
+                fulfillment_name={result?.name || ""}
+                ItemId={ItemId}
                 existingData={shippingResult}
               />
             </>

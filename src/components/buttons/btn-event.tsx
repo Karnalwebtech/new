@@ -7,16 +7,23 @@ interface ButtonEventProps {
   title: string;
   style?: string;
   isLoading?: boolean;
-    variant?: "link" | "default" | "outline" | "destructive" | "secondary" | "ghost" | null | undefined
+  variant?:
+    | "link"
+    | "default"
+    | "outline"
+    | "destructive"
+    | "secondary"
+    | "ghost"
+    | null
+    | undefined;
 }
 
 const ButtonEvent = ({
   event,
   title,
   isLoading = false,
-  variant="default",
+  variant = "default",
   style = "rounded-2xl",
-  
 }: ButtonEventProps) => {
   return (
     <motion.div

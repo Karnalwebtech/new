@@ -26,32 +26,41 @@ import {
 } from "@/lib/variants";
 import { LocationFulFillmentSetType } from "@/types/fulfillment-set-type";
 import { useRouter } from "next/navigation";
-import { useRemoveFulFillmentSetMutation } from "@/state/fullfillment-set-api";
+import {
+  useAddFulfillmentSetMutation,
+  useRemoveFulFillmentSetMutation,
+} from "@/state/fullfillment-set-api";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 
 interface FulfillmentCardDetailsProps {
   title: string;
-  addEvent: () => void;
+  fulfillment_name: string;
   existingData?: LocationFulFillmentSetType[];
+  ItemId: string;
 }
 const FulfillmentCardDetails = ({
   title,
-  addEvent,
+  fulfillment_name,
   existingData = [],
+  ItemId,
 }: FulfillmentCardDetailsProps) => {
   const [
     removeFulFillmentSet,
-    { isLoading: removeLoading, error: removeError, isSuccess: removeSuccess },
+    { error: removeError, isSuccess: removeSuccess },
   ] = useRemoveFulFillmentSetMutation();
+  const [addFulfillmentSet, { error: addError, isSuccess: addSuccess }] =
+    useAddFulfillmentSetMutation();
   const [expandedPickup, setExpandedPickup] = useState(true);
   const [expandedReturn, setExpandedReturn] = useState(true);
   const isExpand = existingData?.length > 0 ? true : false;
   const test: boolean = false;
   const router = useRouter();
   useHandleNotifications({
-    error: removeError,
-    isSuccess: removeSuccess,
-    successMessage: "Removed successfully!",
+    error: removeError || addError,
+    isSuccess: removeSuccess || addSuccess,
+    successMessage: addSuccess
+      ? "Added successfully!"
+      : "Deleted successfully!",
     // redirectPath: "/settings/locations",
   });
   const DeleteLocationfulfillmentHandler = useCallback(
@@ -60,6 +69,19 @@ const FulfillmentCardDetails = ({
     },
     [removeFulFillmentSet]
   );
+
+  const addFulfillmentSetHandler = useCallback(
+    async (type: string, name: string, location_id: string) => {
+      const payload = {
+        name,
+        type,
+        location_id,
+      };
+      await addFulfillmentSet(payload);
+    },
+    [addFulfillmentSet]
+  );
+
   return (
     <motion.div
       initial="hidden"
@@ -123,7 +145,15 @@ const FulfillmentCardDetails = ({
                 ) : (
                   <DropdownMenuItem
                     className="cursor-pointer"
-                    onClick={() => addEvent()}
+                    onClick={() =>
+                      addFulfillmentSetHandler(
+                        title.toLocaleLowerCase(),
+                        `${
+                          fulfillment_name || ""
+                        } ${title.toLocaleLowerCase()}`,
+                        ItemId
+                      )
+                    }
                   >
                     <Plus className="h-4 w-4 mr-2" /> Enable
                   </DropdownMenuItem>

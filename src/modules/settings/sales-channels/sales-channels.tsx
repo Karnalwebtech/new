@@ -76,7 +76,7 @@ const Row = memo(
           </span>
         </TableCell>
         <TableCell className="text-right pr-6 text-gray-700">
-          <StatusIndicator enabled={item.is_disabled!} size={40} />
+          <StatusIndicator enabled={item.is_disabled!} />
         </TableCell>
         <TableCell>
           <TimeAgo time={item.createdAt!} />
