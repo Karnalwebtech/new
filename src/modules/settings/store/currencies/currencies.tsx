@@ -20,7 +20,6 @@ import {
   toggleTax,
 } from "@/reducers/healper-slice";
 import { toast } from "sonner";
-import TableLoaderSkeleton from "@/components/skeletons/table-loader-skeleton";
 
 interface CurrenciesProps {
   isOpen?: boolean;
@@ -43,11 +42,10 @@ const Currencies = ({
 
   const { taxMap, selected } = useSelector((state: RootState) => state.helper);
 
-  const { data, isLoading: fetchStoreCurrencyLoading } =
-    useGetAllStoreCurrenciesQuery({
-      rowsPerPage: 500,
-      page: 1,
-    });
+  const { data } = useGetAllStoreCurrenciesQuery({
+    rowsPerPage: 500,
+    page: 1,
+  });
 
   const [addCurrency, { isLoading, isSuccess, error }] =
     useAddCurrencyMutation();
@@ -115,25 +113,25 @@ const Currencies = ({
       handleClose={() => {}}
     >
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
-        {isLoading || fetchStoreCurrencyLoading ? (
-          <TableLoaderSkeleton />
-        ) : (
-          <div className="w-full mx-auto bg-white min-h-screen">
-            <PageHeander
-              tabs={[]}
-              step={step}
-              setStep={setStep}
-              canAccessStep={[true]}
-              onCancel={() => (isChild ? setIsOpen?.(!isOpen) : router.back())}
-            />
-            <CurrenciesTable isTaxPrice={isTaxPrice} />
-            <NormalPageFooter
-              isLoading={isLoading}
-              onCancel={() => (isChild ? setIsOpen?.(!isOpen) : router.back())}
-              onSubmit={() => (isChild ? closeHandler() : onSubmit())}
-            />
-          </div>
-        )}
+        <div className="w-full mx-auto bg-white min-h-screen">
+          <PageHeander
+            tabs={[]}
+            step={step}
+            setStep={setStep}
+            canAccessStep={[true]}
+            onCancel={() => (isChild ? setIsOpen?.(!isOpen) : router.back())}
+          />
+          {/* {isLoading || fetchStoreCurrencyLoading ? (
+            <TableLoaderSkeleton length={10} />
+          ) : ( */}
+          <CurrenciesTable isTaxPrice={isTaxPrice} />
+          {/* )} */}
+          <NormalPageFooter
+            isLoading={isLoading}
+            onCancel={() => (isChild ? setIsOpen?.(!isOpen) : router.back())}
+            onSubmit={() => (isChild ? closeHandler() : onSubmit())}
+          />
+        </div>
       </ScrollArea>
     </DialogPopUp>
   );
