@@ -15,13 +15,9 @@ import ButtonEvent from "@/components/buttons/btn-event";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import CountryStateCity from "../../country-state-city/country-state-city";
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   bulkToggleCodes,
   clearSelected,
-  toggleCode,
 } from "@/reducers/healper-slice";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { regionSchema } from "@/zod-shema/region-schema";
@@ -31,6 +27,7 @@ import {
 } from "@/state/regions-api";
 import { useGetRegionDetailsQuery } from "../../../../state/regions-api";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
+import SelectedItemsBadgeList from "@/components/selected-items-badge-list";
 
 type FormData = z.infer<typeof regionSchema>;
 interface CreateRegionProps {
@@ -123,17 +120,6 @@ const CreateRegion = ({ ItemId }: CreateRegionProps) => {
       dispatch(clearSelected());
     }
   }, [isSuccess, dispatch, updateSuccess]);
-  const handleRemove = useCallback(
-    (id: string) => {
-      dispatch(
-        toggleCode({
-          code: id, // ✅ single string
-          checked: false,
-        })
-      );
-    },
-    [dispatch]
-  );
 
   const countries = [
     { value: "stripe", label: "Stripe (STRIPE)" },
@@ -181,31 +167,8 @@ const CreateRegion = ({ ItemId }: CreateRegionProps) => {
                   </p>
                 </div>
                 <div className="flex items-center justify-between gap-4 mt-4">
-                  {/* Selected countries badges */}
-                  <div className="flex flex-wrap gap-2">
-                    {selected?.map((item) => (
-                      <Badge
-                        key={item}
-                        variant="secondary"
-                        className="flex items-center gap-2 px-3 py-1 text-sm rounded-full bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition"
-                      >
-                        <span className="truncate max-w-[100px]">{item}</span>
-                        <Button
-                          onClick={() => handleRemove(item)} // ✅ add remove logic
-                          className="p-0 h-6 w-6 rounded-full text-gray-700 bg-gray-100 hover:bg-gray-300 hover:text-gray-900 transition"
-                        >
-                          <X size={14} />
-                        </Button>
-                      </Badge>
-                    ))}
-                    {selected?.length > 0 && (
-                      <ButtonEvent
-                        title="Clear all"
-                        event={() => dispatch(clearSelected())}
-                        // style="bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow px-4 py-2 transition"
-                      />
-                    )}
-                  </div>
+                      <SelectedItemsBadgeList/>
+                
 
                   {/* Add countries button */}
                   <div className="flex justify-end">

@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import StatusIndicator from "@/components/status-indicator";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,6 +31,7 @@ import {
   useRemoveFulFillmentSetMutation,
 } from "@/state/fullfillment-set-api";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
+import { useGetAllServiseZoneByFulfillmentidQuery } from "@/state/service-zone-api";
 
 interface FulfillmentCardDetailsProps {
   title: string;
@@ -48,12 +49,16 @@ const FulfillmentCardDetails = ({
     removeFulFillmentSet,
     { error: removeError, isSuccess: removeSuccess },
   ] = useRemoveFulFillmentSetMutation();
+     const {data}= useGetAllServiseZoneByFulfillmentidQuery({
+    id:existingData[0]?.fulfillment_set_id?.id,
+    page:1,
+    rowsPerPage:1,
+  })
   const [addFulfillmentSet, { error: addError, isSuccess: addSuccess }] =
     useAddFulfillmentSetMutation();
   const [expandedPickup, setExpandedPickup] = useState(true);
   const [expandedReturn, setExpandedReturn] = useState(true);
   const isExpand = existingData?.length > 0 ? true : false;
-  const test: boolean = false;
   const router = useRouter();
   useHandleNotifications({
     error: removeError || addError,
@@ -81,7 +86,8 @@ const FulfillmentCardDetails = ({
     },
     [addFulfillmentSet]
   );
-
+const result = useMemo(()=>data?.result || [],[data])
+console.log(result)
   return (
     <motion.div
       initial="hidden"
@@ -164,7 +170,7 @@ const FulfillmentCardDetails = ({
         </motion.div>
 
         {isExpand &&
-          (test ? (
+          (data?.dataCounter || 0>0 ? (
             <>
               <motion.div
                 variants={itemVariants}
@@ -181,7 +187,8 @@ const FulfillmentCardDetails = ({
                     <div>
                       <h3 className="font-semibold text-slate-900">hhhh</h3>
                       <p className="text-sm text-slate-600 mt-1">
-                        Afghanistan • 1 pickup option • 1 return option
+                      
+                        <span>{result[0]?.country_id?.name} + {data?.dataCounter} more</span> • 1 pickup option • 1 return option
                       </p>
                     </div>
                   </div>

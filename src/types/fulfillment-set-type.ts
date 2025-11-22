@@ -8,6 +8,7 @@ export interface FulFillmentSetType {
   metadata?: string;
   deleted_at?: Date | null;
   id?: string;
+  _id?: string;
 }
 export interface LocationFulFillmentSetType {
   stock_location_id?: StockLocationType;

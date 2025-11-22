@@ -13,7 +13,6 @@ import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
 import { stockLocationSchema } from "@/zod-shema/stock-location-schema";
 import {
-  useAddStockLocationMutation,
   useGetStockLocationDetailsQuery,
   useUpdateStockLocationMutation,
 } from "@/state/stock-location-api";
@@ -21,8 +20,14 @@ import Details from "./details";
 import ButtonEvent from "@/components/buttons/btn-event";
 import TipContent from "@/components/tip-content";
 import CountryStateCity from "@/modules/settings/country-state-city/country-state-city";
+import { useAddServiceZoneMutation } from "../../../../../state/service-zone-api";
+import { useAppSelector } from "@/store";
+import { RootState } from "@/store";
+import { clearSelected, toggleCode } from "@/reducers/healper-slice";
+import SelectedItemsBadgeList from "@/components/selected-items-badge-list";
+import { serviceZoneSchema } from "@/zod-shema/service-zone-schema";
 
-type FormData = z.infer<typeof stockLocationSchema>;
+type FormData = z.infer<typeof serviceZoneSchema>;
 interface CreateFulfillmentSetAreaZoneProps {
   itemId: string;
   fullfillment_set_id: string;
@@ -33,15 +38,19 @@ const CreateFulfillmentSetAreaZone = ({
 }: CreateFulfillmentSetAreaZoneProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { selected } = useAppSelector((state: RootState) => state.helper);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [step, setStep] = React.useState<number>(0);
-  const [addStockLocation, { isLoading, error, isSuccess }] =
-    useAddStockLocationMutation();
+  const [addServiceZone, { isLoading, error, isSuccess }] =
+    useAddServiceZoneMutation();
   const [
     updateStockLocation,
     { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
   ] = useUpdateStockLocationMutation();
-
+  useEffect(() => {
+    // Clear whenever page loads
+    dispatch(clearSelected());
+  }, [dispatch]);
   const {
     data,
     isLoading: dataLoader,
@@ -56,7 +65,7 @@ const CreateFulfillmentSetAreaZone = ({
     successMessage: updateSuccess
       ? "Stock Location updated successfully!"
       : "Add Stock Location!",
-    redirectPath: "/settings/locations",
+    // redirectPath: "/settings/locations",
   });
   const {
     control,
@@ -66,7 +75,7 @@ const CreateFulfillmentSetAreaZone = ({
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {},
-    resolver: zodResolver(stockLocationSchema),
+    resolver: zodResolver(serviceZoneSchema),
   });
   const result = data?.result;
   const values = watch();
@@ -80,26 +89,24 @@ const CreateFulfillmentSetAreaZone = ({
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      if (itemId) {
-        await updateStockLocation({ ...data, id: itemId });
-        return;
-      }
-      await addStockLocation(data);
+      const payload = {
+        ...data,
+        areas: selected,
+        type:"country",
+        fulfillment_set_id: fullfillment_set_id,
+      };
+      // if (itemId) {
+      //   await updateStockLocation({ ...data, id: itemId });
+      //   return;
+      // }
+      await addServiceZone(payload);
     },
-    [addStockLocation, updateStockLocation, itemId]
+    [addServiceZone,selected]
   );
 
   useEffect(() => {
     if (result) {
       setValue("name", result?.name);
-      setValue("phone", result?.address_id?.phone);
-      setValue("address_1", result?.address_id?.address_1);
-      setValue("address_2", result?.address_id?.address_2);
-      setValue("postal_code", result?.address_id?.postal_code);
-      setValue("company", result?.address_id?.company);
-      setValue("city", result?.address_id?.city_id?._id);
-      setValue("country", result?.address_id?.country_id?._id || "");
-      setValue("state", result?.address_id?.province_id?._id || "");
     }
   }, [result, setValue, dispatch]);
   // const value = watch("value", "");
@@ -114,9 +121,10 @@ const CreateFulfillmentSetAreaZone = ({
   //     }
   //   }
   // }, [value, setValue]);
+
   return (
     <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
-      <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
+      <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden pb-12">
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
             tabs={[]}
@@ -137,26 +145,28 @@ const CreateFulfillmentSetAreaZone = ({
                 } Service Zone for Pickup from demo demo`}
                 description={""}
               />
-                    <div className="px-8 pb-0 max-w-[800px] m-auto">
-              <TipContent content="A service zone is a collection of geographical zones or areas. It's used to restrict available shipping options to a defined set of locations." />
+              <div className="px-8 pb-0 max-w-[800px] m-auto">
+                <TipContent content="A service zone is a collection of geographical zones or areas. It's used to restrict available shipping options to a defined set of locations." />
 
-              {/* Areas label and manage areas button */}
-              <div className="mt-4 flex items-center justify-between gap-6">
-                <div>
-                  <h2 className="text-sm font-medium text-gray-700">Areas</h2>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Select the geographical areas that the service zone covers.
-                  </p>
-                </div>
+                {/* Areas label and manage areas button */}
+                <div className="mt-4 flex items-center justify-between gap-6">
+                  <div>
+                    <h2 className="text-sm font-medium text-gray-700">Areas</h2>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Select the geographical areas that the service zone
+                      covers.
+                    </p>
+                  </div>
 
-                <div className="flex items-center gap-4">
-                  <ButtonEvent
-                    title="Manage areas"
-                    event={() => setIsOpen(true)}
-                    variant="outline"
-                  />
+                  <div className="flex items-center gap-4">
+                    <ButtonEvent
+                      title="Manage areas"
+                      event={() => setIsOpen(true)}
+                      variant="outline"
+                    />
+                  </div>
                 </div>
-              </div>
+                <SelectedItemsBadgeList />
               </div>
             </div>
           )}
