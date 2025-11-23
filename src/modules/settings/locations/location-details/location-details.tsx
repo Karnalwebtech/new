@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import StockLocationDetails from "./stock-location-details";
 import SalesChannelsCard from "./sales-channels-card";
 import FulfillmentCard from "./fulfillment-card";
@@ -23,7 +23,7 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
     data,
     isLoading: dataLoader,
     error: dataLoadError,
-  } = useGetStockLocationDetailsQuery({ id: ItemId });
+  } = useGetStockLocationDetailsQuery({ id: ItemId }, { skip: !ItemId });
   const [
     deleteStockLocation,
     { isLoading: delteLoading, error: deleteError, isSuccess: deleteSuccess },
@@ -35,6 +35,8 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
     page: 1,
     rowsPerPage: 2,
     stock_location_id: result?._id,
+  }, {
+    skip: !result?._id
   });
   useHandleNotifications({
     error: dataLoadError || deleteError,
@@ -55,8 +57,6 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
 
     return [pickup, shipping];
   }, [fetchFulfillmentData?.result]);
-
-  // console.log("fetchFulfillmentData", fetchFulfillmentData);
   const DeleteHandler = useCallback(async () => {
     if (deletedId) await deleteStockLocation({ id: deletedId });
   }, [deleteStockLocation, deletedId]);
@@ -91,13 +91,15 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
                 title="Pickup"
                 fulfillment_name={result?.name || ""}
                 ItemId={ItemId}
-                existingData={pickupResult}
+                existingData={pickupResult[0] || []}
+                isExpand={pickupResult?.length > 0}
               />
               <FulfillmentCardDetails
                 title="Shipping"
                 fulfillment_name={result?.name || ""}
                 ItemId={ItemId}
-                existingData={shippingResult}
+                existingData={shippingResult[0] || []}
+                isExpand={shippingResult?.length > 0}
               />
             </>
           )}
@@ -128,4 +130,4 @@ const LocationDetails = ({ ItemId }: LocationDetailsProps) => {
   );
 };
 
-export default LocationDetails;
+export default memo(LocationDetails);

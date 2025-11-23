@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageFooter } from "@/modules/layout/footer/page-footer";
 import PageHeander from "@/modules/layout/header/page-heander";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,8 +64,8 @@ const CreateFulfillmentSetAreaZone = ({
     isSuccess: isSuccess || updateSuccess,
     successMessage: updateSuccess
       ? "Stock Location updated successfully!"
-      : "Add Stock Location!",
-    // redirectPath: "/settings/locations",
+      : "Zone Added successfully!",
+    redirectPath:`/settings/locations/${itemId}`,
   });
   const {
     control,
@@ -106,7 +106,7 @@ const CreateFulfillmentSetAreaZone = ({
 
   useEffect(() => {
     if (result) {
-      setValue("name", result?.name);
+      // setValue("name", result?.name);
     }
   }, [result, setValue, dispatch]);
   // const value = watch("value", "");
@@ -194,4 +194,4 @@ const CreateFulfillmentSetAreaZone = ({
   );
 };
 
-export default CreateFulfillmentSetAreaZone;
+export default memo(CreateFulfillmentSetAreaZone);

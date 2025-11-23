@@ -13,7 +13,7 @@ import {
 import { AnimatePresence } from "framer-motion";
 import { BaggageClaim, ChevronRight, Truck } from "lucide-react";
 import Link from "next/link";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 const Locations = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -162,4 +162,4 @@ const Locations = () => {
   );
 };
 
-export default Locations;
+export default memo(Locations);
