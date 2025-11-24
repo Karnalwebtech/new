@@ -25,7 +25,7 @@ import {
   useRemoveFulFillmentSetMutation,
 } from "@/state/fullfillment-set-api";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
-import ServiseZoneCard from "./edit/servise-zone-card";
+import ServiseZoneCard from "./service-zone/servise-zone-card";
 
 interface FulfillmentCardDetailsProps {
   title: string;

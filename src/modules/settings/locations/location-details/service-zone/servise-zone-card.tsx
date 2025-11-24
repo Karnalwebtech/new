@@ -143,7 +143,7 @@ const ServiseZoneCard = ({ fulfillmentSetId, url }: ServiseZoneCardProps) => {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         className="cursor-pointer"
-                        onClick={() => router.push(`${url}/${item?.id}`)}
+                        onClick={() => router.push(`${url}/service-zone/${item?.id}`)}
                       >
                         <Pencil className="h-4 w-4 mr-2" /> Edit
                       </DropdownMenuItem>
@@ -173,6 +173,7 @@ const ServiseZoneCard = ({ fulfillmentSetId, url }: ServiseZoneCardProps) => {
                 <div className="flex items-center gap-2">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
+                    onClick={()=>router.push(`${url}/service-zone/${item?.id}/shipping-option/create`)}
                     whileTap={{ scale: 0.95 }}
                     className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
                   >

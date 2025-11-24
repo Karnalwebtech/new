@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import Details from "./details";
+import Details from "../shipping-option/details";
 import ButtonEvent from "@/components/buttons/btn-event";
 import TipContent from "@/components/tip-content";
 import CountryStateCity from "@/modules/settings/country-state-city/country-state-city";
@@ -83,9 +83,13 @@ const CreateFulfillmentSetAreaZone = ({
   const values = watch();
   const canAccessStep = useMemo(() => {
     return [
-      true,
+       true,
       !!values.name?.trim(),
-      values.name?.trim().length > 0 && values.name?.trim().length <= 60,
+      // values.meta_title?.trim().length > 0 &&
+      //   values.meta_title?.trim().length <= 60 &&
+      //   values.meta_canonical_url?.trim().length > 0 &&
+      //   values.meta_description?.trim().length > 50 &&
+      //   values.meta_description?.trim().length <= 160,
     ];
   }, [values]);
 
@@ -128,7 +132,7 @@ const CreateFulfillmentSetAreaZone = ({
   }, [result, setValue, dispatch]);
 
   return (
-    <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
+    <DialogPopUp title="" description="" isOpen={true} handleClose={() => { }}>
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden pb-12">
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
@@ -145,9 +149,8 @@ const CreateFulfillmentSetAreaZone = ({
               <Details
                 control={control}
                 errors={errors}
-                title={`${
-                  servise_zone_id ? "Update" : "Create"
-                } Service Zone for Pickup from demo demo`}
+                title={`${servise_zone_id ? "Update" : "Create"
+                  } Service Zone for Pickup from demo demo`}
                 description={""}
               />
               <div className="px-8 pb-0 max-w-[800px] m-auto">
