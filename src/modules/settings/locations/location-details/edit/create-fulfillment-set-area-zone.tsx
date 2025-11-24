@@ -11,19 +11,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import { stockLocationSchema } from "@/zod-shema/stock-location-schema";
-import {
-  useGetStockLocationDetailsQuery,
-  useUpdateStockLocationMutation,
-} from "@/state/stock-location-api";
 import Details from "./details";
 import ButtonEvent from "@/components/buttons/btn-event";
 import TipContent from "@/components/tip-content";
 import CountryStateCity from "@/modules/settings/country-state-city/country-state-city";
-import { useAddServiceZoneMutation } from "../../../../../state/service-zone-api";
+import {
+  useAddServiceZoneMutation,
+  useGetServiseZoneDetailsQuery,
+  useUpdateServiceZoneMutation,
+} from "../../../../../state/service-zone-api";
 import { useAppSelector } from "@/store";
 import { RootState } from "@/store";
-import { clearSelected, toggleCode } from "@/reducers/healper-slice";
+import { bulkToggleCodes, clearSelected } from "@/reducers/healper-slice";
 import SelectedItemsBadgeList from "@/components/selected-items-badge-list";
 import { serviceZoneSchema } from "@/zod-shema/service-zone-schema";
 
@@ -31,41 +30,43 @@ type FormData = z.infer<typeof serviceZoneSchema>;
 interface CreateFulfillmentSetAreaZoneProps {
   itemId: string;
   fullfillment_set_id: string;
+  servise_zone_id?: string;
 }
 const CreateFulfillmentSetAreaZone = ({
   itemId,
   fullfillment_set_id,
+  servise_zone_id,
 }: CreateFulfillmentSetAreaZoneProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const { selected } = useAppSelector((state: RootState) => state.helper);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [step, setStep] = React.useState<number>(0);
-  const [addServiceZone, { isLoading, error, isSuccess }] =
-    useAddServiceZoneMutation();
-  const [
-    updateStockLocation,
-    { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
-  ] = useUpdateStockLocationMutation();
-  useEffect(() => {
-    // Clear whenever page loads
-    dispatch(clearSelected());
-  }, [dispatch]);
   const {
     data,
     isLoading: dataLoader,
     error: dataLoadError,
-  } = useGetStockLocationDetailsQuery(
-    { id: itemId as string },
-    { skip: !itemId }
+  } = useGetServiseZoneDetailsQuery(
+    { id: servise_zone_id as string },
+    { skip: !servise_zone_id }
   );
+  const [addServiceZone, { isLoading, error, isSuccess }] =
+    useAddServiceZoneMutation();
+  const [
+    updateServiceZone,
+    { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
+  ] = useUpdateServiceZoneMutation();
+  useEffect(() => {
+    // Clear whenever page loads
+    dispatch(clearSelected());
+  }, [dispatch]);
   useHandleNotifications({
     error: error || updateError || dataLoadError,
     isSuccess: isSuccess || updateSuccess,
     successMessage: updateSuccess
-      ? "Stock Location updated successfully!"
+      ? "Zone updates successfully!"
       : "Zone Added successfully!",
-    redirectPath:`/settings/locations/${itemId}`,
+    redirectPath: `/settings/locations/${itemId}`,
   });
   const {
     control,
@@ -78,6 +79,7 @@ const CreateFulfillmentSetAreaZone = ({
     resolver: zodResolver(serviceZoneSchema),
   });
   const result = data?.result;
+
   const values = watch();
   const canAccessStep = useMemo(() => {
     return [
@@ -92,35 +94,38 @@ const CreateFulfillmentSetAreaZone = ({
       const payload = {
         ...data,
         areas: selected,
-        type:"country",
+        type: "country",
         fulfillment_set_id: fullfillment_set_id,
       };
-      // if (itemId) {
-      //   await updateStockLocation({ ...data, id: itemId });
-      //   return;
-      // }
+      if (servise_zone_id) {
+        await updateServiceZone({ ...payload, id: servise_zone_id });
+        return;
+      }
       await addServiceZone(payload);
     },
-    [addServiceZone,selected]
+    [
+      addServiceZone,
+      updateServiceZone,
+      selected,
+      fullfillment_set_id,
+      servise_zone_id,
+    ]
   );
 
   useEffect(() => {
     if (result) {
-      // setValue("name", result?.name);
+      const countries = result?.geozone?.map(
+        ({ country_id }) => country_id?.name
+      );
+      setValue("name", result?.serviceZones?.name);
+      dispatch(
+        bulkToggleCodes({
+          codes: countries,
+          checked: true,
+        })
+      );
     }
   }, [result, setValue, dispatch]);
-  // const value = watch("value", "");
-  // useEffect(() => {
-  //   if (value) {
-  //     // ✅ Replace spaces live but don't break typing
-  //     const formatted = value.replace(/\s+/g, "_");
-
-  //     // only update if changed (prevents infinite re-renders)
-  //     if (formatted !== value) {
-  //       setValue("value", formatted);
-  //     }
-  //   }
-  // }, [value, setValue]);
 
   return (
     <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
@@ -141,7 +146,7 @@ const CreateFulfillmentSetAreaZone = ({
                 control={control}
                 errors={errors}
                 title={`${
-                  itemId ? "Update" : "Create"
+                  servise_zone_id ? "Update" : "Create"
                 } Service Zone for Pickup from demo demo`}
                 description={""}
               />

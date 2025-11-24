@@ -2,6 +2,7 @@ import { apiUrl, apiKey } from "@/config";
 import { getToken } from "@/lib/set-localstorage";
 import {
   GetResponseServiseZoneType,
+  GetResponseServiseZoneTypeDetails,
   ServiceZoneType,
 } from "@/types/service-zone-type";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
@@ -27,6 +28,27 @@ export const serviceZoneApi = createApi({
           url: "/add-service-zone",
           method: "POST",
           body: formData,
+        };
+      },
+      invalidatesTags: [{ type: "serviceZoneApi", id: "LIST" }],
+    }),
+    updateServiceZone: build.mutation<void, ServiceZoneType>({
+      query: (data) => {
+        const formData = new FormData();
+        formData.append("data", JSON.stringify(data));
+        return {
+          url: `/update-service-zone/${data?.id}`,
+          method: "PUT",
+          body: formData,
+        };
+      },
+      invalidatesTags: [{ type: "serviceZoneApi", id: "LIST" }],
+    }),
+    deleteServiceZone: build.mutation<void, { id: string }>({
+      query: ({ id }) => {
+        return {
+          url: `/delete-service-zone-by-fullfillmentset/${id}`,
+          method: "DELETE",
         };
       },
       invalidatesTags: [{ type: "serviceZoneApi", id: "LIST" }],
@@ -63,9 +85,24 @@ export const serviceZoneApi = createApi({
       },
       providesTags: [{ type: "serviceZoneApi", id: "LIST" }],
     }),
+    getServiseZoneDetails: build.query<
+      GetResponseServiseZoneTypeDetails,
+      { id: string }
+    >({
+      query: ({ id }) => {
+        return {
+          url: `/service-zone/${id}`,
+          method: "GET",
+        };
+      },
+      providesTags: [{ type: "serviceZoneApi", id: "LIST" }],
+    }),
   }),
 });
 export const {
   useAddServiceZoneMutation,
   useGetAllServiseZoneByFulfillmentidQuery,
+  useDeleteServiceZoneMutation,
+  useGetServiseZoneDetailsQuery,
+  useUpdateServiceZoneMutation,
 } = serviceZoneApi;
