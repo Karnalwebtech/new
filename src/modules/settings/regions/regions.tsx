@@ -26,6 +26,7 @@ import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { TableEmptyState } from "../../../components/table/table-empty-state";
 import PageHeander2 from "@/modules/layout/header/page-heander2";
+import RemainingCount from "@/components/remaining-count";
 
 const Row = memo(
   ({
@@ -46,18 +47,15 @@ const Row = memo(
             <TruncateText text={item?.name || ""} maxLength={25} />
           </span>
         </TableCell>
-        <TableCell>
-          <span className="text-muted-foreground">
-            <TruncateText
-              text={
-                item?.countries?.length <= 3
-                  ? item.countries.map((c) => c?.name).join(", ")
-                  : `${item.countries
-                      .slice(0, 3)
-                      .map((c) => c?.name)
-                      .join(", ")}... more`
-              }
-              maxLength={25}
+        <TableCell >
+          <span className="text-muted-foreground max-w-[100px]">
+            <RemainingCount
+              result={item.countries?.map((ch) => ({
+                id: ch?._id || ch?.id || "",
+                name: ch?.name || ""
+              }))}
+
+              length={item.countries?.length || 0}
             />
           </span>
         </TableCell>
@@ -94,9 +92,9 @@ const Row = memo(
               </DropdownMenuItem>
 
               <DropdownMenuItem
-                disabled={deletedId === item?._id}
+                disabled={deletedId === item?.id}
                 className="text-destructive cursor-pointer"
-                onClick={() => item?._id && removeHandler(item._id)}
+                onClick={() => item?.id && removeHandler(item.id)}
               >
                 <Trash2 className="h-4 w-4 mr-2" /> Delete
               </DropdownMenuItem>
@@ -200,7 +198,7 @@ const Region = () => {
         >
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
             {/* Loader Overlay */}
-           
+
             <Shadcn_table
               table_header={[
                 "Name",
@@ -209,7 +207,7 @@ const Region = () => {
                 "Action",
               ]}
               tabel_body={() => tableBody}
-              isLoading={isLoading || deleteLoading }
+              isLoading={isLoading || deleteLoading}
               textend="Payment Providers"
             />
           </div>

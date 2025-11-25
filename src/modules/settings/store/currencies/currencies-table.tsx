@@ -1,6 +1,5 @@
 "use client";
 import { memo, useCallback, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useTableFilters } from "@/hooks/useTableFilters";
 import Shadcn_table from "@/components/table/table";
@@ -11,17 +10,6 @@ import { useGetAllCurrenciesQuery } from "@/state/currency-api";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { CurrencyItem } from "@/types/currency-type";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { controls } from "@/lib/variants";
 import { useDebounced } from "@/hooks/useDebounced";
 import {
   bulkToggleCodes,
@@ -31,6 +19,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { TableEmptyState } from "@/components/table/table-empty-state";
+import PageHeander2 from "@/modules/layout/header/page-heander2";
 
 const Row = memo(
   ({
@@ -40,6 +29,7 @@ const Row = memo(
     taxInclusive,
     isChecked,
     isTaxPrice,
+    isDisabled,
   }: {
     item: CurrencyItem;
     isChecked: boolean;
@@ -48,11 +38,14 @@ const Row = memo(
     onToggleTax: (code: string, next: boolean) => void;
     taxInclusive: boolean;
     isTaxPrice: boolean;
+    isDisabled: string[];
   }) => {
     return (
-      <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
+      <TableRow className={`group transition-colors duration-200 ${isDisabled.includes(item.code) ? "opacity-50 pointer-events-none" : "hover:bg-muted/40"
+        }`}>
         <TableCell>
           <Checkbox
+            disabled={isDisabled.includes(item.code)}
             checked={isChecked}
             onCheckedChange={(v) => onCheckChange(!!v)}
             aria-label={`Select ${item.code}`}
@@ -91,7 +84,7 @@ const CurrenciesTable = ({ isTaxPrice = true }: CurrenciesTableProps) => {
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const [search, setSearch] = useState<string>("");
   const dispatch = useDispatch();
-  const { taxMap, selected } = useSelector((state: RootState) => state.helper);
+  const { taxMap, selected, isDisabled } = useSelector((state: RootState) => state.helper);
 
   const { data, isLoading } = useGetAllCurrenciesQuery({
     rowsPerPage: Number(rowsPerPage),
@@ -140,6 +133,7 @@ const CurrenciesTable = ({ isTaxPrice = true }: CurrenciesTableProps) => {
     if (selectedOnPageCount === filteredItems.length) return true;
     return "indeterminate";
   }, [filteredItems.length, selectedOnPageCount]);
+
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
       return <TableEmptyState colSpan={1} />;
@@ -151,10 +145,11 @@ const CurrenciesTable = ({ isTaxPrice = true }: CurrenciesTableProps) => {
         item={item}
         index={i}
         onToggleTax={handleToggleTax}
-        isChecked={Array.isArray(selected) && selected.includes(item.code)}
+        isChecked={Array.isArray(selected) && selected.includes(item.code) || isDisabled.includes(item.code)}
         onCheckChange={(next) => handleToggleCode(item.code, next)}
         taxInclusive={taxMap?.[item.code] ?? false}
         isTaxPrice={isTaxPrice}
+        isDisabled={isDisabled}
       />
     ));
   }, [
@@ -191,97 +186,20 @@ const CurrenciesTable = ({ isTaxPrice = true }: CurrenciesTableProps) => {
 
   return (
     <div className="min-h-screen bg-background mb-14">
-      <div className="container mx-auto py-8">
-        <div className="flex px-4 items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground mb-2">
-              Currencies
-            </h1>
-            <p className="text-muted-foreground">
-              Manage and organize product currencies.
-            </p>
-          </div>
-          <motion.div
-            className="flex flex-wrap items-center gap-3"
-            initial="hidden"
-            animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.06 } } }}
-          >
-            {/* Search */}
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="max-w-lg  flex-1"
-            >
-              <Input
-                type="text"
-                value={search}
-                placeholder="Search currencies..."
-                onChange={(e) => setSearch(e.target.value)}
-                className="transition-all focus-visible:shadow-[0_0_0_2px_rgba(59,130,246,.25)]"
-              />
-            </motion.div>
-
-            {/* Per page Select */}
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <Select
-                value={rowsPerPage}
-                onValueChange={(val) => {
-                  setRowsPerPage(val); // val is a string
-                  setCurrentPage(1); // optional: reset page
-                }}
-              >
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Per page" />
-                </SelectTrigger>
-
-                {/* Animate dropdown content on mount/unmount */}
-                <SelectContent>
-                  <AnimatePresence>
-                    <motion.div
-                      key="select-content"
-                      initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                      transition={{ duration: 0.16 }}
-                    >
-                      <SelectGroup>
-                        <SelectLabel>Per page</SelectLabel>
-                        {["10", "20", "50", "100"].map((val) => (
-                          <motion.div
-                            key={val}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 4 }}
-                          >
-                            <SelectItem value={val}>{val} / page</SelectItem>
-                          </motion.div>
-                        ))}
-                      </SelectGroup>
-                    </motion.div>
-                  </AnimatePresence>
-                </SelectContent>
-              </Select>
-            </motion.div>
-          </motion.div>
-        </div>
-
+      <div className="container mx-auto pb-8">
+        <PageHeander2
+          rowsPerPage={rowsPerPage}
+          setRowsPerPage={setRowsPerPage}
+          setCurrentPage={setCurrentPage}
+          searchTerm={search}
+          setSearchTerm={setSearch}
+          is_btn={false}
+        />
         <div
           style={{ width: width < 749 ? `${width}px` : "100%" }}
           className="min-h-[400px] px-2"
         >
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
-            {isLoading && (
-              <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              </div>
-            )}
-
             <Shadcn_table
               table_header={
                 isTaxPrice

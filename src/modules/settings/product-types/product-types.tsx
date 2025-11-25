@@ -7,17 +7,7 @@ import Shadcn_table from "@/components/table/table";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import { TruncateText } from "@/components/truncate-text";
 import ShadcnPagination from "@/components/pagination";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { containerVariants, controls } from "@/lib/variants";
+import { containerVariants } from "@/lib/variants";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,13 +19,14 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
-import NavigateBtn from "@/components/buttons/navigate-btn";
 import { TimeAgo } from "@/lib/timeAgo";
 import {
   useDeleteProductTypesMutation,
   useGetAllProductTypeDataQuery,
 } from "@/state/product-types-api";
 import { ProductTypes } from "@/types/product-type";
+import { TableEmptyState } from "@/components/table/table-empty-state";
+import PageHeander2 from "@/modules/layout/header/page-heander2";
 
 const Row = memo(
   ({
@@ -146,16 +137,7 @@ const ProductType = () => {
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
       return (
-        <TableRow>
-          <TableCell colSpan={4} className="text-center py-8">
-            <div className="text-muted-foreground text-lg mb-2">
-              No currencies found
-            </div>
-            <div className="text-sm text-muted-foreground/70">
-              Try adjusting your search criteria
-            </div>
-          </TableCell>
-        </TableRow>
+        <TableEmptyState colSpan={5} />
       );
     }
 
@@ -184,99 +166,25 @@ const ProductType = () => {
       animate="visible"
     >
       <div className="container mx-auto py-8">
-        <div className="flex px-4 items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground mb-2">
-              Product Types
-            </h1>
-          </div>
-          <motion.div
-            className="flex flex-wrap items-center gap-3"
-            initial="hidden"
-            animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.06 } } }}
-          >
-            {/* Search */}
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="max-w-lg  flex-1"
-            >
-              <Input
-                type="text"
-                value={searchTerm}
-                placeholder="Search currencies..."
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="transition-all focus-visible:shadow-[0_0_0_2px_rgba(59,130,246,.25)]"
-              />
-            </motion.div>
 
-            {/* Per page Select */}
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <Select
-                value={rowsPerPage}
-                onValueChange={(val) => {
-                  setRowsPerPage(val); // val is a string
-                  setCurrentPage(1); // optional: reset page
-                }}
-              >
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Per page" />
-                </SelectTrigger>
-
-                {/* Animate dropdown content on mount/unmount */}
-                <SelectContent>
-                  <AnimatePresence>
-                    <motion.div
-                      key="select-content"
-                      initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                      transition={{ duration: 0.16 }}
-                    >
-                      <SelectGroup>
-                        <SelectLabel>Per page</SelectLabel>
-                        {["10", "20", "50", "100"].map((val) => (
-                          <motion.div
-                            key={val}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 4 }}
-                          >
-                            <SelectItem value={val}>{val} / page</SelectItem>
-                          </motion.div>
-                        ))}
-                      </SelectGroup>
-                    </motion.div>
-                  </AnimatePresence>
-                </SelectContent>
-              </Select>
-            </motion.div>
-            <NavigateBtn
-              path={"/settings/product-types/create"}
-              title="Create"
-            />
-          </motion.div>
-        </div>
-
+        <PageHeander2
+          headerTitle={"Product Types"}
+          headerDescription="Manage product types."
+          rowsPerPage={rowsPerPage}
+          setRowsPerPage={setRowsPerPage}
+          setCurrentPage={setCurrentPage}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          subHeader={true}
+          navLink={`/settings/product-types/create`}
+        />
         <div
           style={{ width: width < 749 ? `${width}px` : "100%" }}
           className="min-h-[400px] px-2"
         >
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
-            {(isLoading || delteLoading) && (
-              <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              </div>
-            )}
-
             <Shadcn_table
-              table_header={["Name","Description", "Created", "Updated", "Action"]}
+              table_header={["Name", "Description", "Created", "Updated", "Action"]}
               tabel_body={() => tableBody}
               isLoading={isLoading || delteLoading}
             />
@@ -301,7 +209,7 @@ const ProductType = () => {
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             title="Are you sure?"
-            description="This action cannot be undone. This will permanently delete the category."
+            description="You are about to delete the product type. This action cannot be undone."
             action={DeleteHandler}
             type="danger"
             setDeletedId={setDeletedId}

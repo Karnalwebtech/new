@@ -34,6 +34,7 @@ import {
   bulkToggleCodes,
   toggleCode,
 } from "@/reducers/healper-slice";
+import { TableEmptyState } from "@/components/table/table-empty-state";
 
 const Row = memo(
   ({
@@ -190,16 +191,7 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
       return (
-        <TableRow>
-          <TableCell colSpan={4} className="text-center py-8">
-            <div className="text-muted-foreground text-lg mb-2">
-              No currencies found
-            </div>
-            <div className="text-sm text-muted-foreground/70">
-              Try adjusting your search criteria
-            </div>
-          </TableCell>
-        </TableRow>
+       <TableEmptyState colSpan={6}/>
       );
     }
 
@@ -326,7 +318,7 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             title="Are you sure?"
-            description="This action cannot be undone. This will permanently delete the category."
+            description="You are about to delete the sales channel. This action cannot be undone."
             action={DeleteHandler}
             type="danger"
             setDeletedId={setDeletedId}

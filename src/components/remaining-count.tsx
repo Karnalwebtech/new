@@ -24,7 +24,7 @@ const RemainingCount = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="flex items-center justify-between text-sm"
+      className="flex items-center gap-4 text-sm"
     >
       <span className="truncate text-slate-700">{name}</span>
 

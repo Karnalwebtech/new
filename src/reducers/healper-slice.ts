@@ -20,13 +20,14 @@ interface SelectCategory {
 }
 interface initialStateTypes
   extends ToggleState,
-    Type,
-    MaxLimit,
-    SelectCategory,
-    SidebarToggle,
-    SetDashboard {
+  Type,
+  MaxLimit,
+  SelectCategory,
+  SidebarToggle,
+  SetDashboard {
   taxMap: Record<string, boolean>;
   selected: string[];
+  isDisabled: string[];
 }
 
 const initialState: initialStateTypes = {
@@ -38,6 +39,7 @@ const initialState: initialStateTypes = {
   dashboardType: "dashboard",
   taxMap: {},
   selected: [],
+  isDisabled: [],
 };
 const helperSlice = createSlice({
   name: "helper",
@@ -78,7 +80,7 @@ const helperSlice = createSlice({
     clearTypeid: (state) => {
       state.typeid = "default";
     },
-   toggleTax: (
+    toggleTax: (
       state,
       action: PayloadAction<{ code: string; checked: boolean }>
     ) => {
@@ -117,12 +119,27 @@ const helperSlice = createSlice({
         state.selected = state.selected.filter((c) => !codes.includes(c));
       }
     },
+    bulkToggleIsDisabled: (
+      state,
+      action: PayloadAction<{ codes: string[]; checked: boolean }>
+    ) => {
+      state.isDisabled = state.isDisabled ?? []; // ✅ Ensure it's always an array
+      const { codes, checked } = action.payload;
+
+      if (checked) {
+        const set = new Set([...state.isDisabled, ...codes]);
+        state.isDisabled = Array.from(set);
+      } else {
+        state.isDisabled = state.isDisabled.filter((c) => !codes.includes(c));
+      }
+    },
 
     clearTaxMap: (state) => {
       state.taxMap = {};
     },
     clearSelected: (state) => {
       state.selected = [];
+      state.isDisabled = [];
     },
   },
 });
@@ -142,5 +159,6 @@ export const {
   clearTaxMap,
   clearSelected,
   bulkToggleCodes,
+  bulkToggleIsDisabled,
 } = helperSlice.actions;
 export default helperSlice.reducer;

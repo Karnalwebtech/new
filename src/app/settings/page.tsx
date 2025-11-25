@@ -4,7 +4,12 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Settings",
   description: "Settings",
+  openGraph: {
+    title: "Settings",
+    description: "Manage store settings",
+  },
 };
+
 
 export default function Page() {
   // redirect immediately

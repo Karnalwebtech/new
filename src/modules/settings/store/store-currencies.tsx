@@ -188,6 +188,7 @@ const StoreCurrencies = () => {
           subHeader={true}
           setSearchTerm={setSearchTerm}
           is_btn={true}
+          btnTitle="Add currency"
           navLink={`/settings/store/currencies`}
         />
 
@@ -196,8 +197,6 @@ const StoreCurrencies = () => {
           className="min-h-[400px] px-2"
         >
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
-            {(isLoading || delteLoading || UpdateLoading) && <TableLoader />}
-
             <Shadcn_table
               table_header={["Code", "Name", "Tax inclusive pricing", "Action"]}
               tabel_body={() => tableBody}
@@ -224,7 +223,7 @@ const StoreCurrencies = () => {
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             title="Are you sure?"
-            description="This action cannot be undone. This will permanently delete the category."
+            description="You are about to remove currency from your store. Ensure that you have removed all prices using the currency before proceeding."
             action={DeleteHandler}
             type="danger"
             setDeletedId={setDeletedId}

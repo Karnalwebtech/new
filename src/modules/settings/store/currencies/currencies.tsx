@@ -14,7 +14,7 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import {
-  bulkToggleCodes,
+  bulkToggleIsDisabled,
   clearSelected,
   clearTaxMap,
   toggleTax,
@@ -79,7 +79,7 @@ const Currencies = ({
 
     // Select currencies in bulk
     dispatch(
-      bulkToggleCodes({
+      bulkToggleIsDisabled({
         codes,
         checked: true,
       })
@@ -110,7 +110,7 @@ const Currencies = ({
       title="Add Currencies"
       description="Add Currencies for your store"
       isOpen={isOpen}
-      handleClose={() => {}}
+      handleClose={() => { }}
     >
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
@@ -121,11 +121,7 @@ const Currencies = ({
             canAccessStep={[true]}
             onCancel={() => (isChild ? setIsOpen?.(!isOpen) : router.back())}
           />
-          {/* {isLoading || fetchStoreCurrencyLoading ? (
-            <TableLoaderSkeleton length={10} />
-          ) : ( */}
           <CurrenciesTable isTaxPrice={isTaxPrice} />
-          {/* )} */}
           <NormalPageFooter
             isLoading={isLoading}
             onCancel={() => (isChild ? setIsOpen?.(!isOpen) : router.back())}
