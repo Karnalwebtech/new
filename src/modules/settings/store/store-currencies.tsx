@@ -7,17 +7,7 @@ import Shadcn_table from "@/components/table/table";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import { TruncateText } from "@/components/truncate-text";
 import ShadcnPagination from "@/components/pagination";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { containerVariants, controls } from "@/lib/variants";
+import { containerVariants } from "@/lib/variants";
 import {
   useDeleteStoreCurrencyMutation,
   useGetAllStoreCurrenciesQuery,
@@ -28,20 +18,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  CircleCheck,
-  CircleX,
-  MoreHorizontal,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+import { CircleCheck, CircleX, MoreHorizontal, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StoreCurrenciesType } from "@/types/store-currincies-type";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { useUpdateTaxPriceStoreCurrencyMutation } from "../../../state/store-currency-api";
 import StatusIndicator from "@/components/status-indicator";
+import { TableEmptyState } from "@/components/table/table-empty-state";
+import PageHeander2 from "@/modules/layout/header/page-heander2";
+import TableLoader from "@/components/table/table-loader";
 
 const Row = memo(
   ({
@@ -114,7 +100,6 @@ const Row = memo(
 Row.displayName = "Row";
 
 const StoreCurrencies = () => {
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [deletedId, setDeletedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -165,18 +150,7 @@ const StoreCurrencies = () => {
 
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
-      return (
-        <TableRow>
-          <TableCell colSpan={4} className="text-center py-8">
-            <div className="text-muted-foreground text-lg mb-2">
-              No currencies found
-            </div>
-            <div className="text-sm text-muted-foreground/70">
-              Try adjusting your search criteria
-            </div>
-          </TableCell>
-        </TableRow>
-      );
+      return <TableEmptyState colSpan={4} />;
     }
 
     return filteredItems.map((item, i) => (
@@ -204,120 +178,25 @@ const StoreCurrencies = () => {
       animate="visible"
     >
       <div className="container mx-auto py-8">
-        <div className="flex px-4 items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground mb-2">
-              Currencies
-            </h1>
-            <p className="text-muted-foreground">
-              Manage and organize product currencies.
-            </p>
-          </div>
-          <motion.div
-            className="flex flex-wrap items-center gap-3"
-            initial="hidden"
-            animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.06 } } }}
-          >
-            {/* Search */}
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="max-w-lg  flex-1"
-            >
-              <Input
-                type="text"
-                value={searchTerm}
-                placeholder="Search currencies..."
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="transition-all focus-visible:shadow-[0_0_0_2px_rgba(59,130,246,.25)]"
-              />
-            </motion.div>
-
-            {/* Per page Select */}
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <Select
-                value={rowsPerPage}
-                onValueChange={(val) => {
-                  setRowsPerPage(val); // val is a string
-                  setCurrentPage(1); // optional: reset page
-                }}
-              >
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Per page" />
-                </SelectTrigger>
-
-                {/* Animate dropdown content on mount/unmount */}
-                <SelectContent>
-                  <AnimatePresence>
-                    <motion.div
-                      key="select-content"
-                      initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                      transition={{ duration: 0.16 }}
-                    >
-                      <SelectGroup>
-                        <SelectLabel>Per page</SelectLabel>
-                        {["10", "20", "50", "100"].map((val) => (
-                          <motion.div
-                            key={val}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 4 }}
-                          >
-                            <SelectItem value={val}>{val} / page</SelectItem>
-                          </motion.div>
-                        ))}
-                      </SelectGroup>
-                    </motion.div>
-                  </AnimatePresence>
-                </SelectContent>
-              </Select>
-            </motion.div>
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Table actions"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => router.push("/settings/store/currencies")}
-                    className="cursor-pointer p-[4px]"
-                  >
-                    <Plus className="h-4 w-4" /> Add
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </motion.div>
-          </motion.div>
-        </div>
+        <PageHeander2
+          headerTitle={"Currencies"}
+          headerDescription={"Manage and organize product currencies."}
+          rowsPerPage={rowsPerPage}
+          setRowsPerPage={setRowsPerPage}
+          setCurrentPage={setCurrentPage}
+          searchTerm={searchTerm}
+          subHeader={true}
+          setSearchTerm={setSearchTerm}
+          is_btn={true}
+          navLink={`/settings/store/currencies`}
+        />
 
         <div
           style={{ width: width < 749 ? `${width}px` : "100%" }}
           className="min-h-[400px] px-2"
         >
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
-            {(isLoading || delteLoading || UpdateLoading) && (
-              <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              </div>
-            )}
+            {(isLoading || delteLoading || UpdateLoading) && <TableLoader />}
 
             <Shadcn_table
               table_header={["Code", "Name", "Tax inclusive pricing", "Action"]}

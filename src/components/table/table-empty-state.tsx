@@ -15,7 +15,7 @@ export const TableEmptyState = ({
 }: TableEmptyStateProps) => {
   return (
     <TableRow>
-      <TableCell colSpan={colSpan} className="py-16">
+      <TableCell colSpan={colSpan} className="text-center py-8">
         <div className="flex flex-col items-center justify-center text-center">
           <div className="text-muted-foreground text-lg font-medium mb-2">
             {title}

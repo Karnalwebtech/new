@@ -1,10 +1,5 @@
 "use client";
-import {
-  memo,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useTableFilters } from "@/hooks/useTableFilters";
@@ -35,6 +30,7 @@ import {
 } from "@/reducers/healper-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
+import { TableEmptyState } from "@/components/table/table-empty-state";
 
 const Row = memo(
   ({
@@ -42,7 +38,8 @@ const Row = memo(
     onToggleTax,
     onCheckChange,
     taxInclusive,
-    isChecked,isTaxPrice
+    isChecked,
+    isTaxPrice,
   }: {
     item: CurrencyItem;
     isChecked: boolean;
@@ -50,7 +47,7 @@ const Row = memo(
     onCheckChange: (next: boolean) => void;
     onToggleTax: (code: string, next: boolean) => void;
     taxInclusive: boolean;
-    isTaxPrice:boolean;
+    isTaxPrice: boolean;
   }) => {
     return (
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
@@ -72,25 +69,24 @@ const Row = memo(
             <TruncateText text={item.name || ""} maxLength={25} />
           </span>
         </TableCell>
-        {isTaxPrice &&
-        <TableCell className="text-right pr-6">
-         
-          <Switch
-            checked={taxInclusive}
-            onCheckedChange={(v) => onToggleTax(item.code, v)}
-            aria-label={`Toggle tax inclusive pricing for ${item.code}`}
-          />
-        </TableCell>
-        }
+        {isTaxPrice && (
+          <TableCell className="text-right pr-6">
+            <Switch
+              checked={taxInclusive}
+              onCheckedChange={(v) => onToggleTax(item.code, v)}
+              aria-label={`Toggle tax inclusive pricing for ${item.code}`}
+            />
+          </TableCell>
+        )}
       </TableRow>
     );
   }
 );
 Row.displayName = "Row";
-interface CurrenciesTableProps{
-  isTaxPrice?:boolean;
+interface CurrenciesTableProps {
+  isTaxPrice?: boolean;
 }
-const CurrenciesTable = ({isTaxPrice=true}:CurrenciesTableProps) => {
+const CurrenciesTable = ({ isTaxPrice = true }: CurrenciesTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const [search, setSearch] = useState<string>("");
@@ -146,18 +142,7 @@ const CurrenciesTable = ({isTaxPrice=true}:CurrenciesTableProps) => {
   }, [filteredItems.length, selectedOnPageCount]);
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
-      return (
-        <TableRow>
-          <TableCell colSpan={4} className="text-center py-8">
-            <div className="text-muted-foreground text-lg mb-2">
-              No currencies found
-            </div>
-            <div className="text-sm text-muted-foreground/70">
-              Try adjusting your search criteria
-            </div>
-          </TableCell>
-        </TableRow>
-      );
+      return <TableEmptyState colSpan={1} />;
     }
 
     return filteredItems.map((item, i) => (
@@ -172,7 +157,14 @@ const CurrenciesTable = ({isTaxPrice=true}:CurrenciesTableProps) => {
         isTaxPrice={isTaxPrice}
       />
     ));
-  }, [filteredItems, handleToggleTax, handleToggleCode,isTaxPrice, taxMap, selected]);
+  }, [
+    filteredItems,
+    handleToggleTax,
+    handleToggleCode,
+    isTaxPrice,
+    taxMap,
+    selected,
+  ]);
 
   const toggleSelectAllOnPage = useCallback(
     (nextChecked: boolean) => {
@@ -291,16 +283,11 @@ const CurrenciesTable = ({isTaxPrice=true}:CurrenciesTableProps) => {
             )}
 
             <Shadcn_table
-              table_header={isTaxPrice?[
-                "checkbox",
-                "Code",
-                "Name",
-                "Tax inclusive pricing",
-              ]:[
-                "checkbox",
-                "Code",
-                "Name",
-              ]}
+              table_header={
+                isTaxPrice
+                  ? ["checkbox", "Code", "Name", "Tax inclusive pricing"]
+                  : ["checkbox", "Code", "Name"]
+              }
               isAllSelected={headerCheckedState}
               isCheckbox={true}
               handleSelectAll={(e) => toggleSelectAllOnPage(e)}

@@ -7,18 +7,7 @@ import Shadcn_table from "@/components/table/table";
 import useWindowWidth from "@/hooks/useWindowWidth";
 import { TruncateText } from "@/components/truncate-text";
 import ShadcnPagination from "@/components/pagination";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { containerVariants, controls, itemVariants } from "@/lib/variants";
-import NavigateBtn from "@/components/buttons/navigate-btn";
+import { containerVariants } from "@/lib/variants";
 import {
   useDeleteRegionMutation,
   useGetAllRegionseDataQuery,
@@ -35,6 +24,8 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
+import { TableEmptyState } from "../../../components/table/table-empty-state";
+import PageHeander2 from "@/modules/layout/header/page-heander2";
 
 const Row = memo(
   ({
@@ -97,9 +88,7 @@ const Row = memo(
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() =>
-                  router.push(`/settings/regions/${item?.id}`)
-                }
+                onClick={() => router.push(`/settings/regions/${item?.id}`)}
               >
                 <Eye className="h-4 w-4 mr-2" /> Preview
               </DropdownMenuItem>
@@ -152,7 +141,6 @@ const Region = () => {
   ]);
 
   const removeHandler = useCallback((id: string) => {
- 
     setIsOpen(true);
     setDeletedId(id);
   }, []);
@@ -169,18 +157,7 @@ const Region = () => {
   }, [deleteSuccess]);
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
-      return (
-        <TableRow>
-          <TableCell colSpan={4} className="text-center py-8">
-            <div className="text-muted-foreground text-lg mb-2">
-              No currencies found
-            </div>
-            <div className="text-sm text-muted-foreground/70">
-              Try adjusting your search criteria
-            </div>
-          </TableCell>
-        </TableRow>
-      );
+      return <TableEmptyState colSpan={4} />;
     }
 
     return filteredItems.map((item, i) => (
@@ -202,102 +179,20 @@ const Region = () => {
       animate="visible"
     >
       <div className="container mx-auto py-8">
-        <motion.div
-          className="flex px-4 items-center justify-between mb-8"
-          variants={itemVariants}
-        >
-          <motion.div>
-            <motion.h1 className="text-2xl font-semibold text-foreground mb-2">
-              Regions
-            </motion.h1>
-            <motion.p className="text-muted-foreground">
-              A region is an area that you sell products in. It can cover
-              multiple countries, and has different tax rates, providers, and
-              currency.
-            </motion.p>
-          </motion.div>
-
-          <NavigateBtn path={"/settings/regions/create"} title={"Create"} />
-        </motion.div>
-
-        <div className="flex px-4 items-center justify-between mb-8">
-          <div>
-            {/* <h1 className="text-2xl font-semibold text-foreground mb-2">
-              Currencies
-            </h1>
-            <p className="text-muted-foreground">
-              Manage and organize product currencies.
-            </p> */}
-          </div>
-          <motion.div
-            className="flex flex-wrap items-center gap-3"
-            initial="hidden"
-            animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.06 } } }}
-          >
-            {/* Search */}
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              className="max-w-lg  flex-1"
-            >
-              <Input
-                type="text"
-                value={searchTerm}
-                placeholder="Search currencies..."
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="transition-all focus-visible:shadow-[0_0_0_2px_rgba(59,130,246,.25)]"
-              />
-            </motion.div>
-
-            {/* Per page Select */}
-            <motion.div
-              variants={controls}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <Select
-                value={rowsPerPage}
-                onValueChange={(val) => {
-                  setRowsPerPage(val); // val is a string
-                  setCurrentPage(1); // optional: reset page
-                }}
-              >
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Per page" />
-                </SelectTrigger>
-
-                {/* Animate dropdown content on mount/unmount */}
-                <SelectContent>
-                  <AnimatePresence>
-                    <motion.div
-                      key="select-content"
-                      initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                      transition={{ duration: 0.16 }}
-                    >
-                      <SelectGroup>
-                        <SelectLabel>Per page</SelectLabel>
-                        {["10", "20", "50", "100"].map((val) => (
-                          <motion.div
-                            key={val}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 4 }}
-                          >
-                            <SelectItem value={val}>{val} / page</SelectItem>
-                          </motion.div>
-                        ))}
-                      </SelectGroup>
-                    </motion.div>
-                  </AnimatePresence>
-                </SelectContent>
-              </Select>
-            </motion.div>
-          </motion.div>
-        </div>
+        <PageHeander2
+          headerTitle={"Regions"}
+          headerDescription={
+            " A region is an area that you sell products in. It can cover multiple countries, and has different tax rates, providers, and currency."
+          }
+          rowsPerPage={rowsPerPage}
+          setRowsPerPage={setRowsPerPage}
+          setCurrentPage={setCurrentPage}
+          searchTerm={searchTerm}
+          subHeader={true}
+          setSearchTerm={setSearchTerm}
+          is_btn={true}
+          navLink={`/settings/regions/create`}
+        />
 
         <div
           style={{ width: width < 749 ? `${width}px` : "100%" }}
@@ -305,28 +200,7 @@ const Region = () => {
         >
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
             {/* Loader Overlay */}
-            <AnimatePresence>
-              {isLoading ||
-                (deleteLoading && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10"
-                  >
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: "linear",
-                      }}
-                      className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
-                    />
-                  </motion.div>
-                ))}
-            </AnimatePresence>
-
+           
             <Shadcn_table
               table_header={[
                 "Name",
@@ -335,11 +209,10 @@ const Region = () => {
                 "Action",
               ]}
               tabel_body={() => tableBody}
-              isLoading={isLoading}
+              isLoading={isLoading || deleteLoading }
               textend="Payment Providers"
             />
           </div>
-
           {/* Pagination */}
           {data && data.dataCounter > Number(rowsPerPage) && (
             <ShadcnPagination
@@ -359,7 +232,7 @@ const Region = () => {
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             title="Are you sure?"
-            description="This action cannot be undone. This will permanently delete the category."
+            description="You are about to delete the region. This action cannot be undone."
             action={DeleteHandler}
             type="danger"
             setDeletedId={setDeletedId}
