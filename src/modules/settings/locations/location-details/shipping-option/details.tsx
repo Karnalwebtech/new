@@ -1,10 +1,12 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
 import InputField from "@/components/fields/input-field";
 import CheckboxLabel from "@/components/fields/checkbox-label";
-import SwitchField from "@/components/fields/switch-field";
+import SelectFields from "@/components/fields/select-field";
+import { useGetAllShippingProfileDataQuery } from "@/state/shipping-profile-api";
+import { useGetAllFulFillmentProviderQuery } from "@/state/fullfillment-provider-api";
 
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
@@ -19,7 +21,16 @@ const Details = <T extends FieldValues>({
   title,
   description,
 }: DetailsProps<T>) => {
-
+  const { data} = useGetAllShippingProfileDataQuery({
+    rowsPerPage: 100,
+    page: 1,
+  });
+    const { data:fulfillmentData  } = useGetAllFulFillmentProviderQuery({
+      rowsPerPage: 100,
+      page: 1,
+    });
+  const shippingProfileResult = useMemo(() => data?.result || [], [data]);
+  const fulfillmentProviderResult = useMemo(() => fulfillmentData?.result || [], [fulfillmentData]);
   return (
     <>
       {/* Form Content */}
@@ -54,12 +65,13 @@ const Details = <T extends FieldValues>({
                 >
                   Shipping profile
                 </Label>
-                <InputField
+                <SelectFields
                   control={control}
                   errors={errors}
                   name={"shipping_profile" as Path<T>}
-                  placeholder=""
-                  inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
+                  drop_down_selector={shippingProfileResult?.map(
+                    ({ _id, name }) => ({ key: _id || "", value: name || "" })
+                  )}
                 />
               </div>
               <div className="mt-2">
@@ -69,12 +81,13 @@ const Details = <T extends FieldValues>({
                 >
                   Fulfillment provider
                 </Label>
-                <InputField
+                <SelectFields
                   control={control}
                   errors={errors}
                   name={"fulfillment_provider" as Path<T>}
-                  placeholder=""
-                  inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
+                  drop_down_selector={fulfillmentProviderResult?.map(
+                    ({ _id, name }) => ({ key: _id || "", value: name || "" })
+                  )}
                 />
               </div>
               <div className="mt-2">
@@ -84,15 +97,13 @@ const Details = <T extends FieldValues>({
                 >
                   Fulfillment option
                 </Label>
-                <InputField
+               <SelectFields
                   control={control}
                   errors={errors}
                   name={"fulfillment_option" as Path<T>}
-                  placeholder=""
-                  inputStyle="placeholder-gray-200 bg-transparent border-zinc-300"
+                  drop_down_selector={[{key:"manual-fulfillment",value:"Manual fulfillment"}]}
                 />
               </div>
-
             </div>
             <div className="mt-8">
               <CheckboxLabel
@@ -103,7 +114,6 @@ const Details = <T extends FieldValues>({
                 name="enable_store"
               />
             </div>
-
           </div>
         </div>
       </div>
