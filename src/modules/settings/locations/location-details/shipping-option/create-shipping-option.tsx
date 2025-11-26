@@ -25,7 +25,7 @@ import { RootState } from "@/store";
 import { bulkToggleCodes, clearSelected } from "@/reducers/healper-slice";
 import SelectedItemsBadgeList from "@/components/selected-items-badge-list";
 import { serviceZoneSchema } from "@/zod-shema/service-zone-schema";
-import PriceEditorDialog from "./price-editor-dialog";
+import LocationPrices from "./price-editor-dialog";
 
 type FormData = z.infer<typeof serviceZoneSchema>;
 interface CreateShippingOptionProps {
@@ -153,7 +153,7 @@ const CreateShippingOption = ({
                   description={""}
                 />
               ) : (
-                <PriceEditorDialog/>
+                <LocationPrices/>
               )}
             </div>
           )}
