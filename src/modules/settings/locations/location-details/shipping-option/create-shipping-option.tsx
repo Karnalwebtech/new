@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageFooter } from "@/modules/layout/footer/page-footer";
 import PageHeander from "@/modules/layout/header/page-heander";
 import { useRouter } from "next/navigation";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,9 +12,6 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
 import Details from "./details";
-import ButtonEvent from "@/components/buttons/btn-event";
-import TipContent from "@/components/tip-content";
-import CountryStateCity from "@/modules/settings/country-state-city/country-state-city";
 import {
   useAddServiceZoneMutation,
   useGetServiseZoneDetailsQuery,
@@ -23,9 +20,11 @@ import {
 import { useAppSelector } from "@/store";
 import { RootState } from "@/store";
 import { bulkToggleCodes, clearSelected } from "@/reducers/healper-slice";
-import SelectedItemsBadgeList from "@/components/selected-items-badge-list";
 import { serviceZoneSchema } from "@/zod-shema/service-zone-schema";
-import LocationPrices from "../../../../../components/price-manager/price-editor-dialog";
+import FullscreenPriceEditor, {
+  PriceRow,
+} from "@/components/price-manager/price-editor-dialog";
+import { useConditionalPrices } from "@/hooks/useConditionalPrices";
 
 type FormData = z.infer<typeof serviceZoneSchema>;
 interface CreateShippingOptionProps {
@@ -40,9 +39,11 @@ const CreateShippingOption = ({
 }: CreateShippingOptionProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { clearPrices } = useConditionalPrices();
   const { selected } = useAppSelector((state: RootState) => state.helper);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [step, setStep] = React.useState<number>(0);
+  const [rows, setRows] = React.useState<PriceRow[]>([]);
+
   const {
     data,
     isLoading: dataLoader,
@@ -51,6 +52,12 @@ const CreateShippingOption = ({
     { id: servise_zone_id as string },
     { skip: !servise_zone_id }
   );
+
+  // Clear prices when component mounts
+  useEffect(() => {
+    clearPrices();
+  }, [clearPrices]);
+
   const [addServiceZone, { isLoading, error, isSuccess }] =
     useAddServiceZoneMutation();
   const [
@@ -143,7 +150,7 @@ const CreateShippingOption = ({
             <FormSkeleton />
           ) : (
             <div>
-              {step !==0 ? (
+              {step !== 0 ? (
                 <Details
                   control={control}
                   errors={errors}
@@ -153,7 +160,7 @@ const CreateShippingOption = ({
                   description={""}
                 />
               ) : (
-                <LocationPrices/>
+                <FullscreenPriceEditor rows={rows} setRows={setRows} />
               )}
             </div>
           )}

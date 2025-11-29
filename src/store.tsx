@@ -23,6 +23,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 import { authApi } from "./state/auth-api";
 import userReducer from "@/reducers/auth-slice";
+import conditionalPricesReducer from "@/reducers/conditional-prices-slice";
 import fileReducer from "@/reducers/file-slice";
 import helperReducer from "@/reducers/healper-slice";
 import listReducer from "@/reducers/list-slice";
@@ -81,7 +82,7 @@ const storage =
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["user", "helper"],
+  whitelist: ["user", "helper", "conditionalPrices"],
   blacklist: [
     authApi.reducerPath,
     trackUserApi.reducerPath,
@@ -133,6 +134,7 @@ const rootReducer = combineReducers({
   files: fileReducer,
   customField: CustomField,
   helper: helperReducer,
+  conditionalPrices: conditionalPricesReducer,
   lists: listReducer,
   [authApi.reducerPath]: authApi.reducer,
   [trackUserApi.reducerPath]: trackUserApi.reducer,
@@ -172,7 +174,6 @@ const rootReducer = combineReducers({
   [fulfillmentProviderApi.reducerPath]: fulfillmentProviderApi.reducer,
   [fulfillmentSetApi.reducerPath]: fulfillmentSetApi.reducer,
   [serviceZoneApi.reducerPath]: serviceZoneApi.reducer,
-
 
   //superme
   [cloudStorageApi.reducerPath]: cloudStorageApi.reducer,

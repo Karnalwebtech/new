@@ -2,108 +2,91 @@
 import DialogPopUp from "@/components/drawer/dialog-component";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PageHeander from "@/modules/layout/header/page-heander";
-import { useRouter } from "next/navigation";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  useAddCurrencyMutation,
-  useGetAllStoreCurrenciesQuery,
-} from "@/state/store-currency-api";
-import { useHandleNotifications } from "@/hooks/use-notification-handler";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store";
-import {
-  bulkToggleIsDisabled,
-  clearSelected,
-  clearTaxMap,
-  toggleTax,
-} from "@/reducers/healper-slice";
-import { toast } from "sonner";
+import React, { memo, useState } from "react";
 import ConditionalPricesManager from "./conditional-prices-manager";
 import { NormalPageFooter } from "@/modules/layout/footer/normal-page-footer";
 
 interface PriceManagerDialogProps {
   isOpen?: boolean;
   setIsOpen?: (value: boolean) => void;
-  isChild?: boolean;
-  isTaxPrice?: boolean;
+  keyValue: { key: string; name: string };
 }
 const PriceManagerDialog = ({
-  isOpen = true,
+  isOpen = false,
   setIsOpen,
-  isChild = false,
-  isTaxPrice = true,
+  keyValue,
 }: PriceManagerDialogProps) => {
   const [step, setStep] = useState<number>(0);
-  const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(clearTaxMap());
-    dispatch(clearSelected());
-  }, [dispatch]);
+  // const dispatch = useDispatch();
+  // useEffect(() => {
+  //   dispatch(clearTaxMap());
+  //   dispatch(clearSelected());
+  // }, [dispatch]);
 
-  const { taxMap, selected } = useSelector((state: RootState) => state.helper);
+  // const { taxMap, selected } = useSelector((state: RootState) => state.helper);
 
-  const { data } = useGetAllStoreCurrenciesQuery({
-    rowsPerPage: 500,
-    page: 1,
-  });
+  // const { data } = useGetAllStoreCurrenciesQuery({
+  //   rowsPerPage: 500,
+  //   page: 1,
+  // });
 
-  const [addCurrency, { isLoading, isSuccess, error }] =
-    useAddCurrencyMutation();
-  const router = useRouter();
-  useHandleNotifications({
-    error,
-    isSuccess,
-    successMessage: "Currency added successfully!",
-    redirectPath: "/settings/store",
-  });
-  const result = useMemo(() => data?.result || [], [data?.result]);
+  // const [addCurrency, { isLoading, isSuccess, error }] =
+  //   useAddCurrencyMutation();
+  // const router = useRouter();
+  // useHandleNotifications({
+  //   error,
+  //   isSuccess,
+  //   successMessage: "Currency added successfully!",
+  //   redirectPath: "/settings/store",
+  // });
+  // const result = useMemo(() => data?.result || [], [data?.result]);
 
-  useEffect(() => {
-    if (!result || result.length === 0) return;
+  // useEffect(() => {
+  //   if (!result || result.length === 0) return;
 
-    // Extract valid currency codes
-    const codes = result.map((item) => item.currency_id?.code).filter(Boolean); // removes undefined/null
+  //   // Extract valid currency codes
+  //   const codes = result.map((item) => item.currency_id?.code).filter(Boolean); // removes undefined/null
 
-    // Extract tax toggles
-    const taxList = result
-      .map((item) => ({
-        code: item.currency_id?.code,
-        checked: item.tax_inclusive,
-      }))
-      .filter((item) => item.code); // only valid codes
+  //   // Extract tax toggles
+  //   const taxList = result
+  //     .map((item) => ({
+  //       code: item.currency_id?.code,
+  //       checked: item.tax_inclusive,
+  //     }))
+  //     .filter((item) => item.code); // only valid codes
 
-    // Apply tax map
-    taxList.forEach((t) => {
-      dispatch(toggleTax({ code: t.code, checked: t.checked }));
-    });
+  //   // Apply tax map
+  //   taxList.forEach((t) => {
+  //     dispatch(toggleTax({ code: t.code, checked: t.checked }));
+  //   });
 
-    // Select currencies in bulk
-    dispatch(
-      bulkToggleIsDisabled({
-        codes,
-        checked: true,
-      })
-    );
-  }, [result, dispatch]);
+  //   // Select currencies in bulk
+  //   dispatch(
+  //     bulkToggleIsDisabled({
+  //       codes,
+  //       checked: true,
+  //     })
+  //   );
+  // }, [result, dispatch]);
 
-  const onSubmit = useCallback(async () => {
-    await addCurrency({ currencies: selected, tax: taxMap });
-  }, [selected, taxMap, addCurrency]);
+  // const onSubmit = useCallback(async () => {
+  //   await addCurrency({ currencies: selected, tax: taxMap });
+  // }, [selected, taxMap, addCurrency]);
 
-  useEffect(() => {
-    if (isSuccess) {
-      dispatch(clearTaxMap());
-      dispatch(clearSelected());
-    }
-  }, [dispatch, isSuccess]);
+  // useEffect(() => {
+  //   if (isSuccess) {
+  //     dispatch(clearTaxMap());
+  //     dispatch(clearSelected());
+  //   }
+  // }, [dispatch, isSuccess]);
 
-  const closeHandler = useCallback(() => {
-    if (selected.length === 0) {
-      toast.warning("Please select one");
-      return;
-    }
-    setIsOpen?.(false);
-  }, [setIsOpen, selected]);
+  // const closeHandler = useCallback(() => {
+  //   if (selected.length === 0) {
+  //     toast.warning("Please select one");
+  //     return;
+  //   }
+  //   setIsOpen?.(false);
+  // }, [setIsOpen, selected]);
 
   return (
     <DialogPopUp
@@ -119,13 +102,16 @@ const PriceManagerDialog = ({
             step={step}
             setStep={setStep}
             canAccessStep={[true]}
-            onCancel={() => (isChild ? setIsOpen?.(!isOpen) : router.back())}
+            onCancel={() => setIsOpen?.(!isOpen)}
           />
-          <ConditionalPricesManager />
+          <ConditionalPricesManager
+            currencyKey={keyValue?.key}
+            name={keyValue?.name}
+          />
           <NormalPageFooter
-            isLoading={isLoading}
-            onCancel={() => (isChild ? setIsOpen?.(!isOpen) : router.back())}
-            onSubmit={() => (isChild ? closeHandler() : onSubmit())}
+            isLoading={false}
+            onCancel={() => setIsOpen?.(!isOpen)}
+            onSubmit={() => setIsOpen?.(!isOpen)}
           />
         </div>
       </ScrollArea>

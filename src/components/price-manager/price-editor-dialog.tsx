@@ -1,27 +1,35 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { Input } from "@/components/ui/input";
 import { Landmark, Maximize2 } from "lucide-react";
 import clsx from "clsx";
 import { useGetAllStoreCurrenciesQuery } from "@/state/store-currency-api";
-import { formatNumberUniversal, getCurrencySymbol } from "@/services/currency";
+import { getCurrencySymbol } from "@/services/currency";
 import { StoreCurrenciesType } from "@/types/store-currincies-type";
 import PriceManagerDialog from "./price-manager-dialog";
 
 type PriceValue = number | "";
-interface PriceRow {
+export interface PriceRow {
   id: string;
   name: string;
   prices: Record<string, PriceValue>;
 }
+type CCValueType = { key: string; name: string };
 
 // Memoized currency formatter to prevent recreation on every render
-const useCurrencyFormatter = () => {
-  return useCallback((value: number, currencyCode: string) => {
-    return formatNumberUniversal(value, currencyCode);
-  }, []);
-};
+// const useCurrencyFormatter = () => {
+//   return useCallback((value: number, currencyCode: string) => {
+//     return formatNumberUniversal(value, currencyCode);
+//   }, []);
+// };
 
 // Optimized currency row component to prevent unnecessary re-renders
 const CurrencyPriceCell = React.memo(
@@ -30,13 +38,17 @@ const CurrencyPriceCell = React.memo(
     rowId,
     priceValue,
     onPriceUpdate,
+    setIsOpen,
+    setCCvalue,
   }: {
-    currency: { code: string; key: string };
+    currency: { code: string; key: string; label: string };
     rowId: string;
     priceValue: PriceValue;
     onPriceUpdate: (rowId: string, currencyCode: string, value: string) => void;
+    setIsOpen: (value: boolean) => void;
+    setCCvalue: Dispatch<SetStateAction<CCValueType>>;
   }) => {
-    const formatCurrency = useCurrencyFormatter();
+    // const formatCurrency = useCurrencyFormatter();
 
     const handleChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,39 +57,38 @@ const CurrencyPriceCell = React.memo(
       [rowId, currency.code, onPriceUpdate]
     );
 
-    const handleBlur = useCallback(() => {
-      if (priceValue !== "" && !isNaN(Number(priceValue))) {
-        const formatted = formatCurrency(Number(priceValue), currency.code);
-        onPriceUpdate(rowId, currency.code, formatted);
-      }
-    }, [priceValue, currency.code, rowId, onPriceUpdate, formatCurrency]);
-
+    // const handleBlur = useCallback(() => {
+    //   if (priceValue !== "" && !isNaN(Number(priceValue))) {
+    //     const formatted = formatCurrency(Number(priceValue), currency.code);
+    //     onPriceUpdate(rowId, currency.code, formatted);
+    //   }
+    // }, [priceValue, currency.code, rowId, onPriceUpdate, formatCurrency]);
     return (
       <>
-      <div className="min-w-[200px] px-3 flex items-center justify-between gap-2 border-r">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">
-            {getCurrencySymbol(currency.code)}
-          </span>
-          <button
-            className="cursor-pointer"
-            onClick={() => console.log("click")}
-          >
-            <Maximize2 size={14} className="text-slate-400" />
-          </button>
+        <div className="min-w-[200px] px-3 flex items-center justify-between gap-2 border-r">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500">
+              {getCurrencySymbol(currency.code)}
+            </span>
+            <button
+              className="cursor-pointer"
+              onClick={() => {
+                setCCvalue({ key: currency.code, name: currency.label });
+                setIsOpen(true);
+              }}
+            >
+              <Maximize2 size={14} className="text-slate-400" />
+            </button>
+          </div>
+          <Input
+            className="w-28 text-right text-sm"
+            inputMode="decimal"
+            placeholder="0"
+            value={priceValue === "" ? "0" : String(priceValue)}
+            onChange={handleChange}
+            // onBlur={handleBlur}
+          />
         </div>
-        <Input
-          className="w-28 text-right text-sm"
-          inputMode="decimal"
-          placeholder="0"
-          value={priceValue === "" ? "0" : String(priceValue)}
-          onChange={handleChange}
-          // onBlur={handleBlur}
-        />
-      </div>
-      <PriceManagerDialog
-      
-      />
       </>
     );
   }
@@ -92,11 +103,15 @@ const PriceTableRow = React.memo(
     rowIndex,
     currencies,
     onPriceUpdate,
+    setIsOpen,
+    setCCvalue,
   }: {
     row: PriceRow;
     rowIndex: number;
     currencies: Array<{ code: string; key: string; label: string }>;
     onPriceUpdate: (rowId: string, currencyCode: string, value: string) => void;
+    setIsOpen: (value: boolean) => void;
+    setCCvalue: Dispatch<SetStateAction<CCValueType>>;
   }) => {
     return (
       <div
@@ -116,6 +131,8 @@ const PriceTableRow = React.memo(
             rowId={row.id}
             priceValue={row.prices[currency.code]}
             onPriceUpdate={onPriceUpdate}
+            setIsOpen={setIsOpen}
+            setCCvalue={setCCvalue}
           />
         ))}
       </div>
@@ -126,7 +143,16 @@ const PriceTableRow = React.memo(
 PriceTableRow.displayName = "PriceTableRow";
 
 // Main component
-export default function FullscreenPriceEditor() {
+interface FullscreenPriceEditorProps {
+  rows: PriceRow[];
+  setRows: React.Dispatch<React.SetStateAction<PriceRow[]>>;
+}
+export default function FullscreenPriceEditor({
+  rows,
+  setRows,
+}: FullscreenPriceEditorProps) {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [CCvalue, setCCvalue] = useState<CCValueType>({ key: "", name: "" });
   const { data, isLoading, error } = useGetAllStoreCurrenciesQuery({
     rowsPerPage: 100,
     page: 1,
@@ -150,8 +176,6 @@ export default function FullscreenPriceEditor() {
     return map;
   }, [currencies]);
 
-  const [rows, setRows] = useState<PriceRow[]>([]);
-
   // Optimized initial rows setup
   useEffect(() => {
     if (currencies.length > 0 && rows.length === 0) {
@@ -163,7 +187,7 @@ export default function FullscreenPriceEditor() {
         },
       ]);
     }
-  }, [currencies.length, rows.length, emptyPricesForCurrencies]);
+  }, [currencies.length, rows.length, setRows, emptyPricesForCurrencies]);
 
   // Memoized price update handler
   const updatePrice = useCallback(
@@ -187,7 +211,7 @@ export default function FullscreenPriceEditor() {
         })
       );
     },
-    []
+    [setRows]
   );
 
   // Loading and error states
@@ -235,11 +259,18 @@ export default function FullscreenPriceEditor() {
                   row={row}
                   rowIndex={rowIndex}
                   currencies={currencies}
+                  setIsOpen={setIsOpen}
+                  setCCvalue={setCCvalue}
                   onPriceUpdate={updatePrice}
                 />
               ))
             )}
           </div>
+          <PriceManagerDialog
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            keyValue={CCvalue}
+          />
           <div className="text-xs text-slate-600">
             Tip: leave blank to use default price.
           </div>
