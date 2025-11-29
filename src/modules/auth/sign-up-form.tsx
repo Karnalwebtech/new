@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import InputField from "@/components/fields/input-field";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema } from "@/zod-shema/user-schema";
+import { signupSchema } from "@/zod-schema/user-schema";
 import Link from "next/link";
 import { useSignupMutation } from "@/state/auth-api";
 import { formData } from "@/types/user-type";

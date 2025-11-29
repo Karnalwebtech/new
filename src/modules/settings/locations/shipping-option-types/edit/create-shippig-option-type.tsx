@@ -12,7 +12,7 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
 import { useAddShippingOptionTypeMutation, useGetShippingOptionTypeDetailsQuery, useUpdateShippingOptionTypeMutation } from "@/state/shipping-option-type-api";
-import { ShippingOptionTypeSchema } from "@/zod-shema/shipping-profile-schema";
+import { ShippingOptionTypeSchema } from "@/zod-schema/shipping-profile-schema";
 
 type FormData = z.infer<typeof ShippingOptionTypeSchema>;
 interface CreateShippingOptionTypeProps {

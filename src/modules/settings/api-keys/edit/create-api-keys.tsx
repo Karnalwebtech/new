@@ -12,7 +12,7 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import { apiKeySchema } from "@/zod-shema/publishable-aPI-key";
+import { apiKeySchema } from "@/zod-schema/publishable-aPI-key";
 import {
   useAddApiKeyMutation,
   useGetApiKeyDetailsQuery,

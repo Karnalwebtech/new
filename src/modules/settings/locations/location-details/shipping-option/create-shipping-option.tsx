@@ -20,13 +20,14 @@ import {
 import { useAppSelector } from "@/store";
 import { RootState } from "@/store";
 import { bulkToggleCodes, clearSelected } from "@/reducers/healper-slice";
-import { serviceZoneSchema } from "@/zod-shema/service-zone-schema";
+import { serviceZoneSchema } from "@/zod-schema/service-zone-schema";
 import FullscreenPriceEditor, {
   PriceRow,
 } from "@/components/price-manager/price-editor-dialog";
 import { useConditionalPrices } from "@/hooks/useConditionalPrices";
+import { shippingOptionSchema } from "@/zod-schema/shipping-options-schema";
 
-type FormData = z.infer<typeof serviceZoneSchema>;
+type FormData = z.infer<typeof shippingOptionSchema>;
 interface CreateShippingOptionProps {
   itemId: string;
   fullfillment_set_id: string;
@@ -39,7 +40,7 @@ const CreateShippingOption = ({
 }: CreateShippingOptionProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { clearPrices } = useConditionalPrices();
+  const { clearPrices, prices } = useConditionalPrices();
   const { selected } = useAppSelector((state: RootState) => state.helper);
   const [step, setStep] = React.useState<number>(0);
   const [rows, setRows] = React.useState<PriceRow[]>([]);
@@ -83,8 +84,10 @@ const CreateShippingOption = ({
     setValue,
     formState: { errors },
   } = useForm<FormData>({
-    defaultValues: {},
-    resolver: zodResolver(serviceZoneSchema),
+    defaultValues: {
+      enabled_in_store: true,
+    },
+    resolver: zodResolver(shippingOptionSchema),
   });
   const result = data?.result;
 
@@ -99,41 +102,49 @@ const CreateShippingOption = ({
 
   const onSubmit = useCallback(
     async (data: FormData) => {
+      console.log(data);
+      console.log(rows);
+      console.log(prices);
+
       const payload = {
         ...data,
-        areas: selected,
-        type: "country",
-        fulfillment_set_id: fullfillment_set_id,
+        rows,
+        prices,
+        fullfillment_set_id,
+        servise_zone_id,
       };
-      if (servise_zone_id) {
-        await updateServiceZone({ ...payload, id: servise_zone_id });
-        return;
-      }
-      await addServiceZone(payload);
+      console.log(JSON.stringify(payload))
+      // if (servise_zone_id) {
+      //   await updateServiceZone({ ...payload, id: servise_zone_id });
+      //   return;
+      // }
+      // await addServiceZone(payload);
     },
     [
-      addServiceZone,
-      updateServiceZone,
-      selected,
+      rows,
+      prices,
+      // addServiceZone,
+      // updateServiceZone,
+      // selected,
       fullfillment_set_id,
       servise_zone_id,
     ]
   );
 
-  useEffect(() => {
-    if (result) {
-      const countries = result?.geozone?.map(
-        ({ country_id }) => country_id?.name
-      );
-      setValue("name", result?.serviceZones?.name);
-      dispatch(
-        bulkToggleCodes({
-          codes: countries,
-          checked: true,
-        })
-      );
-    }
-  }, [result, setValue, dispatch]);
+  // useEffect(() => {
+  //   if (result) {
+  //     // const countries = result?.geozone?.map(
+  //     //   ({ country_id }) => country_id?.name
+  //     // );
+  //     // setValue("name", result?.serviceZones?.name);
+  //     // dispatch(
+  //     //   bulkToggleCodes({
+  //     //     codes: countries,
+  //     //     checked: true,
+  //     //   })
+  //     // );
+  //   }
+  // }, [result, setValue, dispatch]);
 
   return (
     <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
@@ -150,7 +161,7 @@ const CreateShippingOption = ({
             <FormSkeleton />
           ) : (
             <div>
-              {step !== 0 ? (
+              {step === 0 ? (
                 <Details
                   control={control}
                   errors={errors}

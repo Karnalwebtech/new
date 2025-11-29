@@ -13,7 +13,7 @@ import { useSessionStorage } from "@/lib/setSessionData";
 import { useOtpVerificationMutation } from "@/state/auth-api";
 import { OTPFormData } from "@/types/user-type";
 import { useForm } from "react-hook-form";
-import { otpSchema } from "@/zod-shema/user-schema";
+import { otpSchema } from "@/zod-schema/user-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { ResendBtn } from "./resend-btn";

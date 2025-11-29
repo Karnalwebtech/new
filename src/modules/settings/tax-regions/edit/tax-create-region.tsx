@@ -12,7 +12,7 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import { TaxRegionSchema } from "@/zod-shema/tax-region-schema";
+import { TaxRegionSchema } from "@/zod-schema/tax-region-schema";
 import {
   useAddTaxRegionMutation,
   useGetTaxRegionDetailsQuery,

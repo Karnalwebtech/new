@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import InputField from "@/components/fields/input-field";
 import SelectFields from "@/components/fields/select-field";
-import { socialProfileSchema } from "@/zod-shema/social-profile-schema";
+import { socialProfileSchema } from "@/zod-schema/social-profile-schema";
 import { SocialProfileForm } from "@/types/social-profile-type";
 import { useAddSocialProfileMutation, useUpdateSocialProfileMutation } from "@/state/social-profile-api";
 import { GeneralBtn } from "@/components/buttons/general-btn";

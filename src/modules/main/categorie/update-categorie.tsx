@@ -13,8 +13,8 @@ import {
 import NotFound from "@/app/dashboard/not-found";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import { postSchema } from "@/zod-shema/post-schema";
-import { seoSchema } from "@/zod-shema/seo-schema";
+import { postSchema } from "@/zod-schema/post-schema";
+import { seoSchema } from "@/zod-schema/seo-schema";
 import type { CategorieFormData } from "@/types/categorie-type";
 import { toast } from "sonner";
 import { addFile, removeAll } from "@/reducers/file-slice";

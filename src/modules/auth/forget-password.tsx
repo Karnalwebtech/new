@@ -16,7 +16,7 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import InputField from "@/components/fields/input-field";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ForgetPasswordSchema } from "@/zod-shema/user-schema";
+import { ForgetPasswordSchema } from "@/zod-schema/user-schema";
 import { forgetPasswordData } from "@/types/user-type";
 
 export default function ForgotPasswordPage() {

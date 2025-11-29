@@ -7,7 +7,7 @@ import InputField from "@/components/fields/input-field";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormData } from "@/types/user-type";
-import { LoginSchema } from "@/zod-shema/user-schema";
+import { LoginSchema } from "@/zod-schema/user-schema";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useSigninMutation } from "@/state/auth-api";

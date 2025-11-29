@@ -4,7 +4,7 @@ import SelectFields from "@/components/fields/select-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGetCustomFieldQuery } from "@/state/custom-field-api";
-import { generateDynamicSchema } from "@/zod-shema/custom-field-schema";
+import { generateDynamicSchema } from "@/zod-schema/custom-field-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";

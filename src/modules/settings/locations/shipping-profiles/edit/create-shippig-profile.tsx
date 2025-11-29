@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import { ShippingProfileSchema } from "@/zod-shema/shipping-profile-schema";
+import { ShippingProfileSchema } from "@/zod-schema/shipping-profile-schema";
 import {
   useAddShippingProfileMutation,
   useGetShippingProfileDetailsQuery,

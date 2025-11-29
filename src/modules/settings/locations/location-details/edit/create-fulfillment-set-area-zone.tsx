@@ -24,7 +24,7 @@ import { useAppSelector } from "@/store";
 import { RootState } from "@/store";
 import { bulkToggleCodes, clearSelected } from "@/reducers/healper-slice";
 import SelectedItemsBadgeList from "@/components/selected-items-badge-list";
-import { serviceZoneSchema } from "@/zod-shema/service-zone-schema";
+import { serviceZoneSchema } from "@/zod-schema/service-zone-schema";
 
 type FormData = z.infer<typeof serviceZoneSchema>;
 interface CreateFulfillmentSetAreaZoneProps {

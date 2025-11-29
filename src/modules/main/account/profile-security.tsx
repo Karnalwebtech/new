@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { useChangePasswordMutation } from "@/state/profile-api";
 import { ChangePasswordForm } from "@/types/profile-types";
-import { changePasswordSchema } from "@/zod-shema/profile-schema";
+import { changePasswordSchema } from "@/zod-schema/profile-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";

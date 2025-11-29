@@ -12,7 +12,7 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import { ReturnReasonSchema } from "@/zod-shema/return-reason-schema";
+import { ReturnReasonSchema } from "@/zod-schema/return-reason-schema";
 import {
   useAddReturnReasonMutation,
   useGetReturnReasonDetailsQuery,

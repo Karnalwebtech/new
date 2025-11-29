@@ -3,7 +3,7 @@ import DialogPopUp from "@/components/drawer/dialog-component";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageFooter } from "@/modules/layout/footer/page-footer";
 import PageHeander from "@/modules/layout/header/page-heander";
-import { storeSchema } from "@/zod-shema/store-schema";
+import { storeSchema } from "@/zod-schema/store-schema";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";

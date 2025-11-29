@@ -111,7 +111,7 @@ const Details = <T extends FieldValues>({
                 errors={errors}
                 title="Enable in store"
                 description="Whether customers can use this option during checkout."
-                name="enable_store"
+                name="enabled_in_store"
               />
             </div>
           </div>

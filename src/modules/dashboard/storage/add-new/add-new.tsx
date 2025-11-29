@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { DrawerComponent } from "@/components/drawer/drawer-component";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
-import { GoogleDriveFromSchema } from "@/zod-shema/google-drive-schema";
+import { GoogleDriveFromSchema } from "@/zod-schema/google-drive-schema";
 
 const STORAGE_MODES = [
   { key: "google drive", value: "google drive" },

@@ -20,7 +20,7 @@ import {
   clearSelected,
 } from "@/reducers/healper-slice";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { regionSchema } from "@/zod-shema/region-schema";
+import { regionSchema } from "@/zod-schema/region-schema";
 import {
   useAddRegionMutation,
   useUpdateRegionMutation,

@@ -10,8 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import DialogPopUp from "@/components/drawer/dialog-component";
 import Details from "./details";
 import SEOForm from "@/components/forms/SEO-form";
-import { ProductCategoryDetailsSchema } from "@/zod-shema/product-schema";
-import { seoSchema } from "@/zod-shema/seo-schema";
+import { ProductCategoryDetailsSchema } from "@/zod-schema/product-schema";
+import { seoSchema } from "@/zod-schema/seo-schema";
 import { slugify } from "@/services/helpers";
 import { RootState } from "@/store";
 import {

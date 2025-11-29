@@ -12,7 +12,7 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import Details from "./details";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import { salesChannelsSchema } from "@/zod-shema/sales-channels-schema";
+import { salesChannelsSchema } from "@/zod-schema/sales-channels-schema";
 import {
   useAddSalesChannelsMutation,
   useGetSalesChannelsDetailsQuery,

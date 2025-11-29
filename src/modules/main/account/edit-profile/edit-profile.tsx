@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { useDispatch, useSelector } from "react-redux";
 import InputField from "@/components/fields/input-field";
-import { profileSchema } from "@/zod-shema/profile-schema";
+import { profileSchema } from "@/zod-schema/profile-schema";
 import SelectFields from "@/components/fields/select-field";
 import { Upload } from "lucide-react";
 import type { RootState } from "@/store";
