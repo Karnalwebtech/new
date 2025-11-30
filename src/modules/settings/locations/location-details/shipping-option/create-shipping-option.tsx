@@ -13,7 +13,6 @@ import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
 import Details from "./details";
 import {
-  useAddServiceZoneMutation,
   useGetServiseZoneDetailsQuery,
   useUpdateServiceZoneMutation,
 } from "../../../../../state/service-zone-api";
@@ -26,6 +25,7 @@ import FullscreenPriceEditor, {
 } from "@/components/price-manager/price-editor-dialog";
 import { useConditionalPrices } from "@/hooks/useConditionalPrices";
 import { shippingOptionSchema } from "@/zod-schema/shipping-options-schema";
+import { useAddShippingOptionsMutation } from "@/state/shipping-options-api";
 
 type FormData = z.infer<typeof shippingOptionSchema>;
 interface CreateShippingOptionProps {
@@ -59,8 +59,8 @@ const CreateShippingOption = ({
     clearPrices();
   }, [clearPrices]);
 
-  const [addServiceZone, { isLoading, error, isSuccess }] =
-    useAddServiceZoneMutation();
+  const [addShippingOptions, { isLoading, error, isSuccess }] =
+    useAddShippingOptionsMutation();
   const [
     updateServiceZone,
     { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
@@ -75,7 +75,7 @@ const CreateShippingOption = ({
     successMessage: updateSuccess
       ? "Zone updates successfully!"
       : "Zone Added successfully!",
-    redirectPath: `/settings/locations/${itemId}`,
+    // redirectPath: `/settings/locations/${itemId}`,
   });
   const {
     control,
@@ -113,17 +113,17 @@ const CreateShippingOption = ({
         fullfillment_set_id,
         servise_zone_id,
       };
-      console.log(JSON.stringify(payload))
+      // console.log()
       // if (servise_zone_id) {
       //   await updateServiceZone({ ...payload, id: servise_zone_id });
       //   return;
       // }
-      // await addServiceZone(payload);
+      await addShippingOptions({ data: JSON.stringify(payload) });
     },
     [
       rows,
       prices,
-      // addServiceZone,
+      addShippingOptions,
       // updateServiceZone,
       // selected,
       fullfillment_set_id,
@@ -147,7 +147,7 @@ const CreateShippingOption = ({
   // }, [result, setValue, dispatch]);
 
   return (
-    <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
+    <DialogPopUp title="" description="" isOpen={true} handleClose={() => { }}>
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden pb-12">
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
@@ -165,9 +165,8 @@ const CreateShippingOption = ({
                 <Details
                   control={control}
                   errors={errors}
-                  title={`${
-                    servise_zone_id ? "Update" : "Create"
-                  } Service Zone for Pickup from demo demo`}
+                  title={`${servise_zone_id ? "Update" : "Create"
+                    } Service Zone for Pickup from demo demo`}
                   description={""}
                 />
               ) : (

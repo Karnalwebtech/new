@@ -4,7 +4,7 @@ import { Header } from "@/modules/layout/header/header";
 import CreateFulfillmentSetAreaZone from "@/modules/settings/locations/location-details/edit/create-fulfillment-set-area-zone";
 import React from "react";
 export const metadata = buildMetadata({
-  title: "Update region",
+  title: "124 region",
   description: "Update region",
   siteName: siteName,
 });
@@ -21,7 +21,7 @@ const Page = async ({
         breadcrumbData={[
           { label: "Settings", path: "/settings" },
           { label: "Location", path: "/settings/locations" },
-          { label: "Updte", path: "/settings/locations/create" },
+          { label: "123", path: "/settings/locations/create" },
         ]}
       />
       <CreateFulfillmentSetAreaZone

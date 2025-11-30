@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { useDispatch } from "react-redux";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import Details from "../shipping-option/details";
+import Details from "./details";
 import ButtonEvent from "@/components/buttons/btn-event";
 import TipContent from "@/components/tip-content";
 import CountryStateCity from "@/modules/settings/country-state-city/country-state-city";
