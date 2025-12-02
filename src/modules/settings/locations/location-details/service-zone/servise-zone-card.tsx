@@ -26,6 +26,7 @@ import { GeoDataType } from "@/types/service-zone-type";
 import { ParaSkeleton } from "@/components/skeletons/para-skeleton";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
+import ShippingOption from "../shipping-option/shipping-option";
 interface ServiseZoneCardProps {
   fulfillmentSetId: string;
   url: string;
@@ -187,7 +188,7 @@ const ServiseZoneCard = ({ fulfillmentSetId, url }: ServiseZoneCardProps) => {
                   </motion.div>
                 </div>
               </motion.div>
-
+<ShippingOption/>
               {/* <AnimatePresence>
             {expandedPickup && (
               <motion.div
