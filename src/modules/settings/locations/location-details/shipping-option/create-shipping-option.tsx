@@ -3,7 +3,7 @@ import DialogPopUp from "@/components/drawer/dialog-component";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageFooter } from "@/modules/layout/footer/page-footer";
 import PageHeander from "@/modules/layout/header/page-heander";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { memo, useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -41,6 +41,9 @@ const CreateShippingOption = ({
   const router = useRouter();
   const dispatch = useDispatch();
   const { clearPrices, prices } = useConditionalPrices();
+  const searchParams = useSearchParams();
+  const is_return = Array.from(searchParams.keys())[0];
+
   const { selected } = useAppSelector((state: RootState) => state.helper);
   const [step, setStep] = React.useState<number>(0);
   const [rows, setRows] = React.useState<PriceRow[]>([]);
@@ -112,6 +115,7 @@ const CreateShippingOption = ({
         prices,
         fullfillment_set_id,
         servise_zone_id,
+        is_return: is_return ? true : false,
       };
       // console.log()
       // if (servise_zone_id) {
@@ -128,6 +132,7 @@ const CreateShippingOption = ({
       // selected,
       fullfillment_set_id,
       servise_zone_id,
+      is_return,
     ]
   );
 
@@ -147,7 +152,7 @@ const CreateShippingOption = ({
   // }, [result, setValue, dispatch]);
 
   return (
-    <DialogPopUp title="" description="" isOpen={true} handleClose={() => { }}>
+    <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden pb-12">
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
@@ -165,8 +170,9 @@ const CreateShippingOption = ({
                 <Details
                   control={control}
                   errors={errors}
-                  title={`${servise_zone_id ? "Update" : "Create"
-                    } Service Zone for Pickup from demo demo`}
+                  title={`${
+                    servise_zone_id ? "Update" : "Create"
+                  } Service Zone for Pickup from demo demo`}
                   description={""}
                 />
               ) : (

@@ -144,7 +144,9 @@ const ServiseZoneCard = ({ fulfillmentSetId, url }: ServiseZoneCardProps) => {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         className="cursor-pointer"
-                        onClick={() => router.push(`${url}/service-zone/${item?.id}`)}
+                        onClick={() =>
+                          router.push(`${url}/service-zone/${item?.id}`)
+                        }
                       >
                         <Pencil className="h-4 w-4 mr-2" /> Edit
                       </DropdownMenuItem>
@@ -174,7 +176,11 @@ const ServiseZoneCard = ({ fulfillmentSetId, url }: ServiseZoneCardProps) => {
                 <div className="flex items-center gap-2">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
-                    onClick={()=>router.push(`${url}/service-zone/${item?.id}/shipping-option/create`)}
+                    onClick={() =>
+                      router.push(
+                        `${url}/service-zone/${item?.id}/shipping-option/create`
+                      )
+                    }
                     whileTap={{ scale: 0.95 }}
                     className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
                   >
@@ -188,7 +194,7 @@ const ServiseZoneCard = ({ fulfillmentSetId, url }: ServiseZoneCardProps) => {
                   </motion.div>
                 </div>
               </motion.div>
-<ShippingOption/>
+              <ShippingOption serviseZone_id={item?._id} />
               {/* <AnimatePresence>
             {expandedPickup && (
               <motion.div
@@ -245,6 +251,11 @@ const ServiseZoneCard = ({ fulfillmentSetId, url }: ServiseZoneCardProps) => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={() =>
+                      router.push(
+                        `${url}/service-zone/${item?.id}/shipping-option/create?is_return`
+                      )
+                    }
                     className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
                   >
                     Create option
@@ -257,7 +268,7 @@ const ServiseZoneCard = ({ fulfillmentSetId, url }: ServiseZoneCardProps) => {
                   </motion.div>
                 </div>
               </motion.div>
-
+              <ShippingOption serviseZone_id={item?._id}  is_return={true} />
               {/* <AnimatePresence>
             {expandedReturn && (
               <motion.div

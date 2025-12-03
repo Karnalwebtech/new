@@ -26,13 +26,15 @@ export const shippingOptionsApi = createApi({
       },
       invalidatesTags: [{ type: "shippingOptions", id: "LIST" }],
     }),
- getAllShippingOptions: build.query<
+    getAllShippingOptions: build.query<
       GetAllResponseShippingOptions,
       {
         type?: string;
         rowsPerPage?: number;
         page?: number;
         keywords?: string;
+        is_return?: string;
+        service_zone_id?: string;
       } | void
     >({
       query: (filters) => {
@@ -48,6 +50,12 @@ export const shippingOptionsApi = createApi({
           if (filters.keywords) {
             params.keywords = filters.keywords; // Convert number to string
           }
+          if (filters.is_return) {
+            params.is_return = filters.is_return; // Convert number to string
+          }
+           if (filters.service_zone_id) {
+            params.service_zone_id = filters.service_zone_id; // Convert number to string
+          }
         }
 
         return {
@@ -60,7 +68,5 @@ export const shippingOptionsApi = createApi({
     }),
   }),
 });
-export const {
-  useAddShippingOptionsMutation,
-  useGetAllShippingOptionsQuery
-} = shippingOptionsApi;
+export const { useAddShippingOptionsMutation, useGetAllShippingOptionsQuery } =
+  shippingOptionsApi;
