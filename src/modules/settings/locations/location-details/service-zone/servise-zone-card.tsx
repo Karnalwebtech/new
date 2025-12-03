@@ -30,8 +30,9 @@ import ShippingOption from "../shipping-option/shipping-option";
 interface ServiseZoneCardProps {
   fulfillmentSetId: string;
   url: string;
+  title: string;
 }
-const ServiseZoneCard = ({ fulfillmentSetId, url }: ServiseZoneCardProps) => {
+const ServiseZoneCard = ({ title,fulfillmentSetId, url }: ServiseZoneCardProps) => {
   const router = useRouter();
   // const [expandedPickup, setExpandedPickup] = useState(true);
   // const [expandedReturn, setExpandedReturn] = useState(true);
@@ -172,7 +173,7 @@ const ServiseZoneCard = ({ fulfillmentSetId, url }: ServiseZoneCardProps) => {
                 className="w-full px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors"
                 whileHover={{ backgroundColor: "#f9fafb" }}
               >
-                <h4 className="font-medium text-slate-900">Pickup options</h4>
+                <h4 className="font-medium text-slate-900">{title} options</h4>
                 <div className="flex items-center gap-2">
                   <motion.button
                     whileHover={{ scale: 1.05 }}

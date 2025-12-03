@@ -33,7 +33,7 @@ export const shippingOptionsApi = createApi({
         rowsPerPage?: number;
         page?: number;
         keywords?: string;
-        is_return?: string;
+        is_return?: string | boolean;
         service_zone_id?: string;
       } | void
     >({

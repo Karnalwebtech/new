@@ -162,6 +162,7 @@ const FulfillmentCardDetails = ({
         {isExpand &&
           (
             <ServiseZoneCard
+              title={title}
               fulfillmentSetId={existingData?.fulfillment_set_id?.id!}
               url={`/settings/locations/${existingData?.stock_location_id?.id}/fulfillment-set/${existingData?.fulfillment_set_id?.id}`}
             />

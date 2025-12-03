@@ -8,17 +8,15 @@ interface ShippingOptionProps {
   is_return?: boolean;
   serviseZone_id?: string;
 }
-const ShippingOption = ({ serviseZone_id, is_return }: ShippingOptionProps) => {
+const ShippingOption = ({ serviseZone_id, is_return = false }: ShippingOptionProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const query = is_return
-    ? {
-        is_return: "true",
-        service_zone_id: serviseZone_id,
-        rowsPerPage: 10,
-        page: currentPage,
-      }
-    : { rowsPerPage: 10, service_zone_id: serviseZone_id, page: currentPage };
-  const { data } = useGetAllShippingOptionsQuery(query);
+
+  const { data } = useGetAllShippingOptionsQuery({
+    is_return: is_return,
+    service_zone_id: serviseZone_id,
+    rowsPerPage: 10,
+    page: currentPage,
+  });
   const result = useMemo(() => data?.result || [], [data]);
 
   return (
