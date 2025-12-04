@@ -26,6 +26,18 @@ export const shippingOptionsApi = createApi({
       },
       invalidatesTags: [{ type: "shippingOptions", id: "LIST" }],
     }),
+    getShippingOpptionsDetails: build.query<
+      GetAllResponseShippingOptions,
+      { id: string }
+    >({
+      query: ({ id }) => {
+        return {
+          url: `/shipping-options/${id}`,
+          method: "GET",
+        };
+      },
+      providesTags: [{ type: "shippingOptions", id: "LIST" }],
+    }),
     getAllShippingOptions: build.query<
       GetAllResponseShippingOptions,
       {
@@ -53,7 +65,7 @@ export const shippingOptionsApi = createApi({
           if (filters.is_return) {
             params.is_return = filters.is_return; // Convert number to string
           }
-           if (filters.service_zone_id) {
+          if (filters.service_zone_id) {
             params.service_zone_id = filters.service_zone_id; // Convert number to string
           }
         }
@@ -66,7 +78,18 @@ export const shippingOptionsApi = createApi({
       },
       providesTags: [{ type: "shippingOptions", id: "LIST" }],
     }),
+    deleteShippingOption: build.mutation<void, { id: string }>({
+      query: ({ id }) => ({
+        url: `/remove-shipping-option/${id}`,
+        method: "DELETE", // Use DELETE instead of PUT
+      }),
+      invalidatesTags: [{ type: "shippingOptions", id: "LIST" }],
+    }),
   }),
 });
-export const { useAddShippingOptionsMutation, useGetAllShippingOptionsQuery } =
-  shippingOptionsApi;
+export const {
+  useAddShippingOptionsMutation,
+  useGetAllShippingOptionsQuery,
+  useDeleteShippingOptionMutation,
+  useGetShippingOpptionsDetailsQuery,
+} = shippingOptionsApi;

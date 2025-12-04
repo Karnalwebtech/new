@@ -25,19 +25,25 @@ import FullscreenPriceEditor, {
 } from "@/components/price-manager/price-editor-dialog";
 import { useConditionalPrices } from "@/hooks/useConditionalPrices";
 import { shippingOptionSchema } from "@/zod-schema/shipping-options-schema";
-import { useAddShippingOptionsMutation } from "@/state/shipping-options-api";
+import {
+  useAddShippingOptionsMutation,
+  useGetShippingOpptionsDetailsQuery,
+} from "@/state/shipping-options-api";
 
 type FormData = z.infer<typeof shippingOptionSchema>;
 interface CreateShippingOptionProps {
   itemId: string;
   fullfillment_set_id: string;
   servise_zone_id?: string;
+  shipping_option_id?: string;
 }
 const CreateShippingOption = ({
   itemId,
   fullfillment_set_id,
   servise_zone_id,
+  shipping_option_id,
 }: CreateShippingOptionProps) => {
+  console.log(shipping_option_id);
   const router = useRouter();
   const dispatch = useDispatch();
   const { clearPrices, prices } = useConditionalPrices();
@@ -52,11 +58,11 @@ const CreateShippingOption = ({
     data,
     isLoading: dataLoader,
     error: dataLoadError,
-  } = useGetServiseZoneDetailsQuery(
-    { id: servise_zone_id as string },
-    { skip: !servise_zone_id }
+  } = useGetShippingOpptionsDetailsQuery(
+    { id: shipping_option_id as string },
+    { skip: !shipping_option_id }
   );
-
+console.log(data)
   // Clear prices when component mounts
   useEffect(() => {
     clearPrices();
@@ -64,20 +70,15 @@ const CreateShippingOption = ({
 
   const [addShippingOptions, { isLoading, error, isSuccess }] =
     useAddShippingOptionsMutation();
-  const [
-    updateServiceZone,
-    { isLoading: updateLoading, error: updateError, isSuccess: updateSuccess },
-  ] = useUpdateServiceZoneMutation();
+
   useEffect(() => {
     // Clear whenever page loads
     dispatch(clearSelected());
   }, [dispatch]);
   useHandleNotifications({
-    error: error || updateError || dataLoadError,
-    isSuccess: isSuccess || updateSuccess,
-    successMessage: updateSuccess
-      ? "Zone updates successfully!"
-      : "Zone Added successfully!",
+    error: error || dataLoadError,
+    isSuccess: isSuccess,
+    successMessage: "Zone Added successfully!",
     // redirectPath: `/settings/locations/${itemId}`,
   });
   const {
@@ -136,20 +137,24 @@ const CreateShippingOption = ({
     ]
   );
 
-  // useEffect(() => {
-  //   if (result) {
-  //     // const countries = result?.geozone?.map(
-  //     //   ({ country_id }) => country_id?.name
-  //     // );
-  //     // setValue("name", result?.serviceZones?.name);
-  //     // dispatch(
-  //     //   bulkToggleCodes({
-  //     //     codes: countries,
-  //     //     checked: true,
-  //     //   })
-  //     // );
-  //   }
-  // }, [result, setValue, dispatch]);
+  useEffect(() => {
+    if (result) {
+      // const countries = result?.geozone?.map(
+      //   ({ country_id }) => country_id?.name
+      // );
+      setValue("name", result?.name);
+      setValue("shipping_profile", result?.shipping_profile_id);
+      setValue("fulfillment_provider", result?.provider_id);
+      setValue("fulfillment_option", result?.data?.id);
+      setValue("enabled_in_store", data?.shipping_option_rule?.value);
+      // dispatch(
+      //   bulkToggleCodes({
+      //     codes: countries,
+      //     checked: true,
+      //   })
+      // );
+    }
+  }, [result, setValue, dispatch]);
 
   return (
     <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
@@ -174,6 +179,7 @@ const CreateShippingOption = ({
                     servise_zone_id ? "Update" : "Create"
                   } Service Zone for Pickup from demo demo`}
                   description={""}
+                  is_disabled={shipping_option_id ? true : false}
                 />
               ) : (
                 <FullscreenPriceEditor rows={rows} setRows={setRows} />
@@ -188,7 +194,7 @@ const CreateShippingOption = ({
             handleNext={() => setStep(step + 1)}
             handleSubmit={handleSubmit}
             onSubmit={onSubmit}
-            isLoading={isLoading || updateLoading}
+            isLoading={isLoading}
             onCancel={() => router.back()}
           />
         </div>

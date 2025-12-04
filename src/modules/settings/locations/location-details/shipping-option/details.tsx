@@ -13,6 +13,7 @@ interface DetailsProps<T extends FieldValues> {
   errors: FieldErrors<T>;
   title: string;
   description: string;
+  is_disabled?: boolean;
 }
 
 const Details = <T extends FieldValues>({
@@ -20,17 +21,21 @@ const Details = <T extends FieldValues>({
   errors,
   title,
   description,
+  is_disabled
 }: DetailsProps<T>) => {
-  const { data} = useGetAllShippingProfileDataQuery({
+  const { data } = useGetAllShippingProfileDataQuery({
     rowsPerPage: 100,
     page: 1,
   });
-    const { data:fulfillmentData  } = useGetAllFulFillmentProviderQuery({
-      rowsPerPage: 100,
-      page: 1,
-    });
+  const { data: fulfillmentData } = useGetAllFulFillmentProviderQuery({
+    rowsPerPage: 100,
+    page: 1,
+  });
   const shippingProfileResult = useMemo(() => data?.result || [], [data]);
-  const fulfillmentProviderResult = useMemo(() => fulfillmentData?.result || [], [fulfillmentData]);
+  const fulfillmentProviderResult = useMemo(
+    () => fulfillmentData?.result || [],
+    [fulfillmentData]
+  );
   return (
     <>
       {/* Form Content */}
@@ -84,6 +89,7 @@ const Details = <T extends FieldValues>({
                 <SelectFields
                   control={control}
                   errors={errors}
+                  is_disabled={is_disabled}
                   name={"fulfillment_provider" as Path<T>}
                   drop_down_selector={fulfillmentProviderResult?.map(
                     ({ _id, name }) => ({ key: _id || "", value: name || "" })
@@ -97,11 +103,14 @@ const Details = <T extends FieldValues>({
                 >
                   Fulfillment option
                 </Label>
-               <SelectFields
+                <SelectFields
                   control={control}
                   errors={errors}
+                  is_disabled={is_disabled}
                   name={"fulfillment_option" as Path<T>}
-                  drop_down_selector={[{key:"manual-fulfillment",value:"Manual fulfillment"}]}
+                  drop_down_selector={[
+                    { key: "manual-fulfillment", value: "Manual fulfillment" },
+                  ]}
                 />
               </div>
             </div>

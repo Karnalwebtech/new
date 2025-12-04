@@ -32,7 +32,11 @@ interface ServiseZoneCardProps {
   url: string;
   title: string;
 }
-const ServiseZoneCard = ({ title,fulfillmentSetId, url }: ServiseZoneCardProps) => {
+const ServiseZoneCard = ({
+  title,
+  fulfillmentSetId,
+  url,
+}: ServiseZoneCardProps) => {
   const router = useRouter();
   // const [expandedPickup, setExpandedPickup] = useState(true);
   // const [expandedReturn, setExpandedReturn] = useState(true);
@@ -195,50 +199,10 @@ const ServiseZoneCard = ({ title,fulfillmentSetId, url }: ServiseZoneCardProps) 
                   </motion.div>
                 </div>
               </motion.div>
-              <ShippingOption serviseZone_id={item?._id} />
-              {/* <AnimatePresence>
-            {expandedPickup && (
-              <motion.div
-                variants={expandVariants}
-                initial="collapsed"
-                animate="expanded"
-                exit="collapsed"
-              >
-                <motion.div
-                  className="px-6 pb-4"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  <motion.div
-                    className="bg-slate-50 rounded-lg p-4 flex items-center justify-between hover:bg-slate-100 transition-colors group"
-                    whileHover={{ x: 4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <CheckCircle size={20} className="text-emerald-500" />
-                      <div>
-                        <p className="font-medium text-slate-900">
-                          www - India (Manual)
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">
-                          Zone Configuration
-                        </p>
-                      </div>
-                    </div>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-white rounded-md transition-colors"
-                    >
-                      Store
-                    </motion.button>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence> */}
+              <ShippingOption
+                serviseZone_id={item?._id}
+                url={`${url}/service-zone/${item?.id}/shipping-option`}
+              />
             </motion.div>
             {/* Return Options Section */}
             <motion.div variants={itemVariants}>
@@ -269,50 +233,11 @@ const ServiseZoneCard = ({ title,fulfillmentSetId, url }: ServiseZoneCardProps) 
                   </motion.div>
                 </div>
               </motion.div>
-              <ShippingOption serviseZone_id={item?._id}  is_return={true} />
-              {/* <AnimatePresence>
-            {expandedReturn && (
-              <motion.div
-                variants={expandVariants}
-                initial="collapsed"
-                animate="expanded"
-                exit="collapsed"
-              >
-                <motion.div
-                  className="px-6 pb-4"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  <motion.div
-                    className="bg-slate-50 rounded-lg p-4 flex items-center justify-between hover:bg-slate-100 transition-colors group"
-                    whileHover={{ x: 4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <CheckCircle size={20} className="text-emerald-500" />
-                      <div>
-                        <p className="font-medium text-slate-900">
-                          mkesh - Default Shipping Profile (Manual)
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">
-                          Default Configuration
-                        </p>
-                      </div>
-                    </div>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-white rounded-md transition-colors"
-                    >
-                      Store
-                    </motion.button>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence> */}
+              <ShippingOption
+                serviseZone_id={item?._id}
+                is_return={true}
+                url={`${url}/service-zone/${item?.id}/shipping-option`}
+              />
             </motion.div>
           </div>
         ))
