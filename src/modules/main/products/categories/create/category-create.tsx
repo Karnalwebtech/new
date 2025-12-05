@@ -35,7 +35,10 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
     data,
     isLoading: dataFetchLoading,
     error: dataFetchError,
-  } = useGetSingleQuery({ id: catId as string,query:"edit" }, { skip: !catId });
+  } = useGetSingleQuery(
+    { id: catId as string, query: "edit" },
+    { skip: !catId }
+  );
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -55,14 +58,14 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
     successMessage: isSuccess
       ? "Product category added successfully!"
       : "Product category updated successfully!",
-    redirectPath: "/dashboard/products/categories",
+    // redirectPath: "/dashboard/products/categories",
   });
 
-  useEffect(() => {
-    if (isSuccess) {
-      dispatch(removeAll());
-    }
-  }, [isSuccess, dispatch]);
+  // useEffect(() => {
+  //   if (isSuccess) {
+  //     dispatch(removeAll());
+  //   }
+  // }, [isSuccess, dispatch]);
   const {
     control,
     handleSubmit,
@@ -71,8 +74,9 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      status: "active",
-      visibility: "publish",
+      has_parent: false,
+      is_active: true,
+      is_internal: false,
     },
     resolver: zodResolver(schema),
   });
@@ -90,7 +94,7 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
         values.meta_description?.trim().length <= 160,
     ];
   }, [values]);
-
+  console.log(values);
   // const handleNext = () => {
   //   if (step < tabs.length - 1 && canAccessStep[step + 1]) {
   //     setStep((prev) => prev + 1);
@@ -105,6 +109,11 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
     }
   }, [meta_canonical_url, setValue]);
 
+  useEffect(() => {
+    if (values.has_parent === false) {
+      setCategoryId([]);
+    }
+  }, [values.has_parent]);
   const onSubmit = useCallback(
     async (data: FormData) => {
       const payload: ProductCategoryFormData = {
@@ -137,8 +146,8 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
 
     setValue("title", result.name!);
     setValue("description", result.description);
-    setValue("status", result.status);
-    setValue("visibility", result.visibility);
+    // setValue("status", result.status);
+    // setValue("visibility", result.visibility);
     setValue("meta_title", result?.seo_id?.meta_title || "");
     setValue("meta_description", result?.seo_id?.meta_description || "");
     setValue("meta_canonical_url", result?.seo_id?.meta_canonical_url || "");
@@ -197,6 +206,7 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
                 categoryId={categoryId}
                 setCategoryId={setCategoryId}
                 catId={catId}
+                watchedValues_has_parent={values?.has_parent}
               />
             )}
             {step === 1 && (

@@ -4,8 +4,9 @@ export const ProductCategoryDetailsSchema = z.object({
   title: z.string().min(1, "Title is required"),
   handle: z.string().optional(),
   description: z.string().optional(),
-  status: z.string().optional(),
-  visibility: z.string().optional(),
+  is_active: z.boolean().default(true),
+  is_internal: z.boolean().default(false),
+  has_parent: z.boolean().default(false),
 });
 
 export const ProductCollectionsDetailsSchema = z.object({
@@ -40,4 +41,3 @@ export const productTagchema = z.object({
     .min(2, { message: "Description must be at least 2 characters" })
     .max(300, { message: "Description must be at most 300 characters" }),
 });
-

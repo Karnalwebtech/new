@@ -45,8 +45,10 @@ const CategoryNode = ({
   return (
     <motion.li key={id} variants={itemVariants}>
       <div
-        className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted"
-        style={{ paddingLeft: 8 + depth * 16 }}
+        className={`flex items-center space-x-2 rounded-md hover:bg-muted border ${
+          depth % 2 === 0 ? "bg-gray-50 p-2 " : "bg-white p-2 ml-4"
+        }`}
+        // style={{ paddingLeft: 8 + depth * 16 }}
       >
         <Checkbox
           id={id}
@@ -87,7 +89,11 @@ const CategoryNode = ({
   );
 };
 
-const CategoryList = ({ selected, catId, setSelected }: CategoryListProps) => {
+const CategoryList = ({
+  selected,
+  catId,
+  setSelected,
+}: CategoryListProps) => {
   const { data, isLoading, error } = useGetProductCategoryQuery({
     rowsPerPage: 100,
     page: 1,
@@ -117,9 +123,9 @@ const CategoryList = ({ selected, catId, setSelected }: CategoryListProps) => {
     [setSelected]
   );
 
-  const removeHandler = useCallback(() => {
-    setSelected([]); // clear on false or "indeterminate" toggled off
-  }, [setSelected]);
+  // const removeHandler = useCallback(() => {
+  //   setSelected([]); // clear on false or "indeterminate" toggled off
+  // }, [setSelected]);
 
   if (error) {
     return (
@@ -132,7 +138,7 @@ const CategoryList = ({ selected, catId, setSelected }: CategoryListProps) => {
   return (
     <div>
       {/* Select All row */}
-      <div className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted">
+      {/* <div className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted">
         <Checkbox
           id="none"
           checked={selected.length > 0 ? false : true}
@@ -141,7 +147,7 @@ const CategoryList = ({ selected, catId, setSelected }: CategoryListProps) => {
         <Label htmlFor="none" className="flex-1 cursor-pointer text-sm">
           <span className="block">None</span>
         </Label>
-      </div>
+      </div> */}
 
       {/* Loading skeleton */}
       {isLoading ? (

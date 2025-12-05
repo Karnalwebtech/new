@@ -4,17 +4,18 @@ import { Label } from "@/components/ui/label";
 import Media from "./media";
 import HoverTooltip from "@/components/tooltip/hover-tooltip";
 import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
-import SelectFields from "@/components/fields/select-field";
 import InputField from "@/components/fields/input-field";
 import TextareaField from "@/components/fields/textarea-field";
 import CategoryList from "./category-list";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import SwitchField from "../../../../../components/fields/switch-field";
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
   errors: FieldErrors<T>;
   categoryId: string[];
   setCategoryId: React.Dispatch<React.SetStateAction<string[]>>;
   catId?: string;
+  watchedValues_has_parent: boolean;
 }
 const Details = <T extends FieldValues>({
   control,
@@ -22,6 +23,7 @@ const Details = <T extends FieldValues>({
   categoryId,
   catId,
   setCategoryId,
+  watchedValues_has_parent,
 }: DetailsProps<T>) => {
   return (
     <>
@@ -32,7 +34,7 @@ const Details = <T extends FieldValues>({
         <div className="space-y-8">
           {/* Title, Subtitle, Handle Row */}
           <div className="grid grid-cols-12 gap-2">
-            <div className="col-span-8">
+            <div className="col-span-12">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label
@@ -101,71 +103,71 @@ const Details = <T extends FieldValues>({
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="status"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Status
-                  </Label>
-                  <SelectFields
-                    control={control}
-                    errors={errors}
-                    name={"status" as Path<T>}
-                    placeholder="Select status" // Default placeholder
-                    drop_down_selector={[
-                      {
-                        key: "active",
-                        value: "active",
-                      },
-                      {
-                        key: "inactive",
-                        value: "inactive",
-                      },
-                    ]}
-                    class_style={"text-gray-500"}
-                  />
+                  <div className="mt-4 border p-4 rounded-lg">
+                    <SwitchField
+                      control={control}
+                      paragraph={"Make category publicly visible"}
+                      errors={errors}
+                      name={"is_active" as Path<T>}
+                      label={"Active Status"}
+                    />
+                  </div>
                 </div>
-
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="visibility"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Visibility
-                  </Label>
-                  <SelectFields
-                    control={control}
-                    errors={errors}
-                    name={"visibility" as Path<T>}
-                    placeholder="Select visibility" // Default placeholder
-                    drop_down_selector={[
-                      {
-                        key: "publish",
-                        value: "publish",
-                      },
-                      {
-                        key: "draft",
-                        value: "draft",
-                      },
-                    ]}
-                    class_style={"text-gray-500"}
-                  />
+                  <div className="mt-4 border p-4 rounded-lg">
+                    <SwitchField
+                      control={control}
+                      paragraph={"Hide from customers"}
+                      errors={errors}
+                      name={"is_internal" as Path<T>}
+                      label={"Internal Use"}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="mt-4 border p-4 rounded-lg">
+                    <SwitchField
+                      control={control}
+                      paragraph={"Belongs to another category"}
+                      errors={errors}
+                      name={"has_parent" as Path<T>}
+                      label={"Parent Category"}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="col-span-4">
-               <ScrollArea className="h-[400px] w-full p-0 rounded-lg overflow-hidden">
-              <CategoryList
-                selected={categoryId}
-                catId={catId}
-                setSelected={setCategoryId}
-              />
-               </ScrollArea>
+          </div>
+          <div className="grid grid-cols-12 gap-4">
+            {watchedValues_has_parent && (
+              <div className="col-span-12 md:col-span-6 lg:col-span-4">
+                <Label
+                  htmlFor="categories"
+                  className="text-sm font-medium text-gray-500"
+                >
+                  Categories
+                </Label>
+                <div className="my-[10px] border rounded-lg">
+                  <ScrollArea className="h-[210px] w-full p-4 rounded-lg overflow-hidden">
+                    <CategoryList
+                      selected={categoryId}
+                      catId={catId}
+                      setSelected={setCategoryId}
+                    />
+                  </ScrollArea>
+                </div>
+              </div>
+            )}
+            <div
+              className={`col-span-12 md:col-span-${
+                watchedValues_has_parent ? 8 : 12
+              } lg:col-span-${watchedValues_has_parent ? 8 : 12} mb-4`}
+            >
+              <Media />
             </div>
           </div>
-          <Media />
         </div>
       </div>
     </>
