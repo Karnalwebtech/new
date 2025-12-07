@@ -15,6 +15,9 @@ export interface ProductCategoryFormData {
   visibility?: string;
   keywords?: string[];
   meta_canonical_url: string;
+  is_active: boolean;
+  has_parent: boolean;
+  is_internal: boolean;
   rank?: number;
   id?: string;
   isExpanded?: boolean;

@@ -18,15 +18,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import NavigateBtn from "@/components/buttons/navigate-btn";
 import {
   useDeleteProductCategoryMutation,
   useDupicateProductCategoryMutation,
   useGetProductCategoryQuery,
 } from "@/state/product-category-api";
-import { TableCell, TableRow } from "@/components/ui/table";
+import { TableCell } from "@/components/ui/table";
 import { useTableFilters } from "@/hooks/useTableFilters";
-import SubHeader from "@/modules/layout/header/sub-header";
 import Shadcn_table from "@/components/table/table";
 import ShadcnPagination from "@/components/pagination";
 import useWindowWidth from "@/hooks/useWindowWidth";
@@ -39,13 +37,10 @@ import { TruncateText } from "@/components/truncate-text";
 import { containerVariants, itemVariants } from "@/lib/variants";
 import { useRouter } from "next/navigation";
 import { ProductCategoryFormData } from "@/types/product-type";
+import PageHeander2 from "@/modules/layout/header/page-heander2";
+import StatusIndicator from "@/components/status-indicator";
+import { TableEmptyState } from "@/components/table/table-empty-state";
 
-const statusVariants = {
-  inactive: { backgroundColor: "#374151" },
-  active: { backgroundColor: "#10b981" },
-  draft: { backgroundColor: "#374151" },
-  published: { backgroundColor: "#10b981" },
-};
 
 // 🔹 Optimized reusable CategoryRow component
 const CategoryRow = memo(
@@ -120,7 +115,7 @@ const CategoryRow = memo(
               )}
               <TruncateText
                 text={item.name! || ""}
-                maxLength={25}
+                maxLength={30}
                 className="group-hover:text-primary transition-colors duration-200"
               />
             </div>
@@ -129,56 +124,16 @@ const CategoryRow = memo(
           {/* Handle */}
           <TableCell>
             <span className="text-muted-foreground">
-              /<TruncateText text={item.handle! || ""} maxLength={25} />
+              /<TruncateText text={item.handle! || ""} maxLength={30} />
             </span>
           </TableCell>
 
           {/* Status */}
           <TableCell>
-            <div className="flex items-center gap-2">
-              <motion.div
-                className="w-2 h-2 rounded-full"
-                animate={
-                  item?.status === "inactive"
-                    ? statusVariants.inactive
-                    : statusVariants.active
-                }
-                transition={{ duration: 0.3 }}
-              />
-              <span
-                className={`text-sm capitalize ${
-                  item?.status === "inactive"
-                    ? "text-gray-400"
-                    : "text-emerald-500"
-                }`}
-              >
-                {item?.status}
-              </span>
-            </div>
-          </TableCell>
+            <StatusIndicator
+              enabled={item?.is_active}
 
-          {/* Visibility */}
-          <TableCell>
-            <div className="flex items-center gap-2">
-              <motion.div
-                className="w-2 h-2 rounded-full"
-                animate={
-                  item?.visibility === "draft"
-                    ? statusVariants.draft
-                    : statusVariants.published
-                }
-                transition={{ duration: 0.3 }}
-              />
-              <span
-                className={`text-sm capitalize ${
-                  item?.visibility === "draft"
-                    ? "text-gray-400"
-                    : "text-emerald-500"
-                }`}
-              >
-                {item?.visibility}
-              </span>
-            </div>
+            />
           </TableCell>
 
           {/* Actions */}
@@ -202,7 +157,7 @@ const CategoryRow = memo(
                 >
                   <Pencil className="h-4 w-4 mr-2" /> Edit
                 </DropdownMenuItem>
-                 <DropdownMenuItem
+                <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() =>
                     router.push(`/dashboard/products/categories/${item?.id}`)
@@ -217,9 +172,9 @@ const CategoryRow = memo(
                   <Copy className="h-4 w-4 mr-2" /> Duplicate
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  disabled={deletedId === item?._id}
+                  disabled={deletedId === item?.id}
                   className="text-destructive cursor-pointer"
-                  onClick={() => item?._id && removeHandler(item._id)}
+                  onClick={() => item?.id && removeHandler(item.id)}
                 >
                   <Trash2 className="h-4 w-4 mr-2" /> Delete
                 </DropdownMenuItem>
@@ -289,8 +244,8 @@ const Categories = () => {
     successMessage: duplicateSuccess
       ? "Category duplicated successfully!"
       : isDeleteSuccess
-      ? "Category deleted successfully!"
-      : "",
+        ? "Category deleted successfully!"
+        : "",
   });
 
   const width = useWindowWidth();
@@ -338,22 +293,11 @@ const Categories = () => {
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
       return (
-        <TableRow>
-          <TableCell colSpan={6} className="text-center">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="py-8"
-            >
-              <div className="text-muted-foreground text-lg mb-2">
-                No categories found
-              </div>
-              <div className="text-sm text-muted-foreground/70">
-                Try adjusting your search criteria
-              </div>
-            </motion.div>
-          </TableCell>
-        </TableRow>
+        <TableEmptyState
+          colSpan={6}
+          title="No categories found"
+          description="Try adjusting your search criteria"
+        />
       );
     }
     return (
@@ -391,39 +335,18 @@ const Categories = () => {
       animate="visible"
     >
       <div className="container mx-auto py-8">
-        {/* Header */}
-        <motion.div
-          className="flex px-4 items-center justify-between mb-8"
-          variants={itemVariants}
-        >
-          <motion.div>
-            <motion.h1 className="text-2xl font-semibold text-foreground mb-2">
-              Categories
-            </motion.h1>
-            <motion.p className="text-muted-foreground">
-              Manage and organize product categories.
-            </motion.p>
-          </motion.div>
-          <motion.div className="flex items-center gap-3">
-            <NavigateBtn
-              path="/dashboard/products/categories/organize"
-              title="Edit ranking"
-              style="btn-primary"
-            />
-            <NavigateBtn
-              path="/dashboard/products/categories/create"
-              title="Create"
-              style="btn-primary"
-            />
-          </motion.div>
-        </motion.div>
 
-        {/* SubHeader */}
-        <SubHeader
+
+        <PageHeander2
+          headerTitle={"Categories"}
+          headerDescription="Manage and organize product categories."
+          rowsPerPage={rowsPerPage}
+          setRowsPerPage={setRowsPerPage}
+          setCurrentPage={setCurrentPage}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          setRowsPerPage={setRowsPerPage}
-          dataCounter={data?.dataCounter}
+          subHeader={true}
+          navLink={`/dashboard/products/categories/create`}
         />
 
         {/* Table */}
@@ -432,27 +355,7 @@ const Categories = () => {
           className="min-h-[400px] px-2"
         >
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
-            {/* Loader Overlay */}
-            <AnimatePresence>
-              {(isLoading || isDeleteLoading || duplicateLoading) && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10"
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 1,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                    className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+
 
             <Shadcn_table
               table_header={[
@@ -460,11 +363,10 @@ const Categories = () => {
                 "Title",
                 "Handle",
                 "Status",
-                "Visibility",
                 "Action",
               ]}
               tabel_body={() => tableBody}
-              isLoading={isLoading}
+              isLoading={isLoading || isDeleteLoading || duplicateLoading}
             />
           </div>
 

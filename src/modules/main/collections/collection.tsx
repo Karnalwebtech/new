@@ -5,8 +5,6 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   MoreHorizontal,
-  ChevronRight,
-  ChevronDown,
   Copy,
   Trash2,
   Pencil,
@@ -18,10 +16,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import NavigateBtn from "@/components/buttons/navigate-btn";
-import { TableCell, TableRow } from "@/components/ui/table";
+import { TableCell } from "@/components/ui/table";
 import { useTableFilters } from "@/hooks/useTableFilters";
-import SubHeader from "@/modules/layout/header/sub-header";
 import Shadcn_table from "@/components/table/table";
 import ShadcnPagination from "@/components/pagination";
 import useWindowWidth from "@/hooks/useWindowWidth";
@@ -33,38 +29,33 @@ import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { TruncateText } from "@/components/truncate-text";
 import { containerVariants, itemVariants } from "@/lib/variants";
 import { useRouter } from "next/navigation";
-import { ProductCategoryFormData } from "@/types/product-type";
-import {useDeleteProductCollctionMutation, 
+import { ProductCollectionsFormData } from "@/types/product-type";
+import {
+  useDeleteProductCollctionMutation,
   useDupicateProductCollectionMutation,
   useGetProductCollectionsQuery,
 } from "@/state/product-collections-api";
+import PageHeander2 from "@/modules/layout/header/page-heander2";
+import { TableEmptyState } from "@/components/table/table-empty-state";
 
 // 🔹 Optimized reusable Row component
 const Row = memo(
   ({
     item,
     depth,
-    expandedIds,
-    toggleExpand,
     removeHandler,
     DuplicateHandler,
     deletedId,
     router,
   }: {
-    item: ProductCategoryFormData;
+    item: ProductCollectionsFormData;
     depth: number;
-    expandedIds: Set<string>;
-    toggleExpand: (id: string) => void;
     removeHandler: (id: string) => void;
     DuplicateHandler: (id: string) => void;
     deletedId: string | null;
     router: ReturnType<typeof useRouter>;
   }) => {
     const rowId = `${item._id || item.id}-${depth}`;
-
-    const hasChildren =
-      Array.isArray(item?.children) && item.children.length > 0;
-    const isExpanded = expandedIds.has(rowId);
 
     return (
       <>
@@ -94,22 +85,7 @@ const Row = memo(
               className="flex items-center gap-2"
               style={{ paddingLeft: depth * 16 }}
             >
-              {hasChildren ? (
-                <button
-                  type="button"
-                  aria-label={isExpanded ? "Collapse" : "Expand"}
-                  className="h-6 w-6 inline-flex items-center justify-center rounded hover:bg-muted"
-                  onClick={() => toggleExpand(rowId)}
-                >
-                  {isExpanded ? (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </button>
-              ) : (
-                <span className="h-6 w-6 inline-block" />
-              )}
+
               <TruncateText
                 text={item.name! || ""}
                 maxLength={25}
@@ -161,9 +137,9 @@ const Row = memo(
                   <Copy className="h-4 w-4 mr-2" /> Duplicate
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  disabled={deletedId === item?._id}
+                  disabled={deletedId === item?.id}
                   className="text-destructive cursor-pointer"
-                  onClick={() => item?._id && removeHandler(item._id)}
+                  onClick={() => item?.id && removeHandler(item.id)}
                 >
                   <Trash2 className="h-4 w-4 mr-2" /> Delete
                 </DropdownMenuItem>
@@ -171,25 +147,6 @@ const Row = memo(
             </DropdownMenu>
           </TableCell>
         </motion.tr>
-
-        {/* Children */}
-        <AnimatePresence>
-          {hasChildren &&
-            isExpanded &&
-            item.children!.map((child, i) => (
-              <Row
-                key={`${child._id}-${depth + 1}-${i}`}
-                item={child}
-                depth={depth + 1}
-                expandedIds={expandedIds}
-                toggleExpand={toggleExpand}
-                removeHandler={removeHandler}
-                DuplicateHandler={DuplicateHandler}
-                deletedId={deletedId}
-                router={router}
-              />
-            ))}
-        </AnimatePresence>
       </>
     );
   }
@@ -233,8 +190,8 @@ const Collection = () => {
     successMessage: duplicateSuccess
       ? "Collection duplicated successfully!"
       : isDeleteSuccess
-      ? "Collection deleted successfully!"
-      : "",
+        ? "Collection deleted successfully!"
+        : "",
   });
 
   const width = useWindowWidth();
@@ -266,38 +223,15 @@ const Collection = () => {
     }
   }, [isDeleteSuccess]);
 
-  const toggleExpand = useCallback((id: string) => {
-    setExpandedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
-
   // Memoized Table Body
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
       return (
-        <TableRow>
-          <TableCell colSpan={6} className="text-center">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="py-8"
-            >
-              <div className="text-muted-foreground text-lg mb-2">
-                No Collection found
-              </div>
-              <div className="text-sm text-muted-foreground/70">
-                Try adjusting your search criteria
-              </div>
-            </motion.div>
-          </TableCell>
-        </TableRow>
+        <TableEmptyState
+          title="No Collection found"
+          description="Try adjusting your search criteria"
+          colSpan={6}
+        />
       );
     }
     return (
@@ -307,8 +241,6 @@ const Collection = () => {
             key={`${item._id}-0-${i}`}
             item={item}
             depth={0}
-            expandedIds={expandedIds}
-            toggleExpand={toggleExpand}
             removeHandler={removeHandler}
             DuplicateHandler={DuplicateHandler}
             deletedId={deletedId}
@@ -324,7 +256,6 @@ const Collection = () => {
     router,
     DuplicateHandler,
     removeHandler,
-    toggleExpand,
   ]);
 
   return (
@@ -335,68 +266,28 @@ const Collection = () => {
       animate="visible"
     >
       <div className="container mx-auto py-8">
-        {/* Header */}
-        <motion.div
-          className="flex px-4 items-center justify-between mb-8"
-          variants={itemVariants}
-        >
-          <motion.div>
-            <motion.h1 className="text-2xl font-semibold text-foreground mb-2">
-              Collection
-            </motion.h1>
-            <motion.p className="text-muted-foreground">
-              Organize products into collections.
-            </motion.p>
-          </motion.div>
-          <motion.div className="flex items-center gap-3">
-            <NavigateBtn
-              path="/dashboard/collections/create"
-              title="Create"
-              style="btn-primary"
-            />
-          </motion.div>
-        </motion.div>
 
-        {/* SubHeader */}
-        <SubHeader
+        <PageHeander2
+          headerTitle={"Collection"}
+          headerDescription="Organize products into collections."
+          rowsPerPage={rowsPerPage}
+          setRowsPerPage={setRowsPerPage}
+          setCurrentPage={setCurrentPage}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          setRowsPerPage={setRowsPerPage}
-          dataCounter={data?.dataCounter}
+          subHeader={true}
+          navLink={`/dashboard/collections/create`}
         />
-
         {/* Table */}
         <motion.div
           style={{ width: width < 749 ? `${width}px` : "100%" }}
           className="min-h-[400px] px-2"
         >
           <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
-            {/* Loader Overlay */}
-            <AnimatePresence>
-              {(isLoading || isDeleteLoading || duplicateLoading) && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10"
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                      duration: 1,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                    className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full"
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             <Shadcn_table
               table_header={["Thumbnail", "Title", "Handle", "Action"]}
               tabel_body={() => tableBody}
-              isLoading={isLoading}
+              isLoading={isLoading || isDeleteLoading || duplicateLoading}
             />
           </div>
 

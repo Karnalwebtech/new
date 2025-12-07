@@ -58,14 +58,14 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
     successMessage: isSuccess
       ? "Product category added successfully!"
       : "Product category updated successfully!",
-    // redirectPath: "/dashboard/products/categories",
+    redirectPath: "/dashboard/products/categories",
   });
 
-  // useEffect(() => {
-  //   if (isSuccess) {
-  //     dispatch(removeAll());
-  //   }
-  // }, [isSuccess, dispatch]);
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(removeAll());
+    }
+  }, [isSuccess, dispatch]);
   const {
     control,
     handleSubmit,
@@ -88,18 +88,13 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
       true,
       !!values.title?.trim(),
       values.meta_title?.trim().length > 0 &&
-        values.meta_title?.trim().length <= 60 &&
-        values.meta_canonical_url?.trim().length > 0 &&
-        values.meta_description?.trim().length > 50 &&
-        values.meta_description?.trim().length <= 160,
+      values.meta_title?.trim().length <= 60 &&
+      values.meta_canonical_url?.trim().length > 0 &&
+      values.meta_description?.trim().length > 50 &&
+      values.meta_description?.trim().length <= 160,
     ];
   }, [values]);
-  console.log(values);
-  // const handleNext = () => {
-  //   if (step < tabs.length - 1 && canAccessStep[step + 1]) {
-  //     setStep((prev) => prev + 1);
-  //   }
-  // };
+
 
   const meta_canonical_url = watch("meta_canonical_url", "");
   useEffect(() => {
@@ -146,8 +141,9 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
 
     setValue("title", result.name!);
     setValue("description", result.description);
-    // setValue("status", result.status);
-    // setValue("visibility", result.visibility);
+    setValue("is_active", result.is_active);
+    setValue("has_parent", result.has_parent);
+    setValue("is_internal", result.is_internal);
     setValue("meta_title", result?.seo_id?.meta_title || "");
     setValue("meta_description", result?.seo_id?.meta_description || "");
     setValue("meta_canonical_url", result?.seo_id?.meta_canonical_url || "");
@@ -185,7 +181,7 @@ const ProductCategoryForm = ({ catId }: ProductCategoryFormProps) => {
       title="Create Product Category"
       description="Fill in the details to create a new product category."
       isOpen={true}
-      handleClose={() => {}}
+      handleClose={() => { }}
     >
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         {dataFetchLoading ? (

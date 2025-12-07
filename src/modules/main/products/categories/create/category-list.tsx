@@ -45,10 +45,9 @@ const CategoryNode = ({
   return (
     <motion.li key={id} variants={itemVariants}>
       <div
-        className={`flex items-center space-x-2 rounded-md hover:bg-muted border ${
-          depth % 2 === 0 ? "bg-gray-50 p-2 " : "bg-white p-2 ml-4"
-        }`}
-        // style={{ paddingLeft: 8 + depth * 16 }}
+        className={`flex items-center space-x-2 rounded-md hover:bg-muted border ${depth % 2 === 0 ? "bg-gray-50 p-2 " : "bg-white p-2 ml-4"
+          }`}
+      // style={{ paddingLeft: 8 + depth * 16 }}
       >
         <Checkbox
           id={id}
@@ -164,18 +163,24 @@ const CategoryList = ({
             animate="show"
             className="mt-2"
           >
-            {result
-              .filter((item) => item?.id !== catId)
-              .map((item) => (
-                <CategoryNode
-                  key={item._id}
-                  item={item}
-                  depth={0}
-                  catId={catId}
-                  selectedSet={selectedSet}
-                  onSelect={handleSelectOne}
-                />
-              ))}
+            {
+              result.length === 0 ?
+                <motion.li >
+                  <p>No categories found</p>
+                </motion.li>
+                :
+                result
+                  .filter((item) => item?.id !== catId)
+                  .map((item) => (
+                    <CategoryNode
+                      key={item._id}
+                      item={item}
+                      depth={0}
+                      catId={catId}
+                      selectedSet={selectedSet}
+                      onSelect={handleSelectOne}
+                    />
+                  ))}
           </motion.ul>
         </AnimatePresence>
       )}
