@@ -18,16 +18,18 @@ import VariantsDetails from "./variants-details";
 import { useDispatch, useSelector } from "react-redux";
 import { clearSelected } from "@/reducers/healper-slice";
 import { RootState } from "@/store";
+import VariantPriceEditor from "@/components/price-manager/variant-price-editor-dialog";
 
 type FormData = z.infer<typeof ProductSchema>;
 export function ProductCreateForm() {
   const router = useRouter();
+  const [rows, setRows] = useState<PriceRow[]>([])
   const dispatch = useDispatch();
   const [step, setStep] = useState(0);
-  const { selected,selectedKeyValuePair } = useSelector((state: RootState) => state.helper);
+  const { selected, selectedKeyValuePair } = useSelector((state: RootState) => state.helper);
   const [keywords, setKeywords] = useState<string[]>([]);
   useEffect(() => {
-   dispatch(clearSelected())
+    dispatch(clearSelected())
   }, [dispatch]);
   const {
     control,
@@ -43,25 +45,29 @@ export function ProductCreateForm() {
   });
 
   const values = watch();
-
+  const has_inventory_kit = rows[0].has_inventory_kit
+  console.log(rows)
   const canAccessStep = useMemo(() => {
     const mt = values.meta_title?.trim() || "";
-    const md = values.meta_description?.trim() || "";
-    const mc = values.meta_canonical_url?.trim() || "";
+    // const md = values.meta_description?.trim() || "";
+    // const mc = values.meta_canonical_url?.trim() || "";
 
-    const isMetaTitleValid =
-      mt.length >= 3 && mt.length <= 60;
+    // const isMetaTitleValid =
+    //   mt.length >= 3 && mt.length <= 60;
 
-    const isMetaDescriptionValid =
-      md.length >= 50 && md.length <= 160;
+    // const isMetaDescriptionValid =
+    //   md.length >= 50 && md.length <= 160;
 
-    const isCanonicalValid =
-      /^[a-zA-Z0-9-]+$/.test(mc);
+    // const isCanonicalValid =
+    //   /^[a-zA-Z0-9-]+$/.test(mc);
 
     return [
       true,
       !!values.title?.trim(),
-      isMetaTitleValid && isMetaDescriptionValid && isCanonicalValid,
+      true,
+      true,
+      true,
+      // isMetaTitleValid,
     ];
   }, [values]);
 
@@ -101,15 +107,17 @@ export function ProductCreateForm() {
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
-            tabs={["Details", "Organize", "Variants", "SEO"]}
+            tabs={ has_inventory_kit?["Details", "Organize", "Variants", "SEO","Inventory kits"] :["Details", "Organize", "Variants", "SEO"]}
             step={step}
             setStep={setStep}
             canAccessStep={canAccessStep}
             onCancel={() => router.back()}
           />
           {step === 0 && <Details control={control} errors={errors} hasVariant={watch("hasVariants")} />}
-          {step === 1 && <Organize control={control} errors={errors}/>}
-          {step === 2 && <VariantsDetails />}
+          {step === 1 && <Organize control={control} errors={errors} />}
+          {step === 2 &&
+            <VariantPriceEditor rows={rows} setRows={setRows} />
+          }
 
           {/* {step === 3 && <p>sss</p>} */}
           {/* {step === 2 && (
@@ -126,10 +134,21 @@ export function ProductCreateForm() {
               description={values.meta_description}
             />
           )}
+          {has_inventory_kit && step === 4 && (
+            <SEOForm
+              control={control}
+              errors={errors}
+              keywords={keywords}
+              setKeywords={setKeywords}
+              disabled_path={"disabled_path"}
+              title={values.meta_title}
+              description={values.meta_description}
+            />
+          )}
           {/* Footer Actions */}
           <PageFooter<FormData>
             step={step}
-            lastStep={3} // or whatever your last step index is
+            lastStep={has_inventory_kit ? 4 : 3} // or whatever your last step index is
             canAccessStep={canAccessStep} // example: at least 2 steps
             handleNext={() => setStep(step + 1)}
             handleSubmit={handleSubmit}
