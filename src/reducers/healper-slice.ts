@@ -18,6 +18,10 @@ interface SidebarToggle {
 interface SelectCategory {
   category: string;
 }
+interface KeyValue {
+  key: string;
+  value: string;
+}
 interface initialStateTypes
   extends ToggleState,
   Type,
@@ -28,6 +32,7 @@ interface initialStateTypes
   taxMap: Record<string, boolean>;
   selected: string[];
   isDisabled: string[];
+  selectedKeyValuePair: KeyValue[];
 }
 
 const initialState: initialStateTypes = {
@@ -39,6 +44,7 @@ const initialState: initialStateTypes = {
   dashboardType: "dashboard",
   taxMap: {},
   selected: [],
+  selectedKeyValuePair: [],
   isDisabled: [],
 };
 const helperSlice = createSlice({
@@ -91,37 +97,65 @@ const helperSlice = createSlice({
 
     toggleCode: (
       state,
-      action: PayloadAction<{ code: string; checked: boolean }>
+      action: PayloadAction<{ code: string; checked: boolean; name?: string }>
     ) => {
       state.selected = state.selected ?? []; // ✅ Ensure it's always an array
-      const { code, checked } = action.payload;
+      const { code, checked, name = "" } = action.payload;
 
       if (checked) {
         if (!state.selected.includes(code)) {
           state.selected.push(code);
+          if (typeof name === "string" && name.trim() !== "") {
+            state.selectedKeyValuePair.push({ key: code, value: name });
+          }
         }
       } else {
         state.selected = state.selected.filter((c) => c !== code);
+        if (typeof name === "string" && name.trim() !== "") {
+          state.selectedKeyValuePair = state.selectedKeyValuePair.filter(
+            (c) => c.key !== code
+          );
+        }
       }
     },
 
     bulkToggleCodes: (
       state,
-      action: PayloadAction<{ codes: string[]; checked: boolean }>
+      action: PayloadAction<{
+        codes: string[];
+        checked: boolean;
+        keyvaluepair?: { key: string; value: string }[];
+      }>
     ) => {
-      state.selected = state.selected ?? []; // ✅ Ensure it's always an array
-      const { codes, checked } = action.payload;
+      state.selected = state.selected ?? [];
+      const { codes, checked, keyvaluepair } = action.payload;
 
       if (checked) {
         const set = new Set([...state.selected, ...codes]);
         state.selected = Array.from(set);
+
+        // Add key-value pairs if provided
+        if (keyvaluepair && keyvaluepair.length > 0) {
+          keyvaluepair.forEach(({ key, value }) => {
+            if (!state.selectedKeyValuePair.some((x) => x.key === key)) {
+              state.selectedKeyValuePair.push({ key, value });
+            }
+          });
+        }
       } else {
         state.selected = state.selected.filter((c) => !codes.includes(c));
+        state.selectedKeyValuePair = state.selectedKeyValuePair.filter(
+          (c) => !codes.includes(c.key)
+        );
       }
     },
     bulkToggleIsDisabled: (
       state,
-      action: PayloadAction<{ codes: string[]; checked: boolean }>
+      action: PayloadAction<{
+        codes: string[];
+        checked: boolean;
+        keyvaluepair?: { key: string; value: string }[];
+      }>
     ) => {
       state.isDisabled = state.isDisabled ?? []; // ✅ Ensure it's always an array
       const { codes, checked } = action.payload;
@@ -139,6 +173,7 @@ const helperSlice = createSlice({
     },
     clearSelected: (state) => {
       state.selected = [];
+      state.selectedKeyValuePair = [];
       state.isDisabled = [];
     },
   },

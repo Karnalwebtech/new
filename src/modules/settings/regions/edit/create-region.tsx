@@ -168,8 +168,6 @@ const CreateRegion = ({ ItemId }: CreateRegionProps) => {
                 </div>
                 <div className="flex items-center justify-between gap-4 mt-4">
                       <SelectedItemsBadgeList/>
-                
-
                   {/* Add countries button */}
                   <div className="flex justify-end">
                     <ButtonEvent

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
 import Details from "./details";
@@ -15,13 +15,20 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SEOForm from "@/components/forms/SEO-form";
 import VariantsDetails from "./variants-details";
+import { useDispatch, useSelector } from "react-redux";
+import { clearSelected } from "@/reducers/healper-slice";
+import { RootState } from "@/store";
 
-const schema = ProductSchema.merge(seoSchema);
-type FormData = z.infer<typeof schema>;
+type FormData = z.infer<typeof ProductSchema>;
 export function ProductCreateForm() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [step, setStep] = useState(0);
+  const { selected,selectedKeyValuePair } = useSelector((state: RootState) => state.helper);
   const [keywords, setKeywords] = useState<string[]>([]);
+  useEffect(() => {
+   dispatch(clearSelected())
+  }, [dispatch]);
   const {
     control,
     handleSubmit,
@@ -29,25 +36,35 @@ export function ProductCreateForm() {
     setValue,
     formState: { errors },
   } = useForm<FormData>({
-    // defaultValues: {
-    //   status: "active",
-    //   visibility: "publish",
-    // },
-    resolver: zodResolver(schema),
+    defaultValues: {
+      hasVariants: false,   // <-- add this
+    },
+    resolver: zodResolver(ProductSchema),
   });
 
   const values = watch();
+
   const canAccessStep = useMemo(() => {
+    const mt = values.meta_title?.trim() || "";
+    const md = values.meta_description?.trim() || "";
+    const mc = values.meta_canonical_url?.trim() || "";
+
+    const isMetaTitleValid =
+      mt.length >= 3 && mt.length <= 60;
+
+    const isMetaDescriptionValid =
+      md.length >= 50 && md.length <= 160;
+
+    const isCanonicalValid =
+      /^[a-zA-Z0-9-]+$/.test(mc);
+
     return [
       true,
       !!values.title?.trim(),
-      values.meta_title?.trim().length > 0 &&
-        values.meta_title?.trim().length <= 60 &&
-        values.meta_canonical_url?.trim().length > 0 &&
-        values.meta_description?.trim().length > 50 &&
-        values.meta_description?.trim().length <= 160,
+      isMetaTitleValid && isMetaDescriptionValid && isCanonicalValid,
     ];
   }, [values]);
+
 
   const onSubmit = useCallback(
     async (data: FormData) => {
@@ -79,7 +96,7 @@ export function ProductCreateForm() {
       title="Create Product Category"
       description="Fill in the details to create a new product category."
       isOpen={true}
-      handleClose={() => {}}
+      handleClose={() => { }}
     >
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
@@ -90,11 +107,11 @@ export function ProductCreateForm() {
             canAccessStep={canAccessStep}
             onCancel={() => router.back()}
           />
-          {step === 0 && <Details control={control} errors={errors} />}
-          {step === 1 && <VariantsDetails />}
-          {/* {step === 1 && <Organize control={control} errors={errors}/>} */}
+          {step === 0 && <Details control={control} errors={errors} hasVariant={watch("hasVariants")} />}
+          {step === 1 && <Organize control={control} errors={errors}/>}
+          {step === 2 && <VariantsDetails />}
 
-          {step === 2 && <p>sss</p>}
+          {/* {step === 3 && <p>sss</p>} */}
           {/* {step === 2 && (
             <Variants />
           )} */}

@@ -152,7 +152,7 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
     isSuccess: deleteSuccess,
     successMessage: `Sales Channels delete successfully!`,
   });
- 
+
   const width = useWindowWidth();
   const result = useMemo(() => data?.result || [], [data?.result]);
 
@@ -182,8 +182,9 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
   }, [filteredItems.length, selectedOnPageCount]);
 
   const handleToggleCode = useCallback(
-    (code: string, checked: boolean) => {
-      dispatch(toggleCode({ code, checked }));
+    (code: string, checked: boolean, name: string) => {
+
+      dispatch(toggleCode({ code, checked, name }));
     },
     [dispatch]
   );
@@ -191,7 +192,7 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
   const tableBody = useMemo(() => {
     if (!filteredItems.length) {
       return (
-       <TableEmptyState colSpan={6}/>
+        <TableEmptyState colSpan={6} />
       );
     }
 
@@ -203,7 +204,7 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
         deletedId={deletedId}
         router={router}
         isChecked={Array.isArray(selected) && selected.includes(item._id!)}
-        onCheckChange={(next) => handleToggleCode(item._id!, next)}
+        onCheckChange={(next) => handleToggleCode(item._id!, next, item.name!)}
         isChild={isChild}
       />
     ));
@@ -221,8 +222,12 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
     (nextChecked: boolean) => {
       dispatch(
         bulkToggleCodes({
-          codes: result.map((c) => c._id!),
+          codes: result.map(({ _id }) => _id!),
           checked: nextChecked,
+          keyvaluepair: result.map(({ _id, name }) => ({
+            key: _id!,
+            value: name!,
+          })),
         })
       );
     },
@@ -275,21 +280,21 @@ const SalesChannels = ({ isChild = false }: SalesChannelsProps) => {
               table_header={
                 isChild
                   ? [
-                      "checkbox",
-                      "Name",
-                      "Description",
-                      "Status",
-                      "Created",
-                      "Updated",
-                    ]
+                    "checkbox",
+                    "Name",
+                    "Description",
+                    "Status",
+                    "Created",
+                    "Updated",
+                  ]
                   : [
-                      "Name",
-                      "Description",
-                      "Status",
-                      "Created",
-                      "Updated",
-                      "Action",
-                    ]
+                    "Name",
+                    "Description",
+                    "Status",
+                    "Created",
+                    "Updated",
+                    "Action",
+                  ]
               }
               isAllSelected={headerCheckedState}
               isCheckbox={isChild}

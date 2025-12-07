@@ -9,7 +9,6 @@ import { z } from "zod";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { toast } from "sonner";
-import { baseurl } from "@/config";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { removeAll } from "@/reducers/file-slice";
 import { useAddNewTagMutation } from "@/state/tag-api";
@@ -40,7 +39,7 @@ export default function AddNewTag({ type = "post" }: AddNewTagProps) {
     setValue,
     watch,
   } = useForm<PostWithSeoFormData>({
-    defaultValues: { status: "draft", meta_canonical_url: baseurl },
+    defaultValues: { status: "draft", meta_canonical_url: "" },
     resolver: zodResolver(postWithSeoSchema),
   });
   // Submit Handler

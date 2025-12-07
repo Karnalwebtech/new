@@ -7,14 +7,17 @@ import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
 import InputField from "@/components/fields/input-field";
 import HoverTooltip from "@/components/tooltip/hover-tooltip";
 import TextareaField from "@/components/fields/textarea-field";
+import SwitchField from "@/components/fields/switch-field";
 
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
   errors: FieldErrors<T>;
+  hasVariant: boolean;
 }
 const Details = <T extends FieldValues>({
   control,
   errors,
+  hasVariant = false,
 }: DetailsProps<T>) => {
   return (
     <>
@@ -110,7 +113,26 @@ const Details = <T extends FieldValues>({
             />
           </div>
           <Media />
-          <Variants />
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900">Variants</h3>
+            <div className="shadow-md bg-gray-50 p-4 rounded-lg">
+              <div className="flex items-start gap-3">
+                <SwitchField control={control} errors={errors} name={"hasVariants" as Path<T>} />
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="has-variants"
+                    className="text-sm font-medium text-gray-900 cursor-pointer"
+                  >
+                    Yes, this is a product with variants
+                  </Label>
+                  <p className="text-sm text-gray-600">
+                    When unchecked, we will create a default variant for you.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <Variants hasVariant={hasVariant} />
         </div>
       </div>
     </>
