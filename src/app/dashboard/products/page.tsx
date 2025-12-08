@@ -1,5 +1,4 @@
 import { Header } from "@/modules/layout/header/header";
-import Post from "@/modules/main/post/post";
 import { Metadata } from "next";
 import React from "react";
 import { Products } from "../../../modules/main/products/products";

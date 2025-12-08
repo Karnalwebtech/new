@@ -1,4 +1,4 @@
-import { CirclePlus, Database, FileChartLine } from "lucide-react";
+import { CirclePlus, Database, FileChartLine, Warehouse } from "lucide-react";
 
 const supreme = [
   {
@@ -39,6 +39,23 @@ const dashboard = [
       {
         title: "Collections",
         url: "/dashboard/collections",
+      },
+    ],
+  },
+   {
+    title: "Inventory",
+    url: "/inventory",
+    icon: Warehouse,
+    isActive: false,
+    type: "dashboard",
+    items: [
+      {
+        title: "Inventory",
+        url: "/dashboard/inventory",
+      },
+      {
+        title: "Reservations",
+        url: "/reservations",
       },
     ],
   },

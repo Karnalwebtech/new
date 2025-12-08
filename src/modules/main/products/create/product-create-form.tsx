@@ -14,11 +14,10 @@ import { seoSchema } from "@/zod-schema/seo-schema";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SEOForm from "@/components/forms/SEO-form";
-import VariantsDetails from "./variants-details";
 import { useDispatch, useSelector } from "react-redux";
 import { clearSelected } from "@/reducers/healper-slice";
 import { RootState } from "@/store";
-import VariantPriceEditor from "@/components/price-manager/variant-price-editor-dialog";
+import VariantPriceEditor, { PriceRow } from "@/components/price-manager/variant-price-editor-dialog";
 
 type FormData = z.infer<typeof ProductSchema>;
 export function ProductCreateForm() {
@@ -45,8 +44,9 @@ export function ProductCreateForm() {
   });
 
   const values = watch();
-  const has_inventory_kit = rows[0].has_inventory_kit
-  console.log(rows)
+  // const has_inventory_kit = rows?[0]?.has_inventory_kit ?? false;
+  const has_inventory_kit = false;
+  
   const canAccessStep = useMemo(() => {
     const mt = values.meta_title?.trim() || "";
     // const md = values.meta_description?.trim() || "";
