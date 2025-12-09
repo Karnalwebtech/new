@@ -1,5 +1,5 @@
 import { Header } from "@/modules/layout/header/header";
-import CreateInventory from "@/modules/main/inventory/edit/create-product-tag";
+import CreateInventory from "@/modules/main/inventory/edit/create-inventory";
 import React from "react";
 
 const Page = () => {

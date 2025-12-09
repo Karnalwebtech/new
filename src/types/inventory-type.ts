@@ -1,7 +1,14 @@
+import { CountryStateCityType } from "./country-state-city-type";
+
+interface locationType {
+  name?: string;
+}
 interface inventory_levels {
   location_id?: string;
+  id?: string;
   stocked_quantity?: number;
   reserved_quantity?: number;
+  location?: locationType;
 }
 export interface InventoryType {
   title: string;
@@ -21,7 +28,8 @@ export interface InventoryType {
   inventory_levels_preview?: inventory_levels[];
   total_reserved_quantity?: number;
   total_stocked_quantity?: number;
-  origin_country?:string;
+  origin_country?: string;
+  country_info?: CountryStateCityType;
 }
 
 export interface GetResponseAllInventory {
@@ -33,4 +41,8 @@ export interface GetResponseAllInventory {
 export interface GetResponseInventoryDetails {
   success: boolean;
   result: InventoryType;
+  total?: number;
+  totalPages?: number;
+  limit?: number;
+  page?: number;
 }

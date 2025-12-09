@@ -35,7 +35,7 @@ const CreateInventory = ({ ItemId }: CreateInventoryProps) => {
   ] = useUpdateInventoryMutation();
 
   const { data } = useGetInventoryDetailsQuery(
-    { id: ItemId! },
+    { id: ItemId!, rowsPerPage: 100, page: 1 },
     { skip: !ItemId }
   );
   useHandleNotifications({

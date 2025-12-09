@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo, useState } from "react";
 
 import {
   Card,
@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,13 +19,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useGetInventoryDetailsQuery } from "@/state/inventory-api";
+import ShadcnPagination from "@/components/pagination";
+import { useRouter } from "next/navigation";
 
 interface InventoryDetailsProps {
   ItemId?: string;
 }
 const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
+  const router = useRouter();
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const { data, isLoading } = useGetInventoryDetailsQuery(
-    { id: ItemId! },
+    { id: ItemId!, rowsPerPage: 1, page: currentPage },
     { skip: !ItemId }
   );
   const result = useMemo(() => {
@@ -33,24 +38,6 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
     }
     return null;
   }, [data]);
-
-  const locations = [
-    {
-      id: "loc_main",
-      name: "-",
-      reserved: 100,
-      inStock: 10000,
-      available: 9900,
-    },
-    {
-      id: "loc_ccccc",
-      name: "CCCCC",
-      reserved: 0,
-      inStock: 10000,
-      available: 10000,
-    },
-    { id: "loc_sss", name: "sss", reserved: 0, inStock: 0, available: 0 },
-  ];
 
   const reservations = [
     {
@@ -70,11 +57,23 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
         <div className="lg:col-span-2 space-y-6">
           {/* Summary Card */}
           <Card>
-            <CardHeader>
-              <CardTitle>Inventory overview</CardTitle>
-              <CardDescription className="text-muted-foreground">
-                Totals across all locations
-              </CardDescription>
+            <CardHeader className="grid grid-cols-2 items-center">
+              <div>
+                <CardTitle>Inventory overview</CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Totals across all locations
+                </CardDescription>
+              </div>
+              <div className="">
+                <h2 className="text-base text-muted-foreground font-semibold m-0 grid grid-cols-12">
+                  <span className="col-span-2">Title :</span>{" "}
+                  <span className="col-span-10">{result?.title}</span>{" "}
+                </h2>
+                <div className="text-xs text-muted-foreground font-semibold grid grid-cols-12">
+                  <span className="col-span-2">Sku :</span>{" "}
+                  <span className="col-span-10">{result?.sku}</span>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-md bg-white shadow-sm">
@@ -82,8 +81,7 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
                 <p className="text-lg font-semibold">
                   {result?.total_stocked_quantity || 0}{" "}
                   <span className="text-sm text-muted-foreground">
-                    across {result?.inventory_levels_preview?.length || 0}{" "}
-                    locations
+                    across {data?.total || 0} locations
                   </span>
                 </p>
               </div>
@@ -92,8 +90,7 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
                 <p className="text-lg font-semibold">
                   {result?.total_reserved_quantity || 0}{" "}
                   <span className="text-sm text-muted-foreground">
-                    across {result?.inventory_levels_preview?.length || 0}{" "}
-                    locations
+                    across {data?.total || 0} locations
                   </span>
                 </p>
               </div>
@@ -103,8 +100,7 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
                   {(result?.total_stocked_quantity || 0) -
                     (result?.total_reserved_quantity || 0)}{" "}
                   <span className="text-sm text-muted-foreground">
-                    across {result?.inventory_levels_preview?.length || 0}{" "}
-                    locations
+                    across {data?.total || 0} locations
                   </span>
                 </p>
               </div>
@@ -118,9 +114,9 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
               <CardDescription>Manage stock per location</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-end mb-4">
+              {/* <div className="flex justify-end mb-4">
                 <Button variant="outline">Manage locations</Button>
-              </div>
+              </div> */}
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -133,12 +129,17 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {locations.map((l) => (
-                      <TableRow key={l.id}>
-                        <TableCell className="font-medium">{l.name}</TableCell>
-                        <TableCell>{l.reserved}</TableCell>
-                        <TableCell>{l.inStock}</TableCell>
-                        <TableCell>{l.available}</TableCell>
+                    {result?.inventory_levels_preview?.map((l) => (
+                      <TableRow key={l?.id || ""}>
+                        <TableCell className="font-medium">
+                          {l.location?.name || ""}
+                        </TableCell>
+                        <TableCell>{l.reserved_quantity || 0}</TableCell>
+                        <TableCell>{l.stocked_quantity || 0}</TableCell>
+                        <TableCell>
+                          {(l.stocked_quantity || 0) -
+                            (l.reserved_quantity || 0)}
+                        </TableCell>
                         <TableCell className="text-right">
                           {" "}
                           <Button variant="ghost">...</Button>{" "}
@@ -148,11 +149,23 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
                   </TableBody>
                 </Table>
               </div>
-
-              <div className="mt-4 text-sm text-muted-foreground">
-                1 — 3 of 3 results
-              </div>
             </CardContent>
+            <CardFooter className="flex justify-between">
+              <div className="mt-4 text-sm text-muted-foreground">
+                {data?.page || 0} — {data?.totalPages || 0} of{" "}
+                {data?.total || 0} results
+              </div>
+              <div>
+                {data && (data?.total || 0) > (data?.limit || 0) && (
+                  <ShadcnPagination
+                    currentPage={currentPage}
+                    totalPages={data?.limit || 0}
+                    setCurrentPage={setCurrentPage}
+                    data_length={data?.total || 10}
+                  />
+                )}
+              </div>
+            </CardFooter>
           </Card>
 
           {/* Reservations */}
@@ -211,7 +224,14 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
               <CardTitle>Quick actions</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
-              <Button variant="ghost">Edit item</Button>
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  router.push(`/dashboard/inventory/${ItemId}/edit`)
+                }
+              >
+                Edit item
+              </Button>
               <Button variant="ghost">Adjust inventory</Button>
               <Button variant="ghost">Create reservation</Button>
             </CardContent>
@@ -235,7 +255,10 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
                   value={result?.material || "-"}
                 />
                 <AttributeRow label="HS code" value={result?.hs_code || "-"} />
-                <AttributeRow label="Country of origin" value={result?.country_info.name || "-"} />
+                <AttributeRow
+                  label="Country of origin"
+                  value={result?.country_info?.name || "-"}
+                />
               </div>
             </CardContent>
           </Card>

@@ -1,7 +1,7 @@
 import { siteName } from "@/config";
 import { buildMetadata } from "@/lib/metadata";
 import { Header } from "@/modules/layout/header/header";
-import CreateInventory from "@/modules/main/inventory/edit/create-product-tag";
+import CreateInventory from "@/modules/main/inventory/edit/create-inventory";
 import React from "react";
 export const metadata = buildMetadata({
   title: "Update region",

@@ -40,7 +40,7 @@ const InventoryAvailability = ({
   };
 
   return (
-    <div className="bg-white border max-w-[400px] overflow-hidden">
+    <div className="bg-white border max-w-[400px] h-full overflow-auto">
       {/* Table header (sticky inside container) */}
       <div className="sticky top-0 z-10 bg-white border-b">
         <div className="grid grid-cols-12 gap-4 items-center text-xs text-slate-600 font-medium px-4 py-3">
@@ -54,7 +54,7 @@ const InventoryAvailability = ({
       </div>
 
       {/* Content */}
-      <div className="max-h-[56vh]">
+      <div className="">
         {/* Loading skeleton */}
         {isLoading && (
           <div className="p-4 space-y-3">

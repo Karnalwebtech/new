@@ -82,12 +82,29 @@ export const inventoryApi = createApi({
     getInventoryDetails: build.query<
       GetResponseInventoryDetails,
       {
+        rowsPerPage?: number;
+        page?: number;
+        keywords?: string;
         id: string;
-      }
+      } | void
     >({
-      query: ({ id }) => {
+      query: (filters) => {
+        const params: Record<string, string | number | boolean> = {};
+        // Add filters to the query parameters if they are present
+        if (filters) {
+          if (filters.rowsPerPage) {
+            params.rowsPerPage = filters.rowsPerPage; // Convert number to string
+          }
+          if (filters.page) {
+            params.page = filters.page; // Convert number to string
+          }
+          if (filters.keywords) {
+            params.keywords = filters.keywords; // Convert number to string
+          }
+        }
         return {
-          url: `/inventories-details/${id}`,
+          url: `/inventories-details/${filters?.id}`,
+          params,
           method: "GET",
         };
       },
