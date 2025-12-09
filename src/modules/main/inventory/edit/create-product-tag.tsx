@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PageFooter } from "@/modules/layout/footer/page-footer";
 import PageHeander from "@/modules/layout/header/page-heander";
 import { useRouter } from "next/navigation";
-import React, { memo, useCallback, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +12,12 @@ import Details from "./details";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
 import InventoryAvailability from "./inventory-availability";
 import { InventorySchema } from "@/zod-schema/inventory-schema";
-import { useAddInventoryMutation } from "@/state/inventory-api";
+import {
+  useAddInventoryMutation,
+  useGetInventoryDetailsQuery,
+  useUpdateInventoryMutation,
+} from "@/state/inventory-api";
+import { useHandleNotifications } from "@/hooks/use-notification-handler";
 
 type FormData = z.infer<typeof InventorySchema>;
 interface CreateInventoryProps {
@@ -22,7 +27,26 @@ const CreateInventory = ({ ItemId }: CreateInventoryProps) => {
   const router = useRouter();
   const [step, setStep] = React.useState<number>(0);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [addInventory] = useAddInventoryMutation();
+  const [addInventory, { isLoading, isSuccess, error }] =
+    useAddInventoryMutation();
+  const [
+    updateInventory,
+    { isLoading: updateLoading, isSuccess: updateSuccess, error: UpdateError },
+  ] = useUpdateInventoryMutation();
+
+  const { data } = useGetInventoryDetailsQuery(
+    { id: ItemId! },
+    { skip: !ItemId }
+  );
+  useHandleNotifications({
+    error: error || UpdateError,
+    isSuccess: isSuccess || updateSuccess,
+    successMessage: updateSuccess
+      ? "Inventory updated successfully!"
+      : "Inventory added successfully!",
+    redirectPath: `/dashboard/inventory`,
+  });
+
   const {
     control,
     handleSubmit,
@@ -33,6 +57,12 @@ const CreateInventory = ({ ItemId }: CreateInventoryProps) => {
     defaultValues: {},
     resolver: zodResolver(InventorySchema),
   });
+  const result = useMemo(() => {
+    if (data && data.success) {
+      return data.result;
+    }
+    return null;
+  }, [data]);
 
   const values = watch();
   const canAccessStep = useMemo(() => {
@@ -51,11 +81,42 @@ const CreateInventory = ({ ItemId }: CreateInventoryProps) => {
         ...data,
         quantities,
       };
+      if (ItemId) {
+        await updateInventory({ id: ItemId, ...payload });
+        return;
+      }
       await addInventory(payload);
     },
-    [quantities, addInventory]
+    [quantities, updateInventory, ItemId, addInventory]
   );
 
+  useEffect(() => {
+    if (result) {
+      // Populate form fields with fetched data
+      setValue("title", result.title || "");
+      setValue("sku", result.sku || "");
+      setValue("description", result.description || "");
+      setValue("requires_shipping", result.requires_shipping || false);
+      setValue("height", result.height || 0);
+      setValue("hs_code", result.hs_code || "");
+      setValue("length", result.length || 0);
+      setValue("material", result.material || "");
+      setValue("mid_code", result.mid_code || "");
+      setValue("country", result.origin_country || "");
+      setValue("weight", result.weight || 0);
+      setValue("width", result.width || 0);
+      setQuantities(
+        Object.fromEntries(
+          result?.inventory_levels_preview?.map(
+            ({ location_id, stocked_quantity }) => [
+              location_id,
+              stocked_quantity,
+            ]
+          ) || []
+        )
+      );
+    }
+  }, [result, setValue]);
   return (
     <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
@@ -68,7 +129,7 @@ const CreateInventory = ({ ItemId }: CreateInventoryProps) => {
             onCancel={() => router.back()}
           />
           <div className="mb-20">
-            {false ? (
+            {isLoading || updateLoading ? (
               <FormSkeleton />
             ) : (
               <div>
@@ -95,7 +156,7 @@ const CreateInventory = ({ ItemId }: CreateInventoryProps) => {
             handleNext={() => setStep(step + 1)}
             handleSubmit={handleSubmit}
             onSubmit={onSubmit}
-            isLoading={false}
+            isLoading={isLoading || updateLoading}
             onCancel={() => router.back()}
           />
         </div>

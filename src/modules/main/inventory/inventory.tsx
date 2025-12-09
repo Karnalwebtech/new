@@ -19,14 +19,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
-import { TimeAgo } from "@/lib/timeAgo";
-import {
-  useDeleteProductTagMutation,
-  useGetAllProductTagDataQuery,
-} from "@/state/product-tag-api";
-import { ProductTagType } from "@/types/product-type";
 import PageHeander2 from "@/modules/layout/header/page-heander2";
 import { TableEmptyState } from "@/components/table/table-empty-state";
+import {
+  useGetAllInventoryQuery,
+  useRemoveInventoryMutation,
+} from "@/state/inventory-api";
+import { InventoryType } from "@/types/inventory-type";
 
 const Row = memo(
   ({
@@ -35,7 +34,7 @@ const Row = memo(
     router,
     deletedId,
   }: {
-    item: ProductTagType;
+    item: InventoryType;
     removeHandler: (id: string) => void;
     deletedId: string | null;
     router: ReturnType<typeof useRouter>;
@@ -44,19 +43,24 @@ const Row = memo(
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item.name || ""} maxLength={25} />
+            <TruncateText text={item.title || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item.description || ""} maxLength={25} />
+            <TruncateText text={item.sku || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell>
-          <TimeAgo time={item.createdAt!} />
+          <span className="text-muted-foreground">
+            {item.total_reserved_quantity || 0}
+          </span>
         </TableCell>
         <TableCell>
-          <TimeAgo time={item.updatedAt!} />
+          <span className="text-muted-foreground">
+            {(item.total_stocked_quantity || 0) -
+              (item.total_reserved_quantity || 0)}
+          </span>
         </TableCell>
         <TableCell className="text-right pr-6">
           <DropdownMenu>
@@ -69,7 +73,7 @@ const Row = memo(
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/settings/product-tags/${item?.id}/edit`)
+                  router.push(`/dashboard/inventory/${item?.id}/edit`)
                 }
               >
                 <Pencil className="h-4 w-4 mr-2" /> Edit
@@ -77,15 +81,15 @@ const Row = memo(
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() =>
-                  router.push(`/settings/product-tags/${item?.id}`)
+                  router.push(`/dashboard/inventory/${item?.id}`)
                 }
               >
                 <Eye className="h-4 w-4 mr-2" /> Preview
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={deletedId === item?._id}
+                disabled={deletedId === item?.id}
                 className="text-destructive cursor-pointer"
-                onClick={() => item?._id && removeHandler(item?._id)}
+                onClick={() => item?.id && removeHandler(item?.id)}
               >
                 <Trash2 className="h-4 w-4 mr-2" /> Delete
               </DropdownMenuItem>
@@ -105,10 +109,10 @@ const Inventory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const [
-    deleteProductTag,
+    removeInventory,
     { isLoading: delteLoading, error: deleteError, isSuccess: deleteSuccess },
-  ] = useDeleteProductTagMutation();
-  const { data, isLoading, error } = useGetAllProductTagDataQuery({
+  ] = useRemoveInventoryMutation();
+  const { data, isLoading, error } = useGetAllInventoryQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
   });
@@ -122,12 +126,13 @@ const Inventory = () => {
   const result = useMemo(() => data?.result || [], [data?.result]);
 
   const { filteredItems, searchTerm, setSearchTerm } = useTableFilters(result, [
-    "name",
+    "title",
+    "sku",
   ]);
 
   const DeleteHandler = useCallback(async () => {
-    if (deletedId) await deleteProductTag({ id: deletedId });
-  }, [deleteProductTag, deletedId]);
+    if (deletedId) await removeInventory({ id: deletedId });
+  }, [removeInventory, deletedId]);
 
   const removeHandler = useCallback((id: string) => {
     setIsOpen(true);
@@ -182,13 +187,7 @@ const Inventory = () => {
         >
           <div className="overflow-hidden relative">
             <Shadcn_table
-              table_header={[
-                "Name",
-                "Description",
-                "Created",
-                "Updated",
-                "Action",
-              ]}
+              table_header={["Title", "SKU", "Reserved", "In stock", "Action"]}
               tabel_body={() => tableBody}
               isLoading={isLoading || delteLoading}
             />
@@ -213,7 +212,7 @@ const Inventory = () => {
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             title="Are you sure?"
-            description="This action cannot be undone. This will permanently delete the category."
+            description="You are about to delete an inventory item. This action cannot be undone."
             action={DeleteHandler}
             type="danger"
             setDeletedId={setDeletedId}
