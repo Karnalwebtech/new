@@ -29,7 +29,7 @@ const InventoryDetails = ({ ItemId }: InventoryDetailsProps) => {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { data, isLoading } = useGetInventoryDetailsQuery(
-    { id: ItemId!, rowsPerPage: 1, page: currentPage },
+    { id: ItemId!, rowsPerPage: 10, page: currentPage },
     { skip: !ItemId }
   );
   const result = useMemo(() => {

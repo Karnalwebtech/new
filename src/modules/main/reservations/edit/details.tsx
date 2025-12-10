@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
 
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import { useGetAllStockLocationQuery } from "@/state/stock-location-api";
 import InputField from "@/components/fields/input-field";
 import TextareaField from "@/components/fields/textarea-field";
 import { InventoryType } from "@/types/inventory-type";
+import { ReservationsType } from "@/types/reservations-type";
 
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
@@ -18,6 +19,9 @@ interface DetailsProps<T extends FieldValues> {
   title?: string;
   description?: string;
   values?: Partial<T>;
+  setQuantities: (value: number | null) => void;
+  ItemId?: string;
+  resultReservations: ReservationsType;
 }
 
 const Details = <T extends FieldValues>({
@@ -26,7 +30,11 @@ const Details = <T extends FieldValues>({
   title = "reservation",
   description,
   values,
+  setQuantities,
+  ItemId,
+  resultReservations,
 }: DetailsProps<T>) => {
+  const [isError, setError] = useState<string>("");
   const { data, isLoading, error } = useGetAllInventoryQuery({
     rowsPerPage: 100,
     page: 1,
@@ -51,8 +59,31 @@ const Details = <T extends FieldValues>({
       (item) => item?.location_id === location
     ) ?? null;
 
-  console.log(location);
-  console.log(locationDetails);
+  const stocked = locationDetails?.stocked_quantity ?? 0;
+  const reserved = locationDetails?.reserved_quantity ?? 0;
+  const qty = quantity ?? 0;
+
+  const prevQty = resultReservations?.quantity ?? 0;
+
+  // base stock in location
+  const baseStock = stocked - reserved;
+
+  // add back old quantity on edit mode
+  const inStock = ItemId ? baseStock + prevQty : baseStock;
+
+  // reduce by newly selected quantity
+  const available = inStock - qty;
+
+  useEffect(() => {
+    if (quantity) {
+      if (quantity > inStock) {
+        setError(`Minimum quantity is 1 and maximum quantity is ${inStock}`);
+      } else {
+        setError("");
+      }
+      setQuantities(inStock || 0);
+    }
+  }, [inStock, quantity]);
   return (
     <div className="p-8 pb-22 max-w-[800px] m-auto">
       <div className="p-8">
@@ -113,17 +144,12 @@ const Details = <T extends FieldValues>({
 
                 <tr className="border-b last:border-b-0">
                   <td className="px-4 py-3 text-muted-foreground">In stock</td>
-                  <td className="px-4 py-3">
-                    {locationDetails?.stocked_quantity || "-"}
-                  </td>
+                  <td className="px-4 py-3">{inStock || "-"}</td>
                 </tr>
 
                 <tr>
                   <td className="px-4 py-3 text-muted-foreground">Available</td>
-               <td className="px-4 py-3">
-  {(locationDetails?.stocked_quantity ?? 0) - (quantity ?? 0)}
-</td>
-
+                  <td className="px-4 py-3">{available || 0}</td>
                 </tr>
               </tbody>
             </table>
@@ -146,12 +172,13 @@ const Details = <T extends FieldValues>({
               placeholder="0"
               inputStyle={"placeholder-gray-200 bg-transparent border-zinc-300"}
             />
+            {isError && <p className="text-red-500 text-sm mt-2">{isError}</p>}
           </div>
         </div>
         <div className="space-y-2 mb-4">
           <Label
             htmlFor="description"
-            className="text-sm font-medium text-gray-700"
+            className="text-xs font-medium text-gray-700"
           >
             Description <span className="text-gray-300">Optional</span>
           </Label>

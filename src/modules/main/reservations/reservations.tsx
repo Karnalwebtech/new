@@ -21,11 +21,13 @@ import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import PageHeander2 from "@/modules/layout/header/page-heander2";
 import { TableEmptyState } from "@/components/table/table-empty-state";
-import {
-  useGetAllInventoryQuery,
-  useRemoveInventoryMutation,
-} from "@/state/inventory-api";
 import { InventoryType } from "@/types/inventory-type";
+import {
+  useGetAllreservationsQuery,
+  useRemovereservationsMutation,
+} from "@/state/reservations-api";
+import { ReservationsType } from "@/types/reservations-type";
+import { formatDate } from "@/services/helpers";
 
 const Row = memo(
   ({
@@ -34,7 +36,7 @@ const Row = memo(
     router,
     deletedId,
   }: {
-    item: InventoryType;
+    item: ReservationsType;
     removeHandler: (id: string) => void;
     deletedId: string | null;
     router: ReturnType<typeof useRouter>;
@@ -43,24 +45,24 @@ const Row = memo(
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item.title || ""} maxLength={25} />
+            <TruncateText
+              text={item?.inventory_item_id?.sku || ""}
+              maxLength={25}
+            />
           </span>
         </TableCell>
         <TableCell>
           <span className="text-muted-foreground">
-            <TruncateText text={item.sku || ""} maxLength={25} />
+            <TruncateText text={item.description || ""} maxLength={25} />
           </span>
         </TableCell>
         <TableCell>
           <span className="text-muted-foreground">
-            {item.total_reserved_quantity || 0}
+            {formatDate(item?.createdAt || "")}
           </span>
         </TableCell>
         <TableCell>
-          <span className="text-muted-foreground">
-            {(item.total_stocked_quantity || 0) -
-              (item.total_reserved_quantity || 0)}
-          </span>
+          <span className="text-muted-foreground">{item?.quantity || 0}</span>
         </TableCell>
         <TableCell className="text-right pr-6">
           <DropdownMenu>
@@ -109,10 +111,10 @@ const Reservations = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState("20");
   const [
-    removeInventory,
+    removereservations,
     { isLoading: delteLoading, error: deleteError, isSuccess: deleteSuccess },
-  ] = useRemoveInventoryMutation();
-  const { data, isLoading, error } = useGetAllInventoryQuery({
+  ] = useRemovereservationsMutation();
+  const { data, isLoading, error } = useGetAllreservationsQuery({
     rowsPerPage: Number(rowsPerPage),
     page: currentPage,
   });
@@ -120,19 +122,18 @@ const Reservations = () => {
   useHandleNotifications({
     error: error || deleteError,
     isSuccess: deleteSuccess,
-    successMessage: `Product tag delete successfully!`,
+    successMessage: `Reservation delete successfully!`,
   });
   const width = useWindowWidth();
   const result = useMemo(() => data?.result || [], [data?.result]);
 
   const { filteredItems, searchTerm, setSearchTerm } = useTableFilters(result, [
     "title",
-    "sku",
   ]);
 
   const DeleteHandler = useCallback(async () => {
-    if (deletedId) await removeInventory({ id: deletedId });
-  }, [removeInventory, deletedId]);
+    if (deletedId) await removereservations({ id: deletedId });
+  }, [removereservations, deletedId]);
 
   const removeHandler = useCallback((id: string) => {
     setIsOpen(true);
@@ -187,7 +188,13 @@ const Reservations = () => {
         >
           <div className="overflow-hidden relative">
             <Shadcn_table
-              table_header={["Title", "SKU", "Reserved", "In stock", "Action"]}
+              table_header={[
+                "SKU",
+                "	Description",
+                "Created",
+                "Quantity",
+                "Action",
+              ]}
               tabel_body={() => tableBody}
               isLoading={isLoading || delteLoading}
             />
@@ -212,7 +219,7 @@ const Reservations = () => {
             isOpen={isOpen}
             setIsOpen={setIsOpen}
             title="Are you sure?"
-            description="You are about to delete an inventory item. This action cannot be undone."
+            description="You are about to delete a reservation. This action cannot be undone."
             action={DeleteHandler}
             type="danger"
             setDeletedId={setDeletedId}

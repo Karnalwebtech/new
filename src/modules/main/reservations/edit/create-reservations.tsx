@@ -10,14 +10,14 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Details from "./details";
 import FormSkeleton from "@/components/skeletons/form-skeleton";
-import InventoryAvailability from "./inventory-availability";
-import {
-  useAddInventoryMutation,
-  useGetInventoryDetailsQuery,
-  useUpdateInventoryMutation,
-} from "@/state/inventory-api";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { ReservationsSchema } from "@/zod-schema/reservations-schema";
+import {
+  useAddreservationsMutation,
+  useGetreservationsDetailsQuery,
+  useUpdatereservationsMutation,
+} from "@/state/reservations-api";
+import { toast } from "sonner";
 
 type FormData = z.infer<typeof ReservationsSchema>;
 interface CreateReservationsProps {
@@ -26,25 +26,25 @@ interface CreateReservationsProps {
 const CreateReservations = ({ ItemId }: CreateReservationsProps) => {
   const router = useRouter();
   const [step, setStep] = React.useState<number>(0);
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [addInventory, { isLoading, isSuccess, error }] =
-    useAddInventoryMutation();
+  const [quantities, setQuantities] = useState<number | null>(null);
+  const [addreservations, { isLoading, isSuccess, error }] =
+    useAddreservationsMutation();
   const [
-    updateInventory,
+    updatereservations,
     { isLoading: updateLoading, isSuccess: updateSuccess, error: UpdateError },
-  ] = useUpdateInventoryMutation();
+  ] = useUpdatereservationsMutation();
 
-  const { data } = useGetInventoryDetailsQuery(
-    { id: ItemId!, rowsPerPage: 100, page: 1 },
+  const { data } = useGetreservationsDetailsQuery(
+    { id: ItemId! },
     { skip: !ItemId }
   );
   useHandleNotifications({
     error: error || UpdateError,
     isSuccess: isSuccess || updateSuccess,
     successMessage: updateSuccess
-      ? "Inventory updated successfully!"
-      : "Inventory added successfully!",
-    redirectPath: `/dashboard/inventory`,
+      ? "Reservations updated successfully!"
+      : "Reservations added successfully!",
+    redirectPath: `/dashboard/reservations`,
   });
 
   const {
@@ -72,55 +72,42 @@ const CreateReservations = ({ ItemId }: CreateReservationsProps) => {
 
     const isReserveValid = reserve.length > 3 && reserve.length <= 60;
     const isLocationValid = location.length > 3 && location.length <= 60;
-    
-    return [true,isReserveValid && isLocationValid];
+
+    return [true, isReserveValid && isLocationValid];
   }, [values]);
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      console.log("Form Data:", data);
-      console.log("Quantities:", quantities);
+      if ((data.quantity || 0) > (quantities || 0)) {
+        toast.error("Quantity is greater than available quantity");
+        return;
+      }
       const payload = {
         ...data,
-        quantities,
       };
-      // if (ItemId) {
-      //   await updateInventory({ id: ItemId, ...payload });
-      //   return;
-      // }
-      // await addInventory(payload);
+      if (ItemId) {
+        await updatereservations({ id: ItemId, ...payload });
+        return;
+      }
+      await addreservations(payload);
     },
-    [quantities, updateInventory, ItemId, addInventory]
+    [quantities, updatereservations, ItemId, addreservations]
   );
 
   useEffect(() => {
     if (result) {
+      const reserveId =
+        typeof result.inventory_item_id === "string"
+          ? result.inventory_item_id
+          : result.inventory_item_id?._id ?? "";
+
       // Populate form fields with fetched data
-      // setValue("title", result.title || "");
-      // setValue("sku", result.sku || "");
-      // setValue("description", result.description || "");
-      // setValue("requires_shipping", result.requires_shipping || false);
-      // setValue("height", result.height || 0);
-      // setValue("hs_code", result.hs_code || "");
-      // setValue("length", result.length || 0);
-      // setValue("material", result.material || "");
-      // setValue("mid_code", result.mid_code || "");
-      // setValue("country", result.origin_country || "");
-      // setValue("weight", result.weight || 0);
-      // setValue("width", result.width || 0);
-      // setQuantities(
-      //   Object.fromEntries(
-      //     result?.inventory_levels_preview?.map(
-      //       ({ location_id, stocked_quantity }) => [
-      //         location_id,
-      //         stocked_quantity,
-      //       ]
-      //     ) || []
-      //   )
-      // );
+      setValue("reserve", reserveId || "");
+      setValue("location", result?.location_id || "");
+      setValue("quantity", result?.quantity || 0);
+      setValue("description", result?.description || "");
     }
   }, [result, setValue]);
-  console.log(canAccessStep)
   return (
     <DialogPopUp title="" description="" isOpen={true} handleClose={() => {}}>
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
@@ -143,18 +130,21 @@ const CreateReservations = ({ ItemId }: CreateReservationsProps) => {
                   title={`${ItemId ? "Update" : "Create"} reservation`}
                   description={``}
                   values={values}
+                  setQuantities={setQuantities}
+                  ItemId={ItemId}
+                  resultReservations={result!}
                 />
               </div>
             )}
           </div>
           <PageFooter<FormData>
             step={step}
-            lastStep={1} // or whatever your last step index is
+            lastStep={0} // or whatever your last step index is
             canAccessStep={canAccessStep} // example: at least 2 steps
             handleNext={() => setStep(step + 1)}
             handleSubmit={handleSubmit}
             onSubmit={onSubmit}
-            isLoading={false}
+            isLoading={isLoading || updateLoading}
             onCancel={() => router.back()}
           />
         </div>

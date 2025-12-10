@@ -58,8 +58,7 @@ const Row = memo(
         </TableCell>
         <TableCell>
           <span className="text-muted-foreground">
-            {(item.total_stocked_quantity || 0) -
-              (item.total_reserved_quantity || 0)}
+            {item.total_stocked_quantity || 0}
           </span>
         </TableCell>
         <TableCell className="text-right pr-6">

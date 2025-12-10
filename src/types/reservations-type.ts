@@ -1,23 +1,24 @@
+import { InventoryType } from "./inventory-type";
+
 export interface ReservationsType {
   reserve: string;
   location: string;
+  location_id?:string;
+  inventory_item_id?: InventoryType;
   quantity?: number;
   description?: string;
   _id?: string;
   id?: string;
+  createdAt?: string;
 }
 
 export interface GetResponseAllReservations {
   success: boolean;
-  // result: InventoryType[];
+  result: ReservationsType[];
   dataCounter: number;
 }
 
-export interface GetResponseInventoryDetails {
+export interface GetResponseReservationsDetails {
   success: boolean;
-  // result: InventoryType;
-  // total?: number;
-  // totalPages?: number;
-  // limit?: number;
-  // page?: number;
+  result: ReservationsType;
 }
