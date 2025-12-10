@@ -6,6 +6,7 @@ interface locationType {
 interface inventory_levels {
   location_id?: string;
   id?: string;
+  _id?: string;
   stocked_quantity?: number;
   reserved_quantity?: number;
   location?: locationType;
@@ -13,6 +14,7 @@ interface inventory_levels {
 export interface InventoryType {
   title: string;
   sku?: string;
+  _id?: string;
   id?: string;
   description?: string;
   requires_shipping?: boolean;

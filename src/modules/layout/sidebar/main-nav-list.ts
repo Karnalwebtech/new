@@ -55,7 +55,7 @@ const dashboard = [
       },
       {
         title: "Reservations",
-        url: "/reservations",
+        url: "/dashboard/reservations",
       },
     ],
   },
