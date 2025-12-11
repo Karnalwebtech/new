@@ -24,6 +24,12 @@ export function getFlagEmoji(countryCode: string): string {
     );
 }
 
+export const normalizeTokens = (raw: string) =>
+  raw
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+
 // export const formatFileSize = (megabytes: number): string => {
 //   const units = ['MB', 'GB', 'TB', 'PB']; // Adjusted for MB input
 //   let index = 0;

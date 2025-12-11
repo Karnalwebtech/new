@@ -1,28 +1,20 @@
 "use client";
 
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-  useCallback,
-  Dispatch,
-  SetStateAction,
-} from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
-import { Landmark, Maximize2 } from "lucide-react";
+import { Landmark } from "lucide-react";
 import clsx from "clsx";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useGetAllStoreCurrenciesQuery } from "@/state/store-currency-api";
 import { getCurrencySymbol } from "@/services/currency";
 import { StoreCurrenciesType } from "@/types/store-currincies-type";
-import PriceManagerDialog from "./price-manager-dialog";
-import { Checkbox } from "@/components/ui/checkbox";
+import { ProductOption } from "@/modules/main/products/create/variants/variants";
 
 type PriceValue = number | "";
 export interface PriceRow {
   id: string;
   name: string;
 
-  // new fields stored inside the row (Option A)
   title: string;
   sku: string;
   managed_inventory: boolean;
@@ -32,8 +24,6 @@ export interface PriceRow {
   prices: Record<string, PriceValue>;
 }
 
-type CCValueType = { key: string; name: string };
-
 const FIELDS = [
   { key: "title", name: "Title", field: "text" },
   { key: "sku", name: "SKU", field: "text" },
@@ -42,9 +32,27 @@ const FIELDS = [
   { key: "has_inventory_kit", name: "Has Inventory Kit", field: "checkbox" },
 ];
 
-// ---------------------------
-// Currency Input Cell
-// ---------------------------
+/* ---------------------------------------------------------
+   GENERATE ALL COMBINATIONS OF PRODUCT OPTION VALUES
+----------------------------------------------------------*/
+function generateCombinations(options: ProductOption[]) {
+  if (!options.length) return [];
+
+  const values = options.map((opt) => opt.values);
+
+  const combine = (arr: string[][], prefix: string[] = []): string[][] => {
+    if (!arr.length) return [prefix];
+    const [first, ...rest] = arr;
+
+    return first.flatMap((v) => combine(rest, [...prefix, v]));
+  };
+
+  return combine(values);
+}
+
+/* ---------------------------------------------------------
+   CURRENCY PRICE CELL
+----------------------------------------------------------*/
 const CurrencyPriceCell = React.memo(
   ({
     currency,
@@ -66,11 +74,9 @@ const CurrencyPriceCell = React.memo(
 
     return (
       <div className="min-w-[200px] px-3 flex items-center justify-between gap-2 border-r">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">
-            {getCurrencySymbol(currency.code)}
-          </span>
-        </div>
+        <span className="text-xs text-slate-500">
+          {getCurrencySymbol(currency.code)}
+        </span>
 
         <Input
           className="w-[160px] text-right text-sm"
@@ -86,9 +92,9 @@ const CurrencyPriceCell = React.memo(
 
 CurrencyPriceCell.displayName = "CurrencyPriceCell";
 
-// ---------------------------
-// Row Component
-// ---------------------------
+/* ---------------------------------------------------------
+   TABLE ROW
+----------------------------------------------------------*/
 const PriceTableRow = React.memo(
   ({
     row,
@@ -115,7 +121,7 @@ const PriceTableRow = React.memo(
           <div className="text-sm font-medium">{row.name}</div>
         </div>
 
-        {/* Dynamic fields (Title, SKU, Checkboxes) */}
+        {/* Dynamic fields */}
         {FIELDS.map((item) => (
           <div
             key={item.key}
@@ -124,14 +130,14 @@ const PriceTableRow = React.memo(
             {item.field === "text" ? (
               <Input
                 className="w-[160px] text-right text-sm"
-                placeholder={item.name}
                 value={(row as any)[item.key] ?? ""}
-                onChange={(e) => onFieldChange(row.id, item.key, e.target.value)}
+                onChange={(e) =>
+                  onFieldChange(row.id, item.key, e.target.value)
+                }
               />
             ) : (
               <div className="flex items-center justify-center">
                 <Checkbox
-                  id={`${row.id}-${item.key}`}
                   checked={Boolean((row as any)[item.key])}
                   onCheckedChange={(checked) =>
                     onFieldChange(row.id, item.key, Boolean(checked))
@@ -142,7 +148,7 @@ const PriceTableRow = React.memo(
           </div>
         ))}
 
-        {/* Currency columns */}
+        {/* Price cells */}
         {currencies.map((currency) => (
           <CurrencyPriceCell
             key={`${row.id}-${currency.key}`}
@@ -159,68 +165,85 @@ const PriceTableRow = React.memo(
 
 PriceTableRow.displayName = "PriceTableRow";
 
-// ---------------------------
-// MAIN COMPONENT
-// ---------------------------
+/* ---------------------------------------------------------
+   MAIN COMPONENT
+----------------------------------------------------------*/
 export default function VariantPriceEditor({
   rows,
   setRows,
+  productOptions,
 }: {
   rows: PriceRow[];
   setRows: React.Dispatch<React.SetStateAction<PriceRow[]>>;
+  productOptions: ProductOption[];
 }) {
   const { data, isLoading, error } = useGetAllStoreCurrenciesQuery({
     rowsPerPage: 100,
     page: 1,
   });
 
-  // Build currencies list from API result
+  /* Load currencies */
   const currencies = useMemo(() => {
     return (data?.result || [])
       .map((c: StoreCurrenciesType) => {
         const code = c?.currency_id?.code || "";
-        const key = c?.id || c?._id || code || Math.random().toString(36).slice(2);
+        const key = c?.id || c?._id || code;
         const label = c?.currency_id?.name || code;
+
         return { raw: c, key, code, label };
       })
-      // filter out empty currency codes if any (defensive)
       .filter((c) => !!c.code);
   }, [data?.result]);
 
-  // prepare empty prices shape for current currencies
-  const emptyPricesForCurrencies = useMemo(() => {
+  /* Empty initial prices per currency */
+  const emptyPrices = useMemo(() => {
     const map: Record<string, PriceValue> = {};
     currencies.forEach((c) => (map[c.code] = ""));
     return map;
   }, [currencies]);
 
-  // initialize default row if none exists
+  /* ---------------------------------------------------------
+     AUTO GENERATE VARIANT ROWS FROM PRODUCT OPTIONS (Option A)
+  ----------------------------------------------------------*/
   useEffect(() => {
-    if (currencies.length > 0 && rows.length === 0) {
-      setRows([
-        {
-          id: "loc_main",
-          name: "Default option value",
-          title: "",
-          sku: "",
-          managed_inventory: false,
-          allow_backorder: false,
-          has_inventory_kit: false,
-          prices: { ...emptyPricesForCurrencies },
-        },
-      ]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currencies.length]);
+    if (!productOptions.length || !currencies.length) return;
 
-  // update a currency price for a given row
+    const combos = generateCombinations(productOptions);
+
+    setRows((prevRows) => {
+      const existingIds = prevRows.map((r) => r.id);
+      const newRows = combos.map((combo, index) => {
+        const id = `variant_${index}`;
+        const existing = prevRows.find((r) => r.id === id);
+        return existing
+          ? existing // keep user data
+          : {
+              id,
+              name: combo.join(" / "),
+              title: combo.join(" / "),
+              sku: "",
+              managed_inventory: false,
+              allow_backorder: false,
+              has_inventory_kit: false,
+              prices: { ...emptyPrices },
+            };
+      });
+      return newRows;
+    });
+  }, [productOptions, currencies]);
+
+  /* Update price */
   const updatePrice = useCallback(
     (rowId: string, currencyCode: string, value: string) => {
-      // normalize commas to dots, empty string allowed
       const cleaned = value.replace(",", ".");
       const parsed = cleaned === "" ? "" : Number.parseFloat(cleaned);
+
       const finalVal: PriceValue =
-        cleaned === "" ? "" : Number.isFinite(parsed) ? parsed : (rows.find(r => r.id === rowId)?.prices[currencyCode] ?? "");
+        cleaned === ""
+          ? ""
+          : Number.isFinite(parsed)
+          ? parsed
+          : rows.find((r) => r.id === rowId)?.prices[currencyCode] ?? "";
 
       setRows((prev) =>
         prev.map((row) =>
@@ -230,10 +253,10 @@ export default function VariantPriceEditor({
         )
       );
     },
-    [setRows, rows]
+    [rows, setRows]
   );
 
-  // update generic field (title, sku, checkboxes)
+  /* Update text/checkbox field */
   const updateField = useCallback(
     (rowId: string, key: string, value: any) => {
       setRows((prev) =>
@@ -243,23 +266,20 @@ export default function VariantPriceEditor({
     [setRows]
   );
 
-
   if (isLoading) return <div className="p-6">Loading currencies…</div>;
-  if (error) return <div className="p-6 text-red-600">Failed to load currencies</div>;
+  if (error)
+    return <div className="p-6 text-red-600">Failed to load currencies</div>;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center pt-20">
       <div className="flex flex-col w-full h-full max-h-[96vh] max-w-[98vw] bg-white rounded-xl shadow-2xl overflow-hidden">
-
-        {/* HORIZONTAL SCROLL WRAPPER */}
         <div className="flex-1 w-full overflow-x-auto overflow-y-hidden">
-          <div className="w-max min-w-[900px] md:min-w-[1200px] lg:min-w-[1600px]">
-
-            {/* Header row */}
+          <div className="w-max min-w-[1200px]">
+            {/* Header */}
             <div className="flex sticky top-0 bg-white z-20 border-b">
               <div className="sticky left-0 z-30 bg-white px-6 py-3 w-[220px] border-r">
                 <div className="text-xs font-semibold uppercase text-slate-600">
-                  Default option
+                  Variant
                 </div>
               </div>
 
@@ -268,16 +288,16 @@ export default function VariantPriceEditor({
                   key={item.key}
                   className="px-4 py-3 min-w-[200px] text-center text-xs font-semibold uppercase text-slate-600 border-r"
                 >
-                  <span>{item.name}</span>
+                  {item.name}
                 </div>
               ))}
 
               {currencies.map((currency) => (
                 <div
                   key={currency.key}
-                  className="px-4 py-3 min-w-[200px] text-center text-xs font-semibold uppercase text-slate-600 border-r"
+                  className="px-4 py-3 min-w-[200px] border-r text-xs font-semibold uppercase text-slate-600"
                 >
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center justify-between">
                     <span>Price {currency.code}</span>
                     <Landmark size={14} />
                   </div>
@@ -285,21 +305,17 @@ export default function VariantPriceEditor({
               ))}
             </div>
 
-            {/* Data rows */}
-            {rows.length === 0 ? (
-              <div className="py-12 text-center text-slate-500">No rows. Add one to get started.</div>
-            ) : (
-              rows.map((row, i) => (
-                <PriceTableRow
-                  key={row.id}
-                  row={row}
-                  rowIndex={i}
-                  currencies={currencies}
-                  onPriceUpdate={updatePrice}
-                  onFieldChange={updateField}
-                />
-              ))
-            )}
+            {/* DATA ROWS */}
+            {rows.map((row, i) => (
+              <PriceTableRow
+                key={row.id}
+                row={row}
+                rowIndex={i}
+                currencies={currencies}
+                onPriceUpdate={updatePrice}
+                onFieldChange={updateField}
+              />
+            ))}
           </div>
         </div>
       </div>

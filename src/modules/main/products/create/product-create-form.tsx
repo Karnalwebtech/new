@@ -17,18 +17,32 @@ import SEOForm from "@/components/forms/SEO-form";
 import { useDispatch, useSelector } from "react-redux";
 import { clearSelected } from "@/reducers/healper-slice";
 import { RootState } from "@/store";
-import VariantPriceEditor, { PriceRow } from "@/components/price-manager/variant-price-editor-dialog";
+import VariantPriceEditor, {
+  PriceRow,
+} from "@/components/price-manager/variant-price-editor-dialog";
+import InventorytKits from "./inventoryt-kits";
+import { ProductOption } from "./variants/variants";
 
 type FormData = z.infer<typeof ProductSchema>;
 export function ProductCreateForm() {
   const router = useRouter();
-  const [rows, setRows] = useState<PriceRow[]>([])
+  const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
+  const [rows, setRows] = useState<PriceRow[]>([]);
   const dispatch = useDispatch();
   const [step, setStep] = useState(0);
-  const { selected, selectedKeyValuePair } = useSelector((state: RootState) => state.helper);
+
+  const { selected, selectedKeyValuePair } = useSelector(
+    (state: RootState) => state.helper
+  );
+  const is_inventoryt_kits = rows.some(
+    (item) => item.has_inventory_kit === true && item.managed_inventory === true
+  );
+
+  const SEO_STEP = is_inventoryt_kits ? 4 : 3;
+  const KIT_STEP = 3;
   const [keywords, setKeywords] = useState<string[]>([]);
   useEffect(() => {
-    dispatch(clearSelected())
+    dispatch(clearSelected());
   }, [dispatch]);
   const {
     control,
@@ -38,7 +52,7 @@ export function ProductCreateForm() {
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      hasVariants: false,   // <-- add this
+      hasVariants: false, // <-- add this
     },
     resolver: zodResolver(ProductSchema),
   });
@@ -46,7 +60,7 @@ export function ProductCreateForm() {
   const values = watch();
   // const has_inventory_kit = rows?[0]?.has_inventory_kit ?? false;
   const has_inventory_kit = false;
-  
+
   const canAccessStep = useMemo(() => {
     const mt = values.meta_title?.trim() || "";
     // const md = values.meta_description?.trim() || "";
@@ -70,7 +84,6 @@ export function ProductCreateForm() {
       // isMetaTitleValid,
     ];
   }, [values]);
-
 
   const onSubmit = useCallback(
     async (data: FormData) => {
@@ -102,53 +115,61 @@ export function ProductCreateForm() {
       title="Create Product Category"
       description="Fill in the details to create a new product category."
       isOpen={true}
-      handleClose={() => { }}
+      handleClose={() => {}}
     >
       <ScrollArea className="h-[96vh] w-full p-0 rounded-lg overflow-hidden">
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
-            tabs={ has_inventory_kit?["Details", "Organize", "Variants", "SEO","Inventory kits"] :["Details", "Organize", "Variants", "SEO"]}
+            tabs={
+              is_inventoryt_kits
+                ? ["Details", "Organize", "Variants", "Inventory kits", "SEO"]
+                : ["Details", "Organize", "Variants", "SEO"]
+            }
             step={step}
             setStep={setStep}
             canAccessStep={canAccessStep}
             onCancel={() => router.back()}
           />
-          {step === 0 && <Details control={control} errors={errors} hasVariant={watch("hasVariants")} />}
+          {step === 0 && (
+            <Details
+              control={control}
+              errors={errors}
+              productOptions={productOptions}
+              setProductOptions={setProductOptions}
+              hasVariant={watch("hasVariants")}
+            />
+          )}
           {step === 1 && <Organize control={control} errors={errors} />}
-          {step === 2 &&
-            <VariantPriceEditor rows={rows} setRows={setRows} />
-          }
+          {step === 2 && (
+            <VariantPriceEditor
+              rows={rows}
+              setRows={setRows}
+              productOptions={productOptions}
+            />
+          )}
+          {is_inventoryt_kits && step === KIT_STEP && (
+            <div className="h-[70vh] w-full">
+              <ScrollArea className="h-full w-full rounded-lg border">
+                <InventorytKits variants={rows} />
+              </ScrollArea>
+            </div>
+          )}
+          {step === SEO_STEP && (
+            <SEOForm
+              control={control}
+              errors={errors}
+              keywords={keywords}
+              setKeywords={setKeywords}
+              disabled_path={"disabled_path"}
+              title={values.meta_title}
+              description={values.meta_description}
+            />
+          )}
 
-          {/* {step === 3 && <p>sss</p>} */}
-          {/* {step === 2 && (
-            <Variants />
-          )} */}
-          {step === 3 && (
-            <SEOForm
-              control={control}
-              errors={errors}
-              keywords={keywords}
-              setKeywords={setKeywords}
-              disabled_path={"disabled_path"}
-              title={values.meta_title}
-              description={values.meta_description}
-            />
-          )}
-          {has_inventory_kit && step === 4 && (
-            <SEOForm
-              control={control}
-              errors={errors}
-              keywords={keywords}
-              setKeywords={setKeywords}
-              disabled_path={"disabled_path"}
-              title={values.meta_title}
-              description={values.meta_description}
-            />
-          )}
           {/* Footer Actions */}
           <PageFooter<FormData>
             step={step}
-            lastStep={has_inventory_kit ? 4 : 3} // or whatever your last step index is
+            lastStep={is_inventoryt_kits ? 4 : 3} // or whatever your last step index is
             canAccessStep={canAccessStep} // example: at least 2 steps
             handleNext={() => setStep(step + 1)}
             handleSubmit={handleSubmit}

@@ -1,8 +1,8 @@
 "use client";
-import React, { memo } from "react";
+import React from "react";
 import { Label } from "@/components/ui/label";
 import Media from "./media";
-import Variants from "./variants";
+import Variants, { ProductOption } from "./variants/variants";
 import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
 import InputField from "@/components/fields/input-field";
 import HoverTooltip from "@/components/tooltip/hover-tooltip";
@@ -12,11 +12,15 @@ import SwitchField from "@/components/fields/switch-field";
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
   errors: FieldErrors<T>;
-  hasVariant: boolean;
+  productOptions: ProductOption[];
+  setProductOptions: React.Dispatch<React.SetStateAction<ProductOption[]>>;
+  hasVariant?: boolean;
 }
 const Details = <T extends FieldValues>({
   control,
   errors,
+  productOptions,
+  setProductOptions,
   hasVariant = false,
 }: DetailsProps<T>) => {
   return (
@@ -117,7 +121,11 @@ const Details = <T extends FieldValues>({
             <h3 className="text-lg font-semibold text-gray-900">Variants</h3>
             <div className="shadow-md bg-gray-50 p-4 rounded-lg">
               <div className="flex items-start gap-3">
-                <SwitchField control={control} errors={errors} name={"hasVariants" as Path<T>} />
+                <SwitchField
+                  control={control}
+                  errors={errors}
+                  name={"hasVariants" as Path<T>}
+                />
                 <div className="space-y-1">
                   <Label
                     htmlFor="has-variants"
@@ -132,11 +140,15 @@ const Details = <T extends FieldValues>({
               </div>
             </div>
           </div>
-          <Variants hasVariant={hasVariant} />
+          <Variants
+            productOptions={productOptions}
+            setProductOptions={setProductOptions}
+            hasVariant={hasVariant}
+          />
         </div>
       </div>
     </>
   );
 };
 
-export default memo(Details);
+export default Details;
