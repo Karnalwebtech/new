@@ -34,7 +34,7 @@ const CreateInventory = ({ ItemId }: CreateInventoryProps) => {
     { isLoading: updateLoading, isSuccess: updateSuccess, error: UpdateError },
   ] = useUpdateInventoryMutation();
 
-  const { data } = useGetInventoryDetailsQuery(
+  const { data, isLoading: fetachLoading } = useGetInventoryDetailsQuery(
     { id: ItemId!, rowsPerPage: 100, page: 1 },
     { skip: !ItemId }
   );
@@ -70,7 +70,7 @@ const CreateInventory = ({ ItemId }: CreateInventoryProps) => {
 
     const isTitleValid = title.length > 5 && title.length <= 60;
 
-    return [true, isTitleValid];
+    return [true, isTitleValid, true];
   }, [values]);
 
   const onSubmit = useCallback(
@@ -129,7 +129,7 @@ const CreateInventory = ({ ItemId }: CreateInventoryProps) => {
             onCancel={() => router.back()}
           />
           <div className="mb-20">
-            {isLoading || updateLoading ? (
+            {isLoading || updateLoading || fetachLoading ? (
               <FormSkeleton />
             ) : (
               <div>

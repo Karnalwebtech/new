@@ -18,6 +18,7 @@ import {
   useUpdatereservationsMutation,
 } from "@/state/reservations-api";
 import { toast } from "sonner";
+import { ReservationsType } from "@/types/reservations-type";
 
 type FormData = z.infer<typeof ReservationsSchema>;
 interface CreateReservationsProps {
@@ -34,7 +35,7 @@ const CreateReservations = ({ ItemId }: CreateReservationsProps) => {
     { isLoading: updateLoading, isSuccess: updateSuccess, error: UpdateError },
   ] = useUpdatereservationsMutation();
 
-  const { data } = useGetreservationsDetailsQuery(
+  const { data, isLoading: fetachLoading } = useGetreservationsDetailsQuery(
     { id: ItemId! },
     { skip: !ItemId }
   );
@@ -84,7 +85,7 @@ const CreateReservations = ({ ItemId }: CreateReservationsProps) => {
       }
       const payload = {
         ...data,
-      };
+      } as unknown as ReservationsType;
       if (ItemId) {
         await updatereservations({ id: ItemId, ...payload });
         return;
@@ -96,14 +97,9 @@ const CreateReservations = ({ ItemId }: CreateReservationsProps) => {
 
   useEffect(() => {
     if (result) {
-      const reserveId =
-        typeof result.inventory_item_id === "string"
-          ? result.inventory_item_id
-          : result.inventory_item_id?._id ?? "";
-
       // Populate form fields with fetched data
-      setValue("reserve", reserveId || "");
-      setValue("location", result?.location_id || "");
+      setValue("reserve", result?.inventory_item?._id || "");
+      setValue("location", result?.location?._id || "");
       setValue("quantity", result?.quantity || 0);
       setValue("description", result?.description || "");
     }
@@ -120,7 +116,7 @@ const CreateReservations = ({ ItemId }: CreateReservationsProps) => {
             onCancel={() => router.back()}
           />
           <div className="mb-20">
-            {isLoading || updateLoading ? (
+            {isLoading || updateLoading || fetachLoading ? (
               <FormSkeleton />
             ) : (
               <div>

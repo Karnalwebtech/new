@@ -21,7 +21,7 @@ import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import PageHeander2 from "@/modules/layout/header/page-heander2";
 import { TableEmptyState } from "@/components/table/table-empty-state";
-import { InventoryType } from "@/types/inventory-type";
+// import { InventoryType } from "@/types/inventory-type";
 import {
   useGetAllreservationsQuery,
   useRemovereservationsMutation,
