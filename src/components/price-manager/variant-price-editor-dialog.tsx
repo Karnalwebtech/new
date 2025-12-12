@@ -220,33 +220,54 @@ export default function VariantPriceEditor({
 
   /* Auto-generate variant rows from product options */
   useEffect(() => {
-    if (!productOptions.length || !currencies.length) return;
+  if (!currencies.length) return;
+
+  setRows((prevRows) => {
+    // 1) NO PRODUCT OPTIONS → ensure default row exists only once
+    if (!productOptions.length) {
+      if (prevRows.length === 1 && prevRows[0].id === "variant_Default") {
+        return prevRows; // Already set, avoid reset
+      }
+
+      return [
+        {
+          id: "variant_Default",
+          name: "Default option value",
+          title: "Default variant",
+          sku: "",
+          managed_inventory: false,
+          allow_backorder: false,
+          has_inventory_kit: false,
+          prices: { ...emptyPrices },
+        },
+      ];
+    }
+
+    // 2) PRODUCT OPTIONS EXIST → generate combos
     const combos = generateCombinations(productOptions);
 
-    setRows((prevRows) => {
-      // Build stable ids using index + combo values so new order won't accidentally reuse wrong id
-      const newRows = combos.map((combo, index) => {
-        const id = `variant_${index}_${combo.join("_")}`;
-        const existing = prevRows.find((r) => r.id === id);
-        return (
-          existing ?? {
-            id,
-            name: combo.join(" / "),
-            title: combo.join(" / "),
-            sku: "",
-            managed_inventory: false,
-            allow_backorder: false,
-            has_inventory_kit: false,
-            prices: { ...emptyPrices },
-            // product_option_id: productOptions.map((item) => item.id).join("_"),
-          }
-        );
-      });
+    const newRows = combos.map((combo, index) => {
+      const id = `variant_${index}_${combo.join("_")}`;
+      const existing = prevRows.find((r) => r.id === id);
 
-      return newRows;
+      return (
+        existing ?? {
+          id,
+          name: combo.join(" / "),
+          title: combo.join(" / "),
+          sku: "",
+          managed_inventory: false,
+          allow_backorder: false,
+          has_inventory_kit: false,
+          prices: { ...emptyPrices },
+        }
+      );
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productOptions, currencies.length]);
+
+    return newRows;
+  });
+}, [productOptions, currencies.length]);
+
 
   /* Update price */
   const updatePrice = useCallback(
@@ -296,7 +317,7 @@ export default function VariantPriceEditor({
             <div className="flex sticky top-0 bg-white z-20 border-b">
               <div className="sticky left-0 z-30 bg-white px-6 py-3 w-[220px] border-r">
                 <div className="text-xs font-semibold uppercase text-slate-600">
-                  Variant
+                  {rows.length > 0 ? "Variant" : "Default option"}
                 </div>
               </div>
 

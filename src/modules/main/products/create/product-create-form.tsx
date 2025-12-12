@@ -20,6 +20,8 @@ import VariantPriceEditor, {
 } from "@/components/price-manager/variant-price-editor-dialog";
 import { ProductOption } from "./variants/variants";
 import InventorytKits, { VariantKitItem } from "./inventoryt-kits";
+import Variants2 from "./v2";
+import VariantPriceEditor222 from "./v2";
 
 type FormData = z.infer<typeof ProductSchema>;
 
@@ -154,6 +156,7 @@ export function ProductCreateForm() {
           {step === STEP.VARIANTS && (
             <div className="w-full">
               <ScrollArea className="h-full w-full rounded-lg border">
+                {/* <VariantPriceEditor222 rows={rows} setRows={setRows}/> */}
                 <VariantPriceEditor
                   rows={rows}
                   setRows={setRows}
