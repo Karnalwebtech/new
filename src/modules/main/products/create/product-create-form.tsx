@@ -10,40 +10,56 @@ import { PageFooter } from "@/modules/layout/footer/page-footer";
 import { useForm } from "react-hook-form";
 import DialogPopUp from "@/components/drawer/dialog-component";
 import { ProductSchema } from "@/zod-schema/product-schema";
-import { seoSchema } from "@/zod-schema/seo-schema";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import SEOForm from "@/components/forms/SEO-form";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { clearSelected } from "@/reducers/healper-slice";
-import { RootState } from "@/store";
 import VariantPriceEditor, {
   PriceRow,
 } from "@/components/price-manager/variant-price-editor-dialog";
-import InventorytKits from "./inventoryt-kits";
 import { ProductOption } from "./variants/variants";
+import InventorytKits, { VariantKitItem } from "./inventoryt-kits";
 
 type FormData = z.infer<typeof ProductSchema>;
+
 export function ProductCreateForm() {
   const router = useRouter();
+  const dispatch = useDispatch();
+
   const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
   const [rows, setRows] = useState<PriceRow[]>([]);
-  const dispatch = useDispatch();
-  const [step, setStep] = useState(0);
-
-  const { selected, selectedKeyValuePair } = useSelector(
-    (state: RootState) => state.helper
-  );
-  const is_inventoryt_kits = rows.some(
-    (item) => item.has_inventory_kit === true && item.managed_inventory === true
-  );
-
-  const SEO_STEP = is_inventoryt_kits ? 4 : 3;
-  const KIT_STEP = 3;
+  const [step, setStep] = useState<number>(0);
   const [keywords, setKeywords] = useState<string[]>([]);
+  const [kits, setKits] = useState<Record<string, VariantKitItem[]>>({});
+  console.log(rows)
+  console.log(kits)
+  // clear selected on mount
   useEffect(() => {
     dispatch(clearSelected());
   }, [dispatch]);
+
+  // determine whether any variant requires inventory kits
+  const isInventoryKits = useMemo(
+    () =>
+      rows.some(
+        (item) =>
+          item.has_inventory_kit === true && item.managed_inventory === true
+      ),
+    [rows]
+  );
+
+  // explicit step indexes (helps readability)
+  const STEP = {
+    DETAILS: 0,
+    ORGANIZE: 1,
+    VARIANTS: 2,
+    KITS: 3, // if applicable
+    SEO: 4,
+  };
+
+  const lastStep = isInventoryKits ? STEP.SEO : STEP.VARIANTS;
+
   const {
     control,
     handleSubmit,
@@ -51,69 +67,59 @@ export function ProductCreateForm() {
     setValue,
     formState: { errors },
   } = useForm<FormData>({
-    defaultValues: {
-      hasVariants: false, // <-- add this
-    },
+    defaultValues: { hasVariants: false },
     resolver: zodResolver(ProductSchema),
   });
 
   const values = watch();
-  // const has_inventory_kit = rows?[0]?.has_inventory_kit ?? false;
-  const has_inventory_kit = false;
 
   const canAccessStep = useMemo(() => {
-    const mt = values.meta_title?.trim() || "";
-    // const md = values.meta_description?.trim() || "";
-    // const mc = values.meta_canonical_url?.trim() || "";
-
-    // const isMetaTitleValid =
-    //   mt.length >= 3 && mt.length <= 60;
-
-    // const isMetaDescriptionValid =
-    //   md.length >= 50 && md.length <= 160;
-
-    // const isCanonicalValid =
-    //   /^[a-zA-Z0-9-]+$/.test(mc);
-
-    return [
-      true,
-      !!values.title?.trim(),
-      true,
-      true,
-      true,
-      // isMetaTitleValid,
-    ];
+    // minimal example — extend with more complex validations if needed
+    return [true, !!values.title?.trim(), true, true, true];
   }, [values]);
+
+  /* ------------------------ Form submission --------------------------- */
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      // const payload: ProductCategoryFormData = {
-      //   ...data,
-      //   keywords,
-      //   categoryId,
-      //   FileData: fileData.map(({ fileType, _id }) => ({ [fileType]: _id })),
-      // };
-      // if (catId) {
-      //   await UpdateProductCategory({ ...payload, id: catId });
-      //   return;
-      // }
-      // await AddProductCategory(payload);
-      // send API request or dispatch action here
+      // Build payload
+      const productPayload = {
+        ...data,
+        keywords,
+        productOptions,
+        variants: rows,
+        kits: Object.entries(kits).map(([variantId, options]) => ({
+          variantId,
+          options: options.map((o) => ({
+            id: o.id,
+            itemId: o.itemId,
+            itemTitle: o.itemTitle,
+            quantity: Number(o.quantity) || 0,
+          })),
+        })),
+      };
+
+      // TODO: call API or dispatch action to save productPayload
+      // e.g., await api.createProduct(productPayload)
+      // For now: console.log dev payload:
+      // eslint-disable-next-line no-console
+      console.log("Submitting product payload", productPayload);
     },
-    [
-      // AddProductCategory,
-      // categoryId,
-      // UpdateProductCategory,
-      // fileData,
-      // keywords,
-      // catId,
-    ]
+    [keywords, productOptions, rows, kits]
   );
+
+  /* ------------------------- Step navigation -------------------------- */
+
+  const nextStep = useCallback(
+    () => setStep((s) => Math.min(s + 1, lastStep)),
+    [lastStep]
+  );
+  const prevStep = useCallback(() => setStep((s) => Math.max(s - 1, 0)), []);
 
   return (
     <DialogPopUp
-      title="Create Product Category"
-      description="Fill in the details to create a new product category."
+      title="Create Product"
+      description="Fill in the details to create a new product."
       isOpen={true}
       handleClose={() => {}}
     >
@@ -121,7 +127,7 @@ export function ProductCreateForm() {
         <div className="w-full mx-auto bg-white min-h-screen">
           <PageHeander
             tabs={
-              is_inventoryt_kits
+              isInventoryKits
                 ? ["Details", "Organize", "Variants", "Inventory kits", "SEO"]
                 : ["Details", "Organize", "Variants", "SEO"]
             }
@@ -130,7 +136,8 @@ export function ProductCreateForm() {
             canAccessStep={canAccessStep}
             onCancel={() => router.back()}
           />
-          {step === 0 && (
+
+          {step === STEP.DETAILS && (
             <Details
               control={control}
               errors={errors}
@@ -139,22 +146,32 @@ export function ProductCreateForm() {
               hasVariant={watch("hasVariants")}
             />
           )}
-          {step === 1 && <Organize control={control} errors={errors} />}
-          {step === 2 && (
-            <VariantPriceEditor
-              rows={rows}
-              setRows={setRows}
-              productOptions={productOptions}
-            />
+
+          {step === STEP.ORGANIZE && (
+            <Organize control={control} errors={errors} />
           )}
-          {is_inventoryt_kits && step === KIT_STEP && (
-            <div className="h-[70vh] w-full">
+
+          {step === STEP.VARIANTS && (
+            <div className="w-full">
               <ScrollArea className="h-full w-full rounded-lg border">
-                <InventorytKits variants={rows} />
+                <VariantPriceEditor
+                  rows={rows}
+                  setRows={setRows}
+                  productOptions={productOptions}
+                />
               </ScrollArea>
             </div>
           )}
-          {step === SEO_STEP && (
+
+          {isInventoryKits && step === STEP.KITS && (
+            <div className="h-[70vh] w-full">
+              <ScrollArea className="h-full w-full rounded-lg border">
+                <InventorytKits variants={rows} kits={kits} setKits={setKits} />
+              </ScrollArea>
+            </div>
+          )}
+
+          {step === (isInventoryKits ? STEP.SEO : STEP.SEO) && (
             <SEOForm
               control={control}
               errors={errors}
@@ -169,9 +186,9 @@ export function ProductCreateForm() {
           {/* Footer Actions */}
           <PageFooter<FormData>
             step={step}
-            lastStep={is_inventoryt_kits ? 4 : 3} // or whatever your last step index is
-            canAccessStep={canAccessStep} // example: at least 2 steps
-            handleNext={() => setStep(step + 1)}
+            lastStep={lastStep}
+            canAccessStep={canAccessStep}
+            handleNext={nextStep}
             handleSubmit={handleSubmit}
             onSubmit={onSubmit}
             isLoading={false}

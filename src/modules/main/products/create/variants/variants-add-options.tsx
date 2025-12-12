@@ -40,7 +40,8 @@ const VariantsAddOptions = ({
       ...prev,
       {
         _id: id,
-        sku: "",
+        id: `pvarient_${id}`,
+        // sku: "",
         title: "",
         values: [],
       },

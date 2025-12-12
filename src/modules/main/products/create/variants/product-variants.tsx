@@ -110,7 +110,7 @@ const ProductVariants = ({ productOptions }: Props) => {
       <div>
         <h2 className="text-lg font-semibold">Product Variants</h2>
         <p className="text-xs text-gray-500">
-          This ranking will affect the variants' order in your storefront.
+          This ranking will affect the variants&apos; order in your storefront.
         </p>
       </div>
 

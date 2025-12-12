@@ -4,8 +4,9 @@ import ProductVariants from "./product-variants";
 
 export type ProductOption = {
   _id: string;
+  id: string;
   title: string;
-  sku: string;
+  // sku: string;
   values: string[];
 };
 
@@ -114,7 +115,7 @@ const Variants = ({
           <p className="text-sm">
             <span className="font-bold text-base">Tip: </span>
             <span className="text-sm text-gray-700">
-              Variants left unchecked won't be created. You can always create
+              Variants left unchecked won&apos;t be created. You can always create
               and edit variants afterwards but this list fits the variations in
               your product options.
             </span>
