@@ -34,8 +34,11 @@ import {
   ChevronsDown,
 } from "lucide-react";
 import { useReorder } from "@/hooks/useReorder";
-
-const Media = () => {
+interface MediaProps {
+  isThumbnail: string;
+  setIsThumbnail: (value: string) => void;
+}
+const Media = ({ isThumbnail, setIsThumbnail }: MediaProps) => {
   const dispatch = useDispatch();
 
   const isOpen = useSelector((state: RootState) => state?.helper?.isOpen);
@@ -49,7 +52,7 @@ const Media = () => {
   );
 
   const [ordered, setOrdered] = useState<File[]>(onlyImages); // local order
-  const [isThumbnail, setIsThumbnail] = useState<string>(""); // stores public_id
+  // stores public_id
 
   const {
     onDragStart,
@@ -80,7 +83,7 @@ const Media = () => {
       // update store
       dispatch(removeFile(id));
     },
-    [dispatch, ordered, isThumbnail]
+    [dispatch, ordered, isThumbnail, setIsThumbnail]
   );
 
   /* You can expose `ordered` to parent/store on save if needed */

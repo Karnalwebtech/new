@@ -1,8 +1,6 @@
 "use client";
 import React from "react";
 import { Label } from "@/components/ui/label";
-import Media from "./media";
-import Variants, { ProductOption } from "./variants/variants";
 import { Control, FieldErrors, FieldValues, Path } from "react-hook-form";
 import InputField from "@/components/fields/input-field";
 import HoverTooltip from "@/components/tooltip/hover-tooltip";
@@ -12,21 +10,15 @@ import SwitchField from "@/components/fields/switch-field";
 interface DetailsProps<T extends FieldValues> {
   control: Control<T>;
   errors: FieldErrors<T>;
-  productOptions: ProductOption[];
-  setProductOptions: React.Dispatch<React.SetStateAction<ProductOption[]>>;
-  hasVariant?: boolean;
 }
 const Details = <T extends FieldValues>({
   control,
   errors,
-  productOptions,
-  setProductOptions,
-  hasVariant = false,
 }: DetailsProps<T>) => {
   return (
     <>
       {/* Form Content */}
-      <div className="p-8 pb-32 max-w-[800px] m-auto">
+      <div className="">
         <h2 className="text-lg font-semibold text-gray-900 mb-8">General</h2>
 
         <div className="space-y-8">
@@ -116,35 +108,7 @@ const Details = <T extends FieldValues>({
               }
             />
           </div>
-          <Media />
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Variants</h3>
-            <div className="shadow-md bg-gray-50 p-4 rounded-lg">
-              <div className="flex items-start gap-3">
-                <SwitchField
-                  control={control}
-                  errors={errors}
-                  name={"hasVariants" as Path<T>}
-                />
-                <div className="space-y-1">
-                  <Label
-                    htmlFor="has-variants"
-                    className="text-sm font-medium text-gray-900 cursor-pointer"
-                  >
-                    Yes, this is a product with variants
-                  </Label>
-                  <p className="text-sm text-gray-600">
-                    When unchecked, we will create a default variant for you.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <Variants
-            productOptions={productOptions}
-            setProductOptions={setProductOptions}
-            hasVariant={hasVariant}
-          />
+          
         </div>
       </div>
     </>

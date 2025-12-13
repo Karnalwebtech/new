@@ -70,6 +70,7 @@ import { serviceZoneApi } from "./state/service-zone-api";
 import { shippingOptionsApi } from "./state/shipping-options-api";
 import { inventoryApi } from "./state/inventory-api";
 import { reservationsApi } from "./state/reservations-api";
+import { productApi } from "./state/product-api";
 
 const createNoopStorage = () => ({
   getItem: () => Promise.resolve(null),
@@ -128,6 +129,7 @@ const persistConfig = {
     shippingOptionsApi.reducerPath,
     inventoryApi.reducerPath,
     reservationsApi.reducerPath,
+    productApi.reducerPath,
 
     //superme
     cloudStorageApi.reducerPath,
@@ -183,6 +185,7 @@ const rootReducer = combineReducers({
   [shippingOptionsApi.reducerPath]: shippingOptionsApi.reducer,
   [inventoryApi.reducerPath]: inventoryApi.reducer,
   [reservationsApi.reducerPath]: reservationsApi.reducer,
+  [productApi.reducerPath]: productApi.reducer,
 
   //superme
   [cloudStorageApi.reducerPath]: cloudStorageApi.reducer,
@@ -244,6 +247,8 @@ const makeStore = () => {
         shippingOptionsApi.middleware,
         inventoryApi.middleware,
         reservationsApi.middleware,
+        productApi.middleware,
+        
         //superme
         cloudStorageApi.middleware,
       ]),

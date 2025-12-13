@@ -19,12 +19,16 @@ export const ProductCollectionsDetailsSchema = z.object({
 export const ProductSchema = z.object({
   title: z.string().min(1, "Title is required"),
   handle: z.string().optional(),
+  subtitle: z.string().optional(),
   tags: z.string().optional(),
   type: z.string().optional(),
   collection: z.string().optional(),
+  categorie: z.string().optional(),
   shipping_profile: z.string().optional(),
   description: z.string().optional(),
   hasVariants: z.boolean().default(false),
+  discountable: z.boolean().default(false),
+  
 }).merge(seoSchema.partial());
 
 export const productTypeSchema = z.object({
