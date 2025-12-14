@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/modules/layout/header/header";
 import { useHandleNotifications } from "@/hooks/use-notification-handler";
 import { ProductsSkeleton } from "@/components/skeletons/single-page-skeleton";
-import { Products } from "@/modules/main/products/products";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { AlertDialogComponenet } from "@/components/alert-dialog";
 import { useDeleteProductTypesMutation, useGetProductTypesDetailsQuery } from "@/state/product-types-api";
+import Products from "@/modules/main/products/products";
 
 interface ProductTypesDetailsProps {
   ItemId: string;

@@ -44,7 +44,7 @@ export const productApi = createApi({
         }
 
         return {
-          url: "/api-keys",
+          url: "/products",
           params, // Use the dynamically constructed params
           method: "GET",
         };
@@ -89,7 +89,7 @@ export const productApi = createApi({
     >({
       query: ({ id }) => {
         return {
-          url: `/product/${id}`,
+          url: `/product-details/${id}`,
           method: "GET",
         };
       },

@@ -1,280 +1,250 @@
 "use client";
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { useTableFilters } from "@/hooks/useTableFilters";
+import Shadcn_table from "@/components/table/table";
+import useWindowWidth from "@/hooks/useWindowWidth";
+import { TruncateText } from "@/components/truncate-text";
+import ShadcnPagination from "@/components/pagination";
+import { containerVariants } from "@/lib/variants";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  useDeleteRegionMutation,
+  useGetAllRegionseDataQuery,
+} from "../../../state/regions-api";
+import { RegionCountryData } from "@/types/regions-type";
+import { Eye, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Search,
-  Filter,
-  MoreHorizontal,
-  Plus,
-  Download,
-  Upload,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { AlertDialogComponenet } from "@/components/alert-dialog";
+import { useHandleNotifications } from "@/hooks/use-notification-handler";
+import { TableEmptyState } from "../../../components/table/table-empty-state";
+import PageHeander2 from "@/modules/layout/header/page-heander2";
+import RemainingCount from "@/components/remaining-count";
+import { useGetAllProductsQuery } from "@/state/product-api";
 
-// Mock product data
-const products = [
-  {
-    id: 1,
-    name: '16" Ultra-Slim AI Laptop | 3K OLED',
-    icon: "💻",
-    collection: "Featured",
-    salesChannel: "Default Sales Channel",
-    variants: 2,
-    status: "Published",
-  },
-  {
-    id: 2,
-    name: "1080p HD Pro Webcam | Superior Quality",
-    icon: "📹",
-    collection: "",
-    salesChannel: "Default Sales Channel",
-    variants: 2,
-    status: "Published",
-  },
-  {
-    id: 3,
-    name: '6.5" Ultra HD Smartphone | 3x Zoom',
-    icon: "📱",
-    collection: "Featured",
-    salesChannel: "Default Sales Channel",
-    variants: 2,
-    status: "Published",
-  },
-  {
-    id: 4,
-    name: '34" QD-OLED Curved Gaming Monitor',
-    icon: "🖥️",
-    collection: "Featured",
-    salesChannel: "Default Sales Channel",
-    variants: 2,
-    status: "Published",
-  },
-  {
-    id: 5,
-    name: "Hi-Fi Gaming Headset | Pro-Grade Audio",
-    icon: "🎧",
-    collection: "Featured",
-    salesChannel: "Default Sales Channel",
-    variants: 2,
-    status: "Published",
-  },
-  {
-    id: 6,
-    name: "Wireless Keyboard | Touch ID | Numeric",
-    icon: "⌨️",
-    collection: "",
-    salesChannel: "Default Sales Channel",
-    variants: 2,
-    status: "Published",
-  },
-  {
-    id: 7,
-    name: "Wireless Rechargeable Mouse | Ergonomic",
-    icon: "🖱️",
-    collection: "",
-    salesChannel: "Default Sales Channel",
-    variants: 2,
-    status: "Published",
-  },
-  {
-    id: 8,
-    name: "Conference Speaker | High-Performance",
-    icon: "🔊",
-    collection: "",
-    salesChannel: "Default Sales Channel",
-    variants: 2,
-    status: "Published",
-  },
-  {
-    id: 9,
-    name: "test",
-    icon: "📦",
-    collection: "Featured",
-    salesChannel: "Default Sales Channel",
-    variants: 1,
-    status: "Published",
-  },
-];
+const Row = memo(
+  ({
+    item,
+    router,
+    removeHandler,
+    deletedId,
+  }: {
+    router: ReturnType<typeof useRouter>;
+    item: RegionCountryData;
+    removeHandler: (id: string) => void;
+    deletedId: string;
+  }) => {
+    return (
+      <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
+        <TableCell>
+          <span className="text-muted-foreground">
+            <TruncateText text={item?.title || ""} maxLength={25} />
+          </span>
+        </TableCell>
+        <TableCell>
+          <span className="text-muted-foreground">
+            <TruncateText
+              text={item?.collection_id?.name || ""}
+              maxLength={25}
+            />
+          </span>
+        </TableCell>
+        <TableCell className="text-right pr-6">
+          <span className="text-muted-foreground">
+            <TruncateText text={"test"} maxLength={25} />
+          </span>
+        </TableCell>
+        <TableCell className="text-right pr-6">
+          <span className="text-muted-foreground">
+            <TruncateText text={"test"} maxLength={25} />
+          </span>
+        </TableCell>
+        <TableCell className="text-right pr-6">
+          <span className="text-muted-foreground">{item?.status}</span>
+        </TableCell>
+        <TableCell className="text-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="animate-in fade-in">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() =>
+                  router.push(`/dashboard/products/${item?.id}/edit`)
+                }
+              >
+                <Pencil className="h-4 w-4 mr-2" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => router.push(`/dashboard/products/${item?.id}`)}
+              >
+                <Eye className="h-4 w-4 mr-2" /> Preview
+              </DropdownMenuItem>
 
-export const Products = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+              <DropdownMenuItem
+                disabled={deletedId === item?.id}
+                className="text-destructive cursor-pointer"
+                onClick={() => item?.id && removeHandler(item.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+    );
+  }
+);
+Row.displayName = "Row";
+
+const Products = () => {
+  const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [isOpen, setIsOpen] = useState(false);
+  const [deletedId, setDeletedId] = useState<string | null>(null);
+  const [rowsPerPage, setRowsPerPage] = useState("20");
+  const [
+    deleteRegion,
+    { isLoading: deleteLoading, isSuccess: deleteSuccess, error: deteError },
+  ] = useDeleteRegionMutation();
+
+  const { data, isLoading, error } = useGetAllProductsQuery({
+    rowsPerPage: Number(rowsPerPage),
+    page: currentPage,
+  });
+
+  useHandleNotifications({
+    error: deteError || error,
+    isSuccess: deleteSuccess,
+    successMessage: deleteSuccess ? "Regoin deleted successfully!" : "",
+  });
+
+  const width = useWindowWidth();
+  const result = useMemo(() => data?.result || [], [data?.result]);
+  const { filteredItems, searchTerm, setSearchTerm } = useTableFilters(result, [
+    "name",
+    "country_id.name",
+    "region_id.name",
+    "country.name",
+    "region.name",
+  ]);
+
+  const removeHandler = useCallback((id: string) => {
+    setIsOpen(true);
+    setDeletedId(id);
+  }, []);
+
+  const DeleteHandler = useCallback(async () => {
+    if (deletedId) await deleteRegion({ id: deletedId });
+  }, [deleteRegion, deletedId]);
+
+  useEffect(() => {
+    if (deleteSuccess) {
+      setIsOpen(false);
+      setDeletedId(null);
+    }
+  }, [deleteSuccess]);
+  const tableBody = useMemo(() => {
+    if (!filteredItems.length) {
+      return <TableEmptyState colSpan={6} />;
+    }
+
+    return filteredItems.map((item, i) => (
+      <Row
+        key={`${item._id!}-${i}`}
+        item={item}
+        router={router}
+        removeHandler={removeHandler}
+        deletedId={deletedId!}
+      />
+    ));
+  }, [filteredItems, router, removeHandler, deletedId]);
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl font-semibold text-foreground">Products</h1>
-          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full sm:w-auto bg-transparent"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full sm:w-auto bg-transparent"
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Import
-            </Button>
-            <Button
-              size="sm"
-              className="w-full sm:w-auto"
-              onClick={() => router.push("/dashboard/products/create")}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Create
-            </Button>
-          </div>
-        </div>
+    <motion.div
+      className="min-h-screen bg-background"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <div className="container mx-auto py-8">
+        <PageHeander2
+          headerTitle={"Products"}
+          rowsPerPage={rowsPerPage}
+          setRowsPerPage={setRowsPerPage}
+          setCurrentPage={setCurrentPage}
+          searchTerm={searchTerm}
+          subHeader={true}
+          setSearchTerm={setSearchTerm}
+          is_btn={true}
+          navLink={`/dashboard/products/create`}
+        />
 
-        {/* Search and Filter */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full sm:w-auto bg-transparent"
-          >
-            <Filter className="mr-2 h-4 w-4" />
-            Add filter
-          </Button>
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+        <div
+          style={{ width: width < 749 ? `${width}px` : "100%" }}
+          className="min-h-[400px] px-2"
+        >
+          <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm relative">
+            {/* Loader Overlay */}
+
+            <Shadcn_table
+              table_header={[
+                "Product",
+                "Collection",
+                "Sales Channels",
+                "Variants",
+                "Status",
+                "Action",
+              ]}
+              tabel_body={() => tableBody}
+              isLoading={isLoading || deleteLoading}
+              textend="Payment Providers"
             />
           </div>
-        </div>
-
-        {/* Responsive Table View */}
-        <div className="rounded-md border">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[250px] sm:w-[300px]">
-                    Product
-                  </TableHead>
-                  <TableHead className="min-w-[100px] sm:w-[120px]">
-                    Collection
-                  </TableHead>
-                  <TableHead className="min-w-[180px] sm:w-[200px]">
-                    Sales Channels
-                  </TableHead>
-                  <TableHead className="min-w-[80px] sm:w-[100px]">
-                    Variants
-                  </TableHead>
-                  <TableHead className="min-w-[80px] sm:w-[100px]">
-                    Status
-                  </TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="text-lg sm:text-xl flex-shrink-0">
-                          {product.icon}
-                        </div>
-                        <div className="font-medium text-sm sm:text-base leading-tight">
-                          {product.name}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {product.collection && (
-                        <Badge variant="secondary" className="text-xs">
-                          {product.collection}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {product.salesChannel}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {product.variants} variant
-                      {product.variants !== 1 ? "s" : ""}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="default"
-                        className="bg-green-100 text-green-800 hover:bg-green-100 text-xs"
-                      >
-                        {product.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-muted-foreground">
-            1 — {filteredProducts.length} of {filteredProducts.length} results
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">1 of 1 pages</span>
-            <div className="flex gap-1">
-              <Button variant="outline" size="sm" disabled>
-                Prev
-              </Button>
-              <Button variant="outline" size="sm" disabled>
-                Next
-              </Button>
-            </div>
-          </div>
+          {/* Pagination */}
+          {data && data.dataCounter > Number(rowsPerPage) && (
+            <ShadcnPagination
+              leftRightBtn={true}
+              currentPage={currentPage}
+              totalPages={Number(rowsPerPage)}
+              setCurrentPage={setCurrentPage}
+              data_length={data.dataCounter || 10}
+            />
+          )}
         </div>
       </div>
-    </div>
+      {/* Delete Confirmation */}
+      <AnimatePresence>
+        {isOpen && (
+          <AlertDialogComponenet
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            title="Are you sure?"
+            description="You are about to delete the region. This action cannot be undone."
+            action={DeleteHandler}
+            type="danger"
+            setDeletedId={setDeletedId}
+            isLoading={deleteLoading}
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
+
+export default memo(Products);

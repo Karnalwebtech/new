@@ -1,7 +1,7 @@
 import { Header } from "@/modules/layout/header/header";
+import Products from "@/modules/main/products/products";
 import { Metadata } from "next";
 import React from "react";
-import { Products } from "../../../modules/main/products/products";
 export const metadata: Metadata = {
   title: "All post",
   description:
