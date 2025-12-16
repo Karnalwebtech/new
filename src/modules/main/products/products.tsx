@@ -28,6 +28,7 @@ import { TableEmptyState } from "../../../components/table/table-empty-state";
 import PageHeander2 from "@/modules/layout/header/page-heander2";
 import RemainingCount from "@/components/remaining-count";
 import { useGetAllProductsQuery } from "@/state/product-api";
+import Avatar from "../../../components/avatar";
 
 const Row = memo(
   ({
@@ -44,6 +45,12 @@ const Row = memo(
     return (
       <TableRow className="group hover:bg-muted/40 transition-colors duration-200">
         <TableCell>
+          <span className="text-muted-foreground">
+          <Avatar
+          imageUrl={item?.thumbnail}
+          alt={item?.title}
+          />
+          </span>
           <span className="text-muted-foreground">
             <TruncateText text={item?.title || ""} maxLength={25} />
           </span>
