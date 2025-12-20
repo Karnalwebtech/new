@@ -11,7 +11,7 @@ const ALLOWED_HOSTS = [
   "http://localhost:9000", "https://api.karnalwebtech.com","https://new-back-3iqc.onrender.com","https://new-back-3iqc.onrender.com/"
 ];
 
-// Initialize Next.js
+// Initialize Next.js 
 const app = next({ 
   dev,
   hostname,
